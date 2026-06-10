@@ -3,15 +3,15 @@ import '../theme/app_theme.dart';
 import 'animations.dart';
 
 // ─── StatCard ─────────────────────────────────────────────────────────────────
-/// بطاقة إحصاء تُستخدم في الـ Dashboard.
+/// A stat card used in the Dashboard. Animates on hover and counts up numeric values.
+/// بطاقة إحصاء تُستخدم في الـ Dashboard، تتحرك عند hover وتعدّ الأرقام تلقائياً.
 ///
-/// الحقول:
-/// - [title]     — عنوان البطاقة (مثال: "الموظفون")
-/// - [value]     — القيمة الرئيسية؛ إذا كانت رقماً يُعدّ من 0 تلقائياً
-/// - [subtitle]  — نص توضيحي صغير أسفل القيمة
-/// - [icon]      — الأيقونة اليسرى
-/// - [iconColor] — لون الأيقونة (الافتراضي: اللون الأساسي)
-/// - [trend]     — نص الاتجاه (مثال: "+5%") يُعرض باللون الأخضر
+/// - [title]     — Card heading (e.g. "Employees") | عنوان البطاقة (مثال: "الموظفون")
+/// - [value]     — Main value; numbers are counted up via [CountUpText] | القيمة الرئيسية؛ الأرقام تُعدّ من 0
+/// - [subtitle]  — Small descriptive text below the value | نص توضيحي صغير أسفل القيمة
+/// - [icon]      — Leading icon | الأيقونة اليسرى
+/// - [iconColor] — Icon color (default: primary) | لون الأيقونة (الافتراضي: اللون الأساسي)
+/// - [trend]     — Trend string (e.g. "+5%"), shown in green | نص الاتجاه يُعرض باللون الأخضر
 class StatCard extends StatefulWidget {
   const StatCard({
     super.key,
@@ -64,7 +64,7 @@ class _StatCardState extends State<StatCard> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ── رأس البطاقة: أيقونة + عنوان ──────────────────────────
+                  // Card header: icon + title | رأس البطاقة: أيقونة + عنوان
                   Row(
                     children: [
                       if (widget.icon != null) ...[
@@ -85,9 +85,9 @@ class _StatCardState extends State<StatCard> {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  // ── القيمة الرئيسية (count-up animation) ─────────────────
+                  // Main value with count-up animation | القيمة الرئيسية (count-up animation)
                   CountUpText(widget.value, style: AppTypography.h2),
-                  // ── subtitle + trend ─────────────────────────────────────
+                  // subtitle + trend indicator | subtitle + مؤشر الاتجاه
                   if (widget.subtitle != null || widget.trend != null) ...[
                     const SizedBox(height: 4),
                     Row(

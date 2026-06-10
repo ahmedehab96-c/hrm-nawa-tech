@@ -37,7 +37,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _load();
   }
 
-  // ── تحميل البيانات بالتوازي ───────────────────────────────────────────────
+  // Fetch all data in parallel to minimize wait time | تحميل البيانات بالتوازي
   Future<void> _load() async {
     setState(() => _loading = true);
 
@@ -54,12 +54,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     if (!mounted) return;
 
-    // الموظفون
+    // Employee count | الموظفون
     final empCount = results[0] is ApiSuccess<List<EmployeeItem>>
         ? (results[0] as ApiSuccess<List<EmployeeItem>>).data.length
         : 0;
 
-    // الحضور
+    // Attendance breakdown | الحضور
     var p = 0, l = 0, a = 0;
     if (results[1] is ApiSuccess<List<AttendanceRecord>>) {
       for (final r in (results[1] as ApiSuccess<List<AttendanceRecord>>).data) {
@@ -70,7 +70,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       }
     }
 
-    // الإجازات المعلقة
+    // Pending leave requests | الإجازات المعلقة
     final pending = <_LeaveRow>[];
     var pc = 0;
     if (results[2] is ApiSuccess<List<LeaveRequestItem>>) {
@@ -82,7 +82,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       }
     }
 
-    // النشاط الأخير
+    // Recent activity from notifications | النشاط الأخير
     final activities = <_ActivityRow>[];
     if (results[4] is ApiSuccess<List<EmployeeNotificationItem>>) {
       for (final n in (results[4] as ApiSuccess<List<EmployeeNotificationItem>>).data.take(5)) {
@@ -109,7 +109,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── العنوان ──────────────────────────────────────────────────────
+          // Page title | العنوان
           FadeSlideIn(child: Text(l10n.dashboard, style: AppTypography.h1)),
           FadeSlideIn(
             delay: const Duration(milliseconds: 60),
@@ -118,7 +118,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           const SizedBox(height: 32),
 
-          // ── بطاقات الإحصاء مع fade حين تتغير من loading → data ──────────
+          // Stat cards — fade transition between loading skeleton and real data
+          // بطاقات الإحصاء مع fade حين تتغير من loading → data
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
             child: _loading
@@ -134,7 +135,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
           ),
 
-          // ── إجازات معلقة + نشاط أخير ─────────────────────────────────────
+          // Bottom section: pending leaves + recent activity | إجازات معلقة + نشاط أخير
           if (!_loading) ...[
             const SizedBox(height: 32),
             LayoutBuilder(
@@ -163,7 +164,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 }
 
 // ─── _StatGrid ────────────────────────────────────────────────────────────────
+/// Responsive grid of stat cards — each card fades in with a staggered delay.
 /// شبكة البطاقات الأربع — كل بطاقة تظهر بتأخير متصاعد (stagger).
+/// To add a card: append one entry to the [cards] list below.
 /// لإضافة بطاقة جديدة: أضف عنصراً لقائمة [cards] أدناه فقط.
 class _StatGrid extends StatelessWidget {
   const _StatGrid({
@@ -233,7 +236,7 @@ class _PendingLeavesCard extends StatefulWidget {
 }
 
 class _PendingLeavesCardState extends State<_PendingLeavesCard> {
-  // موافقة أو رفض — نفس المنطق بدالة واحدة
+  // Approve or reject — unified logic via a single method | موافقة أو رفض — نفس المنطق بدالة واحدة
   Future<void> _act(String id, Future<ApiResult<void>> Function(String) action, bool isApprove) async {
     final res = await action(id);
     if (!mounted) return;
@@ -343,7 +346,7 @@ class _ActivityRow {
   final String   title, time;
 }
 
-// ─── Table cell helpers ────────────────────────────────────────────────────────
+// ─── Table cell helpers — header and data cell wrappers ───────────────────────
 
 class _TH extends StatelessWidget {
   const _TH(this.text);

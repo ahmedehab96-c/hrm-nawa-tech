@@ -7,9 +7,13 @@ import '../../../core/widgets/hrm_logo.dart';
 import '../../../l10n/app_localizations.dart';
 
 // ─── AdminSidebar ─────────────────────────────────────────────────────────────
-/// الشريط الجانبي للوحة الأدمن.
-/// [collapsed] — هل هو مطوي (72px) أم موسّع (260px).
-/// [onToggle]  — callback لتغيير الحالة.
+/// Animated sidebar for the admin panel. Collapses to icon-only mode.
+/// الشريط الجانبي للوحة الأدمن. يتقلص إلى وضع الأيقونات فقط.
+///
+/// [collapsed] — Whether it is collapsed (72 px) or expanded (260 px).
+///               هل هو مطوي (72px) أم موسّع (260px).
+/// [onToggle]  — Callback to toggle the collapsed state.
+///               callback لتغيير الحالة.
 class AdminSidebar extends StatelessWidget {
   const AdminSidebar({
     super.key,
@@ -24,8 +28,8 @@ class AdminSidebar extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    // ── تعريف عناصر الـ nav من مكان واحد ──────────────────────────────────
-    // لإضافة صفحة جديدة: أضف سطراً هنا فقط
+    // All nav items defined in one place — add a new page by appending a single line here
+    // تعريف عناصر الـ nav من مكان واحد — لإضافة صفحة جديدة: أضف سطراً هنا فقط
     final sub = SubscriptionController.instance;
     final items = <({IconData icon, String label, String path})>[
       (icon: Icons.dashboard_outlined,   label: l10n.dashboard,   path: '/admin'),
@@ -45,7 +49,7 @@ class AdminSidebar extends StatelessWidget {
       child: Column(
         children: [
           const SizedBox(height: 20),
-          // ── رأس الـ sidebar: لوجو + زر الطي ─────────────────────────────
+          // Sidebar header: logo + collapse toggle | رأس الـ sidebar: لوجو + زر الطي
           Padding(
             padding: EdgeInsets.symmetric(horizontal: collapsed ? 0 : 12),
             child: Row(
@@ -69,7 +73,7 @@ class AdminSidebar extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          // ── عناصر التنقل ──────────────────────────────────────────────────
+          // Navigation items | عناصر التنقل
           Expanded(
             child: AnimatedBuilder(
               animation: SubscriptionController.instance,
@@ -101,8 +105,8 @@ class AdminSidebar extends StatelessWidget {
 }
 
 // ─── _NavItem ─────────────────────────────────────────────────────────────────
-/// عنصر تنقل واحد في الـ sidebar.
-/// يُضيف تأثير hover وتمييز للصفحة النشطة تلقائياً.
+/// A single navigation item in the sidebar with hover animation and active highlight.
+/// عنصر تنقل واحد في الـ sidebar يُضيف تأثير hover وتمييز للصفحة النشطة تلقائياً.
 class _NavItem extends StatefulWidget {
   const _NavItem({
     required this.icon,

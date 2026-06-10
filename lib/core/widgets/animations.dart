@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
 
-// ─── قيم افتراضية قابلة للتعديل من مكان واحد ─────────────────────────────────
+// ─── Global animation constants — edit here to tune the whole app ─────────────
+// ─── قيم افتراضية قابلة للتعديل من مكان واحد ────────────────────────────────
 const Duration kAnimEnter = Duration(milliseconds: 420);
 const Duration kAnimStep  = Duration(milliseconds: 75);
 const Duration kAnimCount = Duration(milliseconds: 900);
 const Curve    kAnimCurve = Curves.easeOutCubic;
 
 // ─── FadeSlideIn ──────────────────────────────────────────────────────────────
+/// Reveals any widget with a fade + gentle upward slide on first build.
 /// يُظهر أي widget بتأثير fade + انزلاق خفيف للأعلى عند أول بناء.
 ///
-/// [delay]    — تأخير قبل بدء الأنيميشن (لعمل تتابع stagger).
-/// [dy]       — مسافة الانزلاق كنسبة (0.0–1.0); الافتراضي 0.06.
-/// [duration] — مدة الأنيميشن; الافتراضي [kAnimEnter].
+/// [delay]    — Delay before the animation starts (use for stagger sequences).
+///              تأخير قبل بدء الأنيميشن (لعمل تتابع stagger).
+/// [dy]       — Slide distance as a fraction (0.0–1.0); default 0.06.
+///              مسافة الانزلاق كنسبة (0.0–1.0); الافتراضي 0.06.
+/// [duration] — Animation duration; default [kAnimEnter].
+///              مدة الأنيميشن; الافتراضي [kAnimEnter].
 class FadeSlideIn extends StatefulWidget {
   const FadeSlideIn({
     super.key,
@@ -63,12 +68,13 @@ class _FadeSlideInState extends State<FadeSlideIn>
 }
 
 // ─── StaggeredList ────────────────────────────────────────────────────────────
+/// Wraps each child in [FadeSlideIn] with incrementally increasing delays.
 /// يُغلّف كل عنصر في [children] بـ [FadeSlideIn] مع تأخير متصاعد.
 ///
-/// [step]    — الفرق في الـ delay بين كل عنصر وما يليه.
-/// [initial] — تأخير قبل بدء أول عنصر.
+/// [step]    — Delay increment between each child. | الفرق في الـ delay بين كل عنصر وما يليه.
+/// [initial] — Delay before the first child. | تأخير قبل بدء أول عنصر.
 ///
-/// مثال:
+/// Example | مثال:
 /// ```dart
 /// StaggeredList(children: [CardA(), CardB(), CardC()])
 /// ```
@@ -103,16 +109,18 @@ class StaggeredList extends StatelessWidget {
 }
 
 // ─── CountUpText ──────────────────────────────────────────────────────────────
+/// Animates the first integer in [value] counting up from 0 to its real value.
 /// يُحرّك أول رقم صحيح في [value] من 0 إلى قيمته الحقيقية.
 ///
+/// Preserves prefix and suffix (e.g. "94%" → counts to 94, keeps the "%").
 /// يحافظ على الـ prefix و suffix كما هي (مثال: "94%" → يعدّ حتى 94 ثم يثبت).
-/// القيم غير الرقمية تُعرض بـ fade بسيط.
+/// Non-numeric values fade in instead. | القيم غير الرقمية تُعرض بـ fade بسيط.
 ///
-/// مثال:
+/// Example | مثال:
 /// ```dart
 /// CountUpText('128', style: AppTypography.h2)
 /// CountUpText('94%', style: AppTypography.h2)
-/// CountUpText('جاهز', style: AppTypography.h2)  // fade فقط
+/// CountUpText('جاهز', style: AppTypography.h2)  // fade only | fade فقط
 /// ```
 class CountUpText extends StatefulWidget {
   const CountUpText(
@@ -134,9 +142,10 @@ class _CountUpTextState extends State<CountUpText>
     with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl;
 
-  // نفصل بين "هل القيمة رقمية" و"قيمة الهدف" لتجنّب nullable داخل callbacks
+  // Split into a bool flag + non-nullable int to avoid Dart callback smart-cast limitations.
+  // نفصل بين "هل القيمة رقمية" و"قيمة الهدف" لتجنّب nullable داخل callbacks.
   late final bool   _isNumeric;
-  late final int    _target; // صالح فقط إذا _isNumeric == true
+  late final int    _target; // valid only when _isNumeric | صالح فقط إذا _isNumeric == true
   late final String _prefix;
   late final String _suffix;
 
@@ -152,7 +161,7 @@ class _CountUpTextState extends State<CountUpText>
       _prefix = widget.value.substring(0, match!.start);
       _suffix = widget.value.substring(match.end);
     } else {
-      _target = 0; // غير مستخدمة
+      _target = 0; // unused placeholder | غير مستخدمة
       _prefix = widget.value;
       _suffix = '';
     }
@@ -169,13 +178,14 @@ class _CountUpTextState extends State<CountUpText>
 
   @override
   Widget build(BuildContext context) {
-    // قيمة غير رقمية → fade بسيط
+    // Non-numeric value → simple fade | قيمة غير رقمية → fade بسيط
     if (!_isNumeric) {
       return FadeTransition(
         opacity: CurvedAnimation(parent: _ctrl, curve: Curves.easeOut),
         child: Text(widget.value, style: widget.style),
       );
     }
+    // Numeric value → count from 0 to _target (non-nullable, safe in callback)
     // قيمة رقمية → عدّ من 0 إلى _target (non-nullable, آمن داخل callback)
     return AnimatedBuilder(
       animation: _ctrl,

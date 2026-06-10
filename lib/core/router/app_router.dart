@@ -43,14 +43,17 @@ final _rootKey  = GlobalKey<NavigatorState>();
 final _adminKey = GlobalKey<NavigatorState>();
 
 // ─── Fade transition helper ────────────────────────────────────────────────────
+/// Builds a page with a fade transition instead of the platform default.
 /// بناء صفحة بتأثير fade بدلاً من الانتقال الافتراضي.
+///
+/// Use [pageBuilder] (not [builder]) on any GoRoute you want to animate.
 /// استخدم [pageBuilder] بدل [builder] في أي GoRoute تريد التأثير عليه.
 ///
-/// للـ routes الثابتة:
+/// Static routes | للـ routes الثابتة:
 /// ```dart
 /// GoRoute(path: '/admin', pageBuilder: _fade(const DashboardScreen()))
 /// ```
-/// للـ routes الديناميكية (path parameters):
+/// Dynamic routes (path parameters) | للـ routes الديناميكية:
 /// ```dart
 /// GoRoute(path: '/admin/:id',
 ///   pageBuilder: (ctx, state) => _fadeOf(ctx, state, MyScreen(id: state.pathParameters['id'])))
@@ -68,6 +71,7 @@ CustomTransitionPage<void> _fadeOf(BuildContext ctx, GoRouterState state, Widget
     );
 
 // ─── Auth redirect ────────────────────────────────────────────────────────────
+/// Redirects unauthenticated users to /login and logged-in users away from /login.
 /// يُعيد التوجيه إذا لم يكن المستخدم مسجّلاً دخوله.
 String? _authRedirect(BuildContext context, GoRouterState state) {
   final path = state.uri.path;
@@ -84,6 +88,7 @@ String? _authRedirect(BuildContext context, GoRouterState state) {
 }
 
 // ─── Subscription redirect ─────────────────────────────────────────────────────
+/// Blocks access to recruitment pages if the company's plan doesn't include it.
 /// يمنع الوصول لصفحات التوظيف إذا لم يكن الاشتراك يدعمها.
 String? _recruitmentGuard(BuildContext context, GoRouterState state) =>
     SubscriptionController.instance.recruitmentEnabled ? null : '/admin/settings';
@@ -179,6 +184,7 @@ GoRouter createAppRouter() => GoRouter(
     );
 
 // ─── AdminShell ────────────────────────────────────────────────────────────────
+/// Renders AdminLayout on web; passes [child] through on other platforms.
 /// يعرض AdminLayout على الويب فقط.
 class AdminShell extends StatelessWidget {
   const AdminShell({super.key, required this.child});
@@ -190,11 +196,13 @@ class AdminShell extends StatelessWidget {
 }
 
 // ─── EmployeeShell ────────────────────────────────────────────────────────────
+/// Wraps employee screens with a bottom navigation bar on mobile.
 /// يُغلّف شاشات الموظف بـ bottom navigation bar.
 class EmployeeShell extends StatelessWidget {
   const EmployeeShell({super.key, required this.child});
   final Widget child;
 
+  // Tab paths in order — add a new tab by appending here only
   // مسارات التبويبات بالترتيب — عدّل هنا لإضافة تبويب جديد
   static const _paths = [
     '/employee',
@@ -206,6 +214,7 @@ class EmployeeShell extends StatelessWidget {
 
   int _selectedIndex(BuildContext context) {
     final path = GoRouterState.of(context).uri.path;
+    // Start from most-specific path to avoid '/employee' matching everything
     // نبدأ من الأكثر تحديداً لتجنّب مطابقة '/employee' مع كل شيء
     for (var i = _paths.length - 1; i > 0; i--) {
       if (path.startsWith(_paths[i])) return i;
