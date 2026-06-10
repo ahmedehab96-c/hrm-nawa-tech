@@ -191,30 +191,43 @@ class NawaTechFullLogo extends StatelessWidget {
 
   final bool onDark;
 
-  static const _navy = Color(0xFF1A2B5E);
-  static const _teal = Color(0xFF14B8A6);
+  // Light-mode palette
+  static const _navy     = Color(0xFF1A2B5E);
+  static const _teal     = Color(0xFF14B8A6);
+  // On-dark palette — bright so they pop against dark navy/teal backgrounds
+  static const _darkN1   = Colors.white;                 // "N" gradient start
+  static const _darkN2   = Color(0xFF2DD4BF);            // "N" gradient end
+  static const _darkTech = Color(0xFF5EEAD4);            // "Tech" word
+  static const _darkLine = Color(0xFF2DD4BF);            // tagline lines
 
   @override
   Widget build(BuildContext context) {
-    final wordmarkColor = onDark ? Colors.white : _navy;
-    final taglineColor  = onDark ? Colors.white70 : const Color(0xFF64748B);
-    final subtitleColor = onDark ? Colors.white70 : _navy;
+    final nGradStart    = onDark ? _darkN1   : _navy;
+    final nGradEnd      = onDark ? _darkN2   : _teal;
+    final nawaColor     = onDark ? Colors.white : _navy;
+    final techColor     = onDark ? _darkTech : _teal;
+    final lineColor     = onDark ? _darkLine : _teal;
+    final taglineColor  = onDark ? Colors.white60 : const Color(0xFF64748B);
+    final hrmColor      = onDark ? Colors.white : _navy;
+    final subtitleColor = onDark ? Colors.white60 : _navy;
+    final hexStart      = onDark ? const Color(0xFF2DD4BF) : _navy;
+    final hexEnd        = onDark ? Colors.white.withValues(alpha: 0.92) : _teal;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // ── "N" letterform with blue→teal gradient ──────────────────────
+        // ── "N" letterform — white→teal on dark, navy→teal on light ─────
         ShaderMask(
-          shaderCallback: (b) => const LinearGradient(
+          shaderCallback: (b) => LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [_navy, _teal],
+            colors: [nGradStart, nGradEnd],
           ).createShader(b),
           child: const Text(
             'N',
             style: TextStyle(
-              fontSize: 80,
+              fontSize: 84,
               fontWeight: FontWeight.w900,
               color: Colors.white,
               height: 1.0,
@@ -228,52 +241,58 @@ class NawaTechFullLogo extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text('Nawa', style: TextStyle(
-              fontSize: 26, fontWeight: FontWeight.w900,
-              color: wordmarkColor, fontFamily: 'Cairo',
+              fontSize: 28, fontWeight: FontWeight.w900,
+              color: nawaColor, fontFamily: 'Cairo',
             )),
-            const SizedBox(width: 6),
-            const Text('Tech', style: TextStyle(
-              fontSize: 26, fontWeight: FontWeight.w900,
-              color: _teal, fontFamily: 'Cairo',
+            const SizedBox(width: 7),
+            Text('Tech', style: TextStyle(
+              fontSize: 28, fontWeight: FontWeight.w900,
+              color: techColor, fontFamily: 'Cairo',
             )),
           ],
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 7),
         // ── Tagline with decorative lines ────────────────────────────────
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(width: 22, height: 1.5, color: _teal),
+            Container(width: 24, height: 1.5, color: lineColor),
             const SizedBox(width: 8),
             Text(
               'Smart IT Solutions, Better Future',
-              style: TextStyle(fontSize: 11, color: taglineColor, fontFamily: 'Cairo'),
+              style: TextStyle(
+                fontSize: 11, color: taglineColor, fontFamily: 'Cairo',
+              ),
             ),
             const SizedBox(width: 8),
-            Container(width: 22, height: 1.5, color: _teal),
+            Container(width: 24, height: 1.5, color: lineColor),
           ],
         ),
         const SizedBox(height: 28),
         // ── HRM hexagon badge ────────────────────────────────────────────
         SizedBox(
-          width: 76, height: 82,
+          width: 78, height: 84,
           child: CustomPaint(
-            painter: _HexPainter(_navy, _teal),
-            child: const Center(
-              child: Icon(Icons.groups_outlined, color: Colors.white, size: 34),
+            painter: _HexPainter(hexStart, hexEnd),
+            child: Center(
+              child: Icon(
+                Icons.groups_outlined,
+                color: onDark ? _navy : Colors.white,
+                size: 36,
+              ),
             ),
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 12),
         // ── "HRM" title ──────────────────────────────────────────────────
         Text('HRM', style: TextStyle(
-          fontSize: 26, fontWeight: FontWeight.w900,
-          color: wordmarkColor, fontFamily: 'Cairo',
+          fontSize: 28, fontWeight: FontWeight.w900,
+          color: hrmColor, fontFamily: 'Cairo', letterSpacing: 1,
         )),
-        const SizedBox(height: 2),
+        const SizedBox(height: 3),
         // ── Subtitle ─────────────────────────────────────────────────────
         Text('Human Resource Management', style: TextStyle(
-          fontSize: 11, fontWeight: FontWeight.w500,
+          fontSize: 12, fontWeight: FontWeight.w500,
           color: subtitleColor, fontFamily: 'Cairo',
         )),
       ],
