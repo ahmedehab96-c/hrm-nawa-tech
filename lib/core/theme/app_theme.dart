@@ -49,48 +49,46 @@ class AppColors {
 class AppTypography {
   static String get fontFamily => 'Cairo';
 
+  // Colors are intentionally omitted — text inherits from the active theme
+  // (onSurface: dark in light mode, white in dark mode).
+  // Use .copyWith(color: ...) for explicit overrides.
   static const TextStyle h1 = TextStyle(
     fontSize: 28,
     fontWeight: FontWeight.bold,
-    color: AppColors.textPrimary,
     height: 1.3,
   );
 
   static const TextStyle h2 = TextStyle(
     fontSize: 24,
     fontWeight: FontWeight.bold,
-    color: AppColors.textPrimary,
     height: 1.3,
   );
 
   static const TextStyle h3 = TextStyle(
     fontSize: 20,
     fontWeight: FontWeight.w600,
-    color: AppColors.textPrimary,
     height: 1.4,
   );
 
   static const TextStyle h4 = TextStyle(
     fontSize: 18,
     fontWeight: FontWeight.w600,
-    color: AppColors.textPrimary,
     height: 1.4,
   );
 
   static const TextStyle bodyLarge = TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.normal,
-    color: AppColors.textPrimary,
     height: 1.5,
   );
 
   static const TextStyle bodyMedium = TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.normal,
-    color: AppColors.textPrimary,
     height: 1.5,
   );
 
+  // Secondary/muted styles keep their gray colors — readable on both dark and light.
   static const TextStyle bodySmall = TextStyle(
     fontSize: 12,
     fontWeight: FontWeight.normal,

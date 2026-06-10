@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/text_direction_helper.dart';
 import '../sidebar/admin_sidebar.dart';
 import '../topbar/admin_topbar.dart';
@@ -39,10 +38,12 @@ class _AdminLayoutState extends State<AdminLayout> {
                         setState(() => _sidebarCollapsed = !_sidebarCollapsed),
                   ),
                   Expanded(
-                    child: Container(
-                      color: AppColors.background,
-                      padding: const EdgeInsets.all(28),
-                      child: widget.child,
+                    child: ColoredBox(
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                      child: Padding(
+                        padding: const EdgeInsets.all(28),
+                        child: widget.child,
+                      ),
                     ),
                   ),
                 ],

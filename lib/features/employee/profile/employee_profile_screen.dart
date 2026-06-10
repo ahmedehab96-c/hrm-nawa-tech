@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/locale/locale_controller.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/theme_scope.dart';
 import '../../../core/utils/text_direction_helper.dart';
 import '../../../core/api/api_result.dart';
 import '../../../core/repositories/employees_repository.dart';
@@ -140,6 +142,59 @@ class _EmployeeProfileScreenState extends State<EmployeeProfileScreen> {
                 const SizedBox(height: 16),
                 Text(_error!, style: AppTypography.bodySmall.copyWith(color: AppColors.error)),
               ],
+              const SizedBox(height: 32),
+
+              // ── App settings: language + theme ────────────────────────
+              Text(l10n.appearance, style: AppTypography.h4),
+              const SizedBox(height: 16),
+              Card(
+                child: Column(
+                  children: [
+                    // Dark / light mode toggle
+                    Builder(builder: (ctx) {
+                      final notifier = ThemeScope.of(ctx);
+                      return SwitchListTile(
+                        secondary: Icon(
+                          notifier.isDark ? Icons.dark_mode : Icons.light_mode,
+                          color: AppColors.primary,
+                        ),
+                        title: Text(l10n.darkMode, style: AppTypography.bodyMedium),
+                        subtitle: Text(
+                          notifier.isDark ? l10n.darkModeOn : l10n.darkModeOff,
+                          style: AppTypography.caption,
+                        ),
+                        value: notifier.isDark,
+                        onChanged: (v) =>
+                            notifier.setMode(v ? ThemeMode.dark : ThemeMode.light),
+                      );
+                    }),
+                    const Divider(height: 1),
+                    // Language toggle
+                    Builder(builder: (ctx) {
+                      final locale = Localizations.localeOf(ctx);
+                      final isAr   = locale.languageCode == 'ar';
+                      return ListTile(
+                        leading: const Icon(Icons.language, color: AppColors.primary),
+                        title: Text(l10n.language, style: AppTypography.bodyMedium),
+                        subtitle: Text(
+                          isAr ? l10n.arabic : l10n.english,
+                          style: AppTypography.caption,
+                        ),
+                        trailing: SegmentedButton<String>(
+                          segments: [
+                            ButtonSegment(value: 'ar', label: Text(l10n.arabic)),
+                            ButtonSegment(value: 'en', label: Text(l10n.english)),
+                          ],
+                          selected: {isAr ? 'ar' : 'en'},
+                          onSelectionChanged: (s) =>
+                              LocaleController.instance.setLocale(Locale(s.first)),
+                        ),
+                      );
+                    }),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
             ],
           ),
         ),

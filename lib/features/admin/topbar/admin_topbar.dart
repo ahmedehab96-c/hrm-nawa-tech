@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/locale/locale_controller.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_scope.dart';
 import '../../../l10n/app_localizations.dart';
@@ -86,7 +87,36 @@ class AdminTopBar extends StatelessWidget {
             tooltip: l10n.aiPanelTitle,
           ),
           const SizedBox(width: 8),
-          // الوضع الليلي / النهاري
+          // Language toggle: AR ↔ EN
+          Builder(builder: (ctx) {
+            final locale = Localizations.localeOf(ctx);
+            final isAr   = locale.languageCode == 'ar';
+            return Tooltip(
+              message: l10n.language,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(8),
+                onTap: () => LocaleController.instance.setLocale(
+                    isAr ? const Locale('en') : const Locale('ar')),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: colorScheme.outline),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    isAr ? 'EN' : 'AR',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                      color: colorScheme.primary,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }),
+          const SizedBox(width: 4),
+          // Dark / Light mode toggle | الوضع الليلي / النهاري
           IconButton(
             icon: Icon(
               themeNotifier.isDark ? Icons.light_mode : Icons.dark_mode,
