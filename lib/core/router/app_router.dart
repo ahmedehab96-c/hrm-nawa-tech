@@ -37,14 +37,41 @@ import '../../features/employee/notifications/employee_notifications_screen.dart
 import '../../features/welcome/welcome_screen.dart';
 import '../../l10n/app_localizations.dart';
 
-final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
-final GlobalKey<NavigatorState> _adminShellNavigatorKey = GlobalKey<NavigatorState>();
+// ─── Keys ────────────────────────────────────────────────────────────────────
 
+final _rootKey  = GlobalKey<NavigatorState>();
+final _adminKey = GlobalKey<NavigatorState>();
+
+// ─── Fade transition helper ────────────────────────────────────────────────────
+/// بناء صفحة بتأثير fade بدلاً من الانتقال الافتراضي.
+/// استخدم [pageBuilder] بدل [builder] في أي GoRoute تريد التأثير عليه.
+///
+/// للـ routes الثابتة:
+/// ```dart
+/// GoRoute(path: '/admin', pageBuilder: _fade(const DashboardScreen()))
+/// ```
+/// للـ routes الديناميكية (path parameters):
+/// ```dart
+/// GoRoute(path: '/admin/:id',
+///   pageBuilder: (ctx, state) => _fadeOf(ctx, state, MyScreen(id: state.pathParameters['id'])))
+/// ```
+Page<void> Function(BuildContext, GoRouterState) _fade(Widget child) =>
+    (ctx, state) => _fadeOf(ctx, state, child);
+
+CustomTransitionPage<void> _fadeOf(BuildContext ctx, GoRouterState state, Widget child) =>
+    CustomTransitionPage(
+      key:                state.pageKey,
+      child:              child,
+      transitionDuration: const Duration(milliseconds: 220),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+          FadeTransition(opacity: animation, child: child),
+    );
+
+// ─── Auth redirect ────────────────────────────────────────────────────────────
+/// يُعيد التوجيه إذا لم يكن المستخدم مسجّلاً دخوله.
 String? _authRedirect(BuildContext context, GoRouterState state) {
   final path = state.uri.path;
-  if (path == '/register' || path == '/forgot-password') {
-    return null;
-  }
+  if (path == '/register' || path == '/forgot-password') return null;
   if (path == '/login') {
     if (ApiConfig.useApi && AuthSession.instance.hasSession) {
       return PlatformHelper.isAdminApp ? '/admin' : '/employee';
@@ -52,258 +79,159 @@ String? _authRedirect(BuildContext context, GoRouterState state) {
     return null;
   }
   if (!ApiConfig.useApi) return null;
-  if (!AuthSession.instance.hasSession) {
-    return '/login';
-  }
+  if (!AuthSession.instance.hasSession) return '/login';
   return null;
 }
 
-GoRouter createAppRouter() {
-  return GoRouter(
-    navigatorKey: _rootNavigatorKey,
-    initialLocation: '/welcome',
-    refreshListenable: AuthSession.instance,
-    redirect: _authRedirect,
-    routes: [
-      GoRoute(
-        path: '/',
-        redirect: (context, state) =>
-            PlatformHelper.isAdminApp ? '/admin' : '/employee',
-      ),
-      GoRoute(
-        path: '/welcome',
-        builder: (context, state) => const WelcomeScreen(),
-      ),
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => PlatformHelper.isAdminApp
-            ? const LoginScreen()
-            : const EmployeeLoginScreen(),
-      ),
-      GoRoute(
-        path: '/register',
-        builder: (context, state) => const CompanyRegisterScreen(),
-      ),
-      GoRoute(
-        path: '/forgot-password',
-        builder: (context, state) => const ForgotPasswordScreen(),
-      ),
-      // Admin Web - ShellRoute للحفاظ على التخطيط عند التنقل
-      ShellRoute(
-        navigatorKey: _adminShellNavigatorKey,
-        builder: (context, state, child) => AdminShell(child: child),
-        routes: [
-          GoRoute(
-            path: '/admin',
-            builder: (context, state) => const DashboardScreen(),
-          ),
-          GoRoute(
-            path: '/admin/employees',
-            builder: (context, state) => const EmployeesScreen(),
-          ),
-          GoRoute(
-            path: '/admin/employees/add',
-            builder: (context, state) => const EmployeeFormScreen(),
-          ),
-          GoRoute(
-            path: '/admin/employees/:id',
-            builder: (_, state) => EmployeeFormScreen(employeeId: state.pathParameters['id']),
-          ),
-          GoRoute(
-            path: '/admin/employees/:id/view',
-            builder: (_, state) => EmployeeDetailScreen(employeeId: state.pathParameters['id']),
-          ),
-          GoRoute(
-            path: '/admin/attendance',
-            builder: (context, state) => const AttendanceScreen(),
-          ),
-          GoRoute(
-            path: '/admin/leave',
-            builder: (context, state) => const LeaveScreen(),
-          ),
-          GoRoute(
-            path: '/admin/payroll',
-            builder: (context, state) => const PayrollScreen(),
-          ),
-          GoRoute(
-            path: '/admin/payroll/payslip/:employeeId',
-            builder: (context, state) => PayslipDetailScreen(
-              employeeId: state.pathParameters['employeeId'],
-              month: state.uri.queryParameters['month'],
-            ),
-          ),
-          GoRoute(
-            path: '/admin/recruitment',
-            redirect: (context, state) =>
-                SubscriptionController.instance.recruitmentEnabled ? null : '/admin/settings',
-            builder: (context, state) => const RecruitmentScreen(),
-          ),
-          GoRoute(
-            path: '/admin/recruitment/add',
-            redirect: (context, state) =>
-                SubscriptionController.instance.recruitmentEnabled ? null : '/admin/settings',
-            builder: (context, state) => AddJobScreen(
-              editJob: state.extra is JobItem ? state.extra as JobItem : null,
-            ),
-          ),
-          GoRoute(
-            path: '/admin/recruitment/job/:id',
-            redirect: (context, state) =>
-                SubscriptionController.instance.recruitmentEnabled ? null : '/admin/settings',
-            builder: (context, state) => JobDetailScreen(jobId: state.pathParameters['id']),
-          ),
-          GoRoute(
-            path: '/admin/settings',
-            builder: (context, state) => const SettingsScreen(),
-          ),
-          GoRoute(
-            path: '/admin/settings/role/:id',
-            builder: (context, state) => RoleDetailScreen(roleId: state.pathParameters['id']),
-          ),
-          GoRoute(
-            path: '/admin/notifications',
-            builder: (context, state) => const NotificationsScreen(),
-          ),
-          GoRoute(
-            path: '/admin/profile',
-            builder: (context, state) => const AdminProfileScreen(),
-          ),
-          GoRoute(
-            path: '/admin/companies/add',
-            builder: (context, state) => const AddCompanyScreen(),
-          ),
-        ],
-      ),
-      // Employee (Mobile) routes - Shell for bottom nav
-      ShellRoute(
-        builder: (context, state, child) => EmployeeShell(child: child),
-        routes: [
-          GoRoute(
-            path: '/employee',
-            builder: (context, state) => const EmployeeHomeScreen(),
-          ),
-          GoRoute(
-            path: '/employee/attendance',
-            builder: (context, state) => const EmployeeAttendanceScreen(),
-          ),
-          GoRoute(
-            path: '/employee/leave',
-            builder: (context, state) => const EmployeeLeaveScreen(),
-          ),
-          GoRoute(
-            path: '/employee/leave/request',
-            builder: (context, state) => const LeaveRequestScreen(),
-          ),
-          GoRoute(
-            path: '/employee/payslip',
-            builder: (context, state) => const EmployeePayslipScreen(),
-          ),
-          GoRoute(
-            path: '/employee/profile',
-            builder: (context, state) => const EmployeeProfileScreen(),
-          ),
-          GoRoute(
-            path: '/employee/notifications',
-            builder: (context, state) => const EmployeeNotificationsScreen(),
-          ),
-        ],
-      ),
-    ],
-  );
-}
+// ─── Subscription redirect ─────────────────────────────────────────────────────
+/// يمنع الوصول لصفحات التوظيف إذا لم يكن الاشتراك يدعمها.
+String? _recruitmentGuard(BuildContext context, GoRouterState state) =>
+    SubscriptionController.instance.recruitmentEnabled ? null : '/admin/settings';
 
-/// Admin shell - يعرض التخطيط فقط على الويب
+// ─── Router ───────────────────────────────────────────────────────────────────
+GoRouter createAppRouter() => GoRouter(
+      navigatorKey: _rootKey,
+      initialLocation: '/welcome',
+      refreshListenable: AuthSession.instance,
+      redirect: _authRedirect,
+      routes: [
+        // ── عام ──────────────────────────────────────────────────────────────
+        GoRoute(
+          path: '/',
+          redirect: (context, state) => PlatformHelper.isAdminApp ? '/admin' : '/employee',
+        ),
+        GoRoute(path: '/welcome',         pageBuilder: _fade(const WelcomeScreen())),
+        GoRoute(path: '/login',           pageBuilder: _fade(PlatformHelper.isAdminApp ? const LoginScreen() : const EmployeeLoginScreen())),
+        GoRoute(path: '/register',        pageBuilder: _fade(const CompanyRegisterScreen())),
+        GoRoute(path: '/forgot-password', pageBuilder: _fade(const ForgotPasswordScreen())),
+
+        // ── لوحة الأدمن (ويب) ────────────────────────────────────────────────
+        ShellRoute(
+          navigatorKey: _adminKey,
+          builder: (context, state, child) => AdminShell(child: child),
+          routes: [
+            // صفحات ثابتة
+            GoRoute(path: '/admin',               pageBuilder: _fade(const DashboardScreen())),
+            GoRoute(path: '/admin/employees',      pageBuilder: _fade(const EmployeesScreen())),
+            GoRoute(path: '/admin/employees/add',  pageBuilder: _fade(const EmployeeFormScreen())),
+            GoRoute(path: '/admin/attendance',     pageBuilder: _fade(const AttendanceScreen())),
+            GoRoute(path: '/admin/leave',          pageBuilder: _fade(const LeaveScreen())),
+            GoRoute(path: '/admin/payroll',        pageBuilder: _fade(const PayrollScreen())),
+            GoRoute(path: '/admin/settings',       pageBuilder: _fade(const SettingsScreen())),
+            GoRoute(path: '/admin/notifications',  pageBuilder: _fade(const NotificationsScreen())),
+            GoRoute(path: '/admin/profile',        pageBuilder: _fade(const AdminProfileScreen())),
+            GoRoute(path: '/admin/companies/add',  pageBuilder: _fade(const AddCompanyScreen())),
+            GoRoute(path: '/admin/recruitment',    redirect: _recruitmentGuard, pageBuilder: _fade(const RecruitmentScreen())),
+
+            // صفحات ديناميكية (تحتاج path parameters)
+            GoRoute(
+              path: '/admin/employees/:id',
+              pageBuilder: (ctx, state) => _fadeOf(ctx, state,
+                  EmployeeFormScreen(employeeId: state.pathParameters['id'])),
+            ),
+            GoRoute(
+              path: '/admin/employees/:id/view',
+              pageBuilder: (ctx, state) => _fadeOf(ctx, state,
+                  EmployeeDetailScreen(employeeId: state.pathParameters['id'])),
+            ),
+            GoRoute(
+              path: '/admin/payroll/payslip/:employeeId',
+              pageBuilder: (ctx, state) => _fadeOf(ctx, state,
+                  PayslipDetailScreen(
+                    employeeId: state.pathParameters['employeeId'],
+                    month:      state.uri.queryParameters['month'],
+                  )),
+            ),
+            GoRoute(
+              path: '/admin/recruitment/add',
+              redirect: _recruitmentGuard,
+              pageBuilder: (ctx, state) => _fadeOf(ctx, state,
+                  AddJobScreen(editJob: state.extra is JobItem ? state.extra as JobItem : null)),
+            ),
+            GoRoute(
+              path: '/admin/recruitment/job/:id',
+              redirect: _recruitmentGuard,
+              pageBuilder: (ctx, state) => _fadeOf(ctx, state,
+                  JobDetailScreen(jobId: state.pathParameters['id'])),
+            ),
+            GoRoute(
+              path: '/admin/settings/role/:id',
+              pageBuilder: (ctx, state) => _fadeOf(ctx, state,
+                  RoleDetailScreen(roleId: state.pathParameters['id'])),
+            ),
+          ],
+        ),
+
+        // ── تطبيق الموظف (موبايل) ────────────────────────────────────────────
+        ShellRoute(
+          builder: (context, state, child) => EmployeeShell(child: child),
+          routes: [
+            GoRoute(path: '/employee',               pageBuilder: _fade(const EmployeeHomeScreen())),
+            GoRoute(path: '/employee/attendance',    pageBuilder: _fade(const EmployeeAttendanceScreen())),
+            GoRoute(path: '/employee/leave',         pageBuilder: _fade(const EmployeeLeaveScreen())),
+            GoRoute(path: '/employee/leave/request', pageBuilder: _fade(const LeaveRequestScreen())),
+            GoRoute(path: '/employee/payslip',       pageBuilder: _fade(const EmployeePayslipScreen())),
+            GoRoute(path: '/employee/profile',       pageBuilder: _fade(const EmployeeProfileScreen())),
+            GoRoute(path: '/employee/notifications', pageBuilder: _fade(const EmployeeNotificationsScreen())),
+          ],
+        ),
+      ],
+    );
+
+// ─── AdminShell ────────────────────────────────────────────────────────────────
+/// يعرض AdminLayout على الويب فقط.
 class AdminShell extends StatelessWidget {
   const AdminShell({super.key, required this.child});
-
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
-    if (!PlatformHelper.isAdminApp) {
-      return child;
-    }
-    return AdminLayout(child: child);
-  }
+  Widget build(BuildContext context) =>
+      PlatformHelper.isAdminApp ? AdminLayout(child: child) : child;
 }
 
+// ─── EmployeeShell ────────────────────────────────────────────────────────────
+/// يُغلّف شاشات الموظف بـ bottom navigation bar.
 class EmployeeShell extends StatelessWidget {
   const EmployeeShell({super.key, required this.child});
-
   final Widget child;
 
-  @override
-  Widget build(BuildContext context) {
-    if (!PlatformHelper.isEmployeeApp) {
-      return child;
-    }
-    return Scaffold(
-      body: child,
-      bottomNavigationBar: Builder(
-        builder: (context) {
-          final l10n = AppLocalizations.of(context)!;
-          return NavigationBar(
-            selectedIndex: _selectedIndex(context),
-            onDestinationSelected: (i) => _onSelect(context, i),
-            destinations: [
-              NavigationDestination(
-                icon: const Icon(Icons.home_outlined),
-                selectedIcon: const Icon(Icons.home),
-                label: l10n.employeeNavHome,
-              ),
-              NavigationDestination(
-                icon: const Icon(Icons.access_time_outlined),
-                selectedIcon: const Icon(Icons.access_time),
-                label: l10n.employeeNavAttendance,
-              ),
-              NavigationDestination(
-                icon: const Icon(Icons.event_note_outlined),
-                selectedIcon: const Icon(Icons.event_note),
-                label: l10n.employeeNavLeave,
-              ),
-              NavigationDestination(
-                icon: const Icon(Icons.receipt_long_outlined),
-                selectedIcon: const Icon(Icons.receipt_long),
-                label: l10n.employeeNavPayroll,
-              ),
-              NavigationDestination(
-                icon: const Icon(Icons.person_outline),
-                selectedIcon: const Icon(Icons.person),
-                label: l10n.employeeNavProfile,
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
+  // مسارات التبويبات بالترتيب — عدّل هنا لإضافة تبويب جديد
+  static const _paths = [
+    '/employee',
+    '/employee/attendance',
+    '/employee/leave',
+    '/employee/payslip',
+    '/employee/profile',
+  ];
 
   int _selectedIndex(BuildContext context) {
     final path = GoRouterState.of(context).uri.path;
-    if (path.contains('attendance')) return 1;
-    if (path.contains('leave')) return 2;
-    if (path.contains('payslip')) return 3;
-    if (path.contains('profile')) return 4;
+    // نبدأ من الأكثر تحديداً لتجنّب مطابقة '/employee' مع كل شيء
+    for (var i = _paths.length - 1; i > 0; i--) {
+      if (path.startsWith(_paths[i])) return i;
+    }
     return 0;
   }
 
-  void _onSelect(BuildContext context, int index) {
-    switch (index) {
-      case 0:
-        context.go('/employee');
-        break;
-      case 1:
-        context.go('/employee/attendance');
-        break;
-      case 2:
-        context.go('/employee/leave');
-        break;
-      case 3:
-        context.go('/employee/payslip');
-        break;
-      case 4:
-        context.go('/employee/profile');
-        break;
-    }
+  @override
+  Widget build(BuildContext context) {
+    if (!PlatformHelper.isEmployeeApp) return child;
+
+    final l10n = AppLocalizations.of(context)!;
+
+    return Scaffold(
+      body: child,
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _selectedIndex(context),
+        onDestinationSelected: (i) => context.go(_paths[i]),
+        destinations: [
+          NavigationDestination(icon: const Icon(Icons.home_outlined),        selectedIcon: const Icon(Icons.home),         label: l10n.employeeNavHome),
+          NavigationDestination(icon: const Icon(Icons.access_time_outlined), selectedIcon: const Icon(Icons.access_time),  label: l10n.employeeNavAttendance),
+          NavigationDestination(icon: const Icon(Icons.event_note_outlined),  selectedIcon: const Icon(Icons.event_note),   label: l10n.employeeNavLeave),
+          NavigationDestination(icon: const Icon(Icons.receipt_long_outlined),selectedIcon: const Icon(Icons.receipt_long), label: l10n.employeeNavPayroll),
+          NavigationDestination(icon: const Icon(Icons.person_outline),       selectedIcon: const Icon(Icons.person),       label: l10n.employeeNavProfile),
+        ],
+      ),
+    );
   }
 }
