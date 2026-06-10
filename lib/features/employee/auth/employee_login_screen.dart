@@ -69,55 +69,57 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen>
     return Directionality(
       textDirection: textDirectionForContext(context),
       child: Scaffold(
-        body: Stack(
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    AppColors.primary.withValues(alpha: 0.14),
-                    AppColors.background,
-                    AppColors.secondary.withValues(alpha: 0.10),
-                  ],
+        backgroundColor: AppColors.background,
+        body: FadeTransition(
+          opacity: _fade,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // ── Brand header ─────────────────────────────────────────
+                Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      stops: [0.0, 0.55, 1.0],
+                      colors: [
+                        Color(0xFF0C1731),
+                        Color(0xFF152244),
+                        Color(0xFF0B5E54),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.only(
+                      bottomLeft:  Radius.circular(36),
+                      bottomRight: Radius.circular(36),
+                    ),
+                  ),
+                  child: SafeArea(
+                    bottom: false,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 16),
+                      child: ScaleTransition(
+                        scale: _logoScale,
+                        child: const NawaTechFullLogo(onDark: true),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            Positioned(
-              top: -70,
-              right: -50,
-              child: _MobileDecor(
-                size: 170,
-                color: AppColors.primary.withValues(alpha: 0.20),
-              ),
-            ),
-            Positioned(
-              bottom: -90,
-              left: -60,
-              child: _MobileDecor(
-                size: 220,
-                color: AppColors.secondary.withValues(alpha: 0.14),
-              ),
-            ),
-            SafeArea(
-              child: FadeTransition(
-                opacity: _fade,
-                child: SlideTransition(
-                  position: _formSlide,
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(24),
+                // ── Login form card ───────────────────────────────────────
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+                  child: SlideTransition(
+                    position: _formSlide,
                     child: Container(
-                      padding: const EdgeInsets.all(22),
+                      padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.88),
+                        color: Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(22),
-                        border: Border.all(color: Colors.white.withValues(alpha: 0.76)),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.textMuted.withValues(alpha: 0.20),
-                            blurRadius: 22,
-                            offset: const Offset(0, 10),
+                            color: Colors.black.withValues(alpha: 0.08),
+                            blurRadius: 24,
+                            offset: const Offset(0, 8),
                           ),
                         ],
                       ),
@@ -126,19 +128,6 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            const SizedBox(height: 20),
-                            ScaleTransition(
-                              scale: _logoScale,
-                              child: Transform(
-                                alignment: Alignment.center,
-                                transform: Matrix4.identity()
-                                  ..setEntry(3, 2, 0.002)
-                                  ..rotateX(0.03)
-                                  ..rotateY(-0.05),
-                                child: const HrmLogo(height: 78, showTagline: true),
-                              ),
-                            ),
-                            const SizedBox(height: 36),
                             _Reveal(
                               delayMs: 50,
                               child: Text(
@@ -257,9 +246,9 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen>
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -307,24 +296,3 @@ class _RevealState extends State<_Reveal> {
   }
 }
 
-class _MobileDecor extends StatelessWidget {
-  const _MobileDecor({
-    required this.size,
-    required this.color,
-  });
-
-  final double size;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
-      ),
-    );
-  }
-}
