@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/platform_helper.dart';
+import '../../core/widgets/hrm_logo.dart';
 
 // ─── Entry Point ─────────────────────────────────────────────────────────────
 
@@ -55,22 +56,27 @@ class _MobileSplashState extends State<_MobileSplash>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primary,
-      body: Center(
-        child: FadeTransition(
-          opacity: _fade,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.people_alt_rounded, size: 72, color: Colors.white),
-              const SizedBox(height: 16),
-              Text('Nawa Tech HRM',
-                  style: AppTypography.h1.copyWith(
-                      color: Colors.white, fontSize: 36, fontWeight: FontWeight.w900)),
-              const SizedBox(height: 6),
-              Text('بوابة الموظفين',
-                  style: AppTypography.bodyMedium.copyWith(color: Colors.white70)),
-            ],
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [AppColors.primaryDark, AppColors.primary, Color(0xFF3B6FD4)],
+          ),
+        ),
+        child: Center(
+          child: FadeTransition(
+            opacity: _fade,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const HrmLogoWithRing(size: 96),
+                const SizedBox(height: 28),
+                Text('بوابة الموظفين',
+                    style: AppTypography.bodyLarge.copyWith(
+                        color: Colors.white70, letterSpacing: 1.2)),
+              ],
+            ),
           ),
         ),
       ),

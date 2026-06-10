@@ -14,10 +14,10 @@ class AppColors {
   static const Color secondaryLight = Color(0xFF10B981);
   static const Color secondaryDark = Color(0xFF047857);
 
-  // Neutral grays
-  static const Color background = Color(0xFFF8FAFC);
+  // Neutral grays — subtle blue tint gives a modern, premium feel
+  static const Color background = Color(0xFFF4F6FD);
   static const Color surface = Color(0xFFFFFFFF);
-  static const Color surfaceVariant = Color(0xFFF1F5F9);
+  static const Color surfaceVariant = Color(0xFFECEFF8);
   static const Color border = Color(0xFFE2E8F0);
   static const Color borderDark = Color(0xFFCBD5E1);
 

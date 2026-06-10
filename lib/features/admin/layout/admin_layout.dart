@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/text_direction_helper.dart';
 import '../sidebar/admin_sidebar.dart';
 import '../topbar/admin_topbar.dart';
@@ -39,8 +40,8 @@ class _AdminLayoutState extends State<AdminLayout> {
                   ),
                   Expanded(
                     child: Container(
-                      color: Theme.of(context).colorScheme.surfaceContainerLowest,
-                      padding: const EdgeInsets.all(24),
+                      color: AppColors.background,
+                      padding: const EdgeInsets.all(28),
                       child: widget.child,
                     ),
                   ),

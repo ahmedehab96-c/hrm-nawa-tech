@@ -45,33 +45,41 @@ class AdminSidebar extends StatelessWidget {
       duration: const Duration(milliseconds: 220),
       curve:    Curves.easeInOut,
       width:    collapsed ? 72 : 260,
-      color:    AppColors.sidebarBg,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end:   Alignment.bottomCenter,
+          colors: [Color(0xFF1E293B), Color(0xFF131E30)],
+        ),
+      ),
       child: Column(
         children: [
           const SizedBox(height: 20),
           // Sidebar header: logo + collapse toggle | رأس الـ sidebar: لوجو + زر الطي
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: collapsed ? 0 : 12),
-            child: Row(
-              mainAxisAlignment: collapsed
-                  ? MainAxisAlignment.center
-                  : MainAxisAlignment.spaceBetween,
+          if (collapsed)
+            Column(
               children: [
-                if (!collapsed)
-                  const Padding(
-                    padding: EdgeInsets.only(right: 8),
-                    child: HrmLogo(height: 36),
-                  ),
+                const HrmLogoIcon(size: 32),
                 IconButton(
-                  icon: Icon(
-                    collapsed ? Icons.menu_open : Icons.menu,
-                    color: Colors.white70,
-                  ),
+                  icon: const Icon(Icons.menu_open, color: Colors.white70),
                   onPressed: onToggle,
                 ),
               ],
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const HrmLogo(height: 36),
+                  IconButton(
+                    icon: const Icon(Icons.menu, color: Colors.white70),
+                    onPressed: onToggle,
+                  ),
+                ],
+              ),
             ),
-          ),
           const SizedBox(height: 24),
           // Navigation items | عناصر التنقل
           Expanded(
