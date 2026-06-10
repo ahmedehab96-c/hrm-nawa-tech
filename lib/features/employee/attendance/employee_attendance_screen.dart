@@ -176,7 +176,11 @@ class _EmployeeAttendanceScreenState extends State<EmployeeAttendanceScreen> {
         appBar: AppBar(
           title: Text(l10n.attendance),
         ),
-        body: SingleChildScrollView(
+        body: Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 640),
+            child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -288,6 +292,8 @@ class _EmployeeAttendanceScreenState extends State<EmployeeAttendanceScreen> {
                 );
               }),
             ],
+          ),
+        ),
           ),
         ),
       ),

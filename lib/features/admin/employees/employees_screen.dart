@@ -172,43 +172,55 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
+          LayoutBuilder(builder: (context, constraints) {
+            final isNarrow = constraints.maxWidth < 640;
+            final addBtn = FilledButton.icon(
+              onPressed: () {
+                final max = SubscriptionController.instance.maxEmployees;
+                if (_total >= max) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text(l10n.employeeLimitReached),
+                    backgroundColor: AppColors.warning,
+                  ));
+                  return;
+                }
+                context.push('/admin/employees/add');
+              },
+              icon: const Icon(Icons.add),
+              label: Text(l10n.addEmployee),
+            );
+            final refreshBtn = IconButton(
+              onPressed: _loading ? null : _load,
+              icon: const Icon(Icons.refresh),
+              tooltip: l10n.refreshAction,
+            );
+            if (isNarrow) {
+              return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(l10n.employees, style: AppTypography.h1),
                   if (_total > 0)
                     Text('$_total ${l10n.employees}', style: AppTypography.caption),
+                  const SizedBox(height: 12),
+                  Wrap(spacing: 8, runSpacing: 8, children: [refreshBtn, addBtn]),
                 ],
-              ),
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: _loading ? null : _load,
-                    icon: const Icon(Icons.refresh),
-                    tooltip: l10n.refreshAction,
-                  ),
-                  FilledButton.icon(
-                    onPressed: () {
-                      final max = SubscriptionController.instance.maxEmployees;
-                      if (_total >= max) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: Text(l10n.employeeLimitReached),
-                          backgroundColor: AppColors.warning,
-                        ));
-                        return;
-                      }
-                      context.push('/admin/employees/add');
-                    },
-                    icon: const Icon(Icons.add),
-                    label: Text(l10n.addEmployee),
-                  ),
-                ],
-              ),
-            ],
-          ),
+              );
+            }
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l10n.employees, style: AppTypography.h1),
+                    if (_total > 0)
+                      Text('$_total ${l10n.employees}', style: AppTypography.caption),
+                  ],
+                ),
+                Row(children: [refreshBtn, addBtn]),
+              ],
+            );
+          }),
           const SizedBox(height: 24),
           Card(
             child: Padding(

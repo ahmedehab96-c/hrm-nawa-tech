@@ -121,32 +121,44 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ── Header ──────────────────────────────────────────────────────
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(l10n.dailyAttendance, style: AppTypography.h1),
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: _loading ? null : _load,
-                    icon: const Icon(Icons.refresh),
-                    tooltip: l10n.refreshAction,
-                  ),
-                  OutlinedButton.icon(
-                    onPressed: () => _exportDemo(excel: true, l10n: l10n),
-                    icon: const Icon(Icons.file_download),
-                    label: Text(l10n.exportExcel),
-                  ),
-                  const SizedBox(width: 8),
-                  OutlinedButton.icon(
-                    onPressed: () => _exportDemo(excel: false, l10n: l10n),
-                    icon: const Icon(Icons.picture_as_pdf),
-                    label: Text(l10n.exportPdf),
-                  ),
-                ],
+          LayoutBuilder(builder: (context, constraints) {
+            final isNarrow = constraints.maxWidth < 640;
+            final actions = [
+              IconButton(
+                onPressed: _loading ? null : _load,
+                icon: const Icon(Icons.refresh),
+                tooltip: l10n.refreshAction,
               ),
-            ],
-          ),
+              OutlinedButton.icon(
+                onPressed: () => _exportDemo(excel: true, l10n: l10n),
+                icon: const Icon(Icons.file_download),
+                label: Text(l10n.exportExcel),
+              ),
+              const SizedBox(width: 8),
+              OutlinedButton.icon(
+                onPressed: () => _exportDemo(excel: false, l10n: l10n),
+                icon: const Icon(Icons.picture_as_pdf),
+                label: Text(l10n.exportPdf),
+              ),
+            ];
+            if (isNarrow) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(l10n.dailyAttendance, style: AppTypography.h1),
+                  const SizedBox(height: 12),
+                  Wrap(spacing: 4, runSpacing: 8, children: actions),
+                ],
+              );
+            }
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(l10n.dailyAttendance, style: AppTypography.h1),
+                Row(children: actions),
+              ],
+            );
+          }),
           const SizedBox(height: 24),
 
           // ── Stats Row ────────────────────────────────────────────────────

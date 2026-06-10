@@ -108,7 +108,11 @@ class _EmployeeLeaveScreenState extends State<EmployeeLeaveScreen> {
         ),
         body: _loading
             ? const Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
+            : Align(
+                alignment: Alignment.topCenter,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 640),
+                  child: SingleChildScrollView(
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -172,6 +176,8 @@ class _EmployeeLeaveScreenState extends State<EmployeeLeaveScreen> {
                   ],
                 ),
               ),
+                  ),
+                ),
       ),
     );
   }

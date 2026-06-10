@@ -104,62 +104,70 @@ class _EmployeeHomeScreenState extends State<EmployeeHomeScreen> {
           ],
         ),
         body: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ── Gradient header with greeting + WiFi chip ─────────────
-              _HeaderBanner(
-                greeting: l10n.greetingWithName('محمد'),
-                date: l10n.homeDateSample,
-                isLoading: _isLoading,
-                isOnCompanyWifi: _isOnCompanyWifi,
-                wifiName: _wifiName,
-                onRefresh: _checkWifiStatus,
-              ),
-
-              // ── Attendance card ────────────────────────────────────────
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-                child: FadeSlideIn(
-                  delay: const Duration(milliseconds: 80),
-                  child: _AttendanceCard(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 720),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ── Gradient header with greeting + WiFi chip ──────────
+                  _HeaderBanner(
+                    greeting: l10n.greetingWithName('محمد'),
+                    date: l10n.homeDateSample,
                     isLoading: _isLoading,
-                    onCheckIn: _handleCheckIn,
-                    onCheckOut: _handleCheckOut,
+                    isOnCompanyWifi: _isOnCompanyWifi,
+                    wifiName: _wifiName,
+                    onRefresh: _checkWifiStatus,
                   ),
-                ),
-              ),
 
-              // ── Quick actions ──────────────────────────────────────────
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
-                child: FadeSlideIn(
-                  delay: const Duration(milliseconds: 160),
-                  child: Text(l10n.quickActionsTitle, style: AppTypography.h4),
-                ),
+                  // ── Attendance card ─────────────────────────────────────
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+                    child: FadeSlideIn(
+                      delay: const Duration(milliseconds: 80),
+                      child: _AttendanceCard(
+                        isLoading: _isLoading,
+                        onCheckIn: _handleCheckIn,
+                        onCheckOut: _handleCheckOut,
+                      ),
+                    ),
+                  ),
+
+                  // ── Quick actions ───────────────────────────────────────
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+                    child: FadeSlideIn(
+                      delay: const Duration(milliseconds: 160),
+                      child: Text(l10n.quickActionsTitle, style: AppTypography.h4),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
+                    child: LayoutBuilder(builder: (_, c) {
+                      final cols = c.maxWidth > 480 ? 4 : 2;
+                      return GridView.count(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        crossAxisCount: cols,
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
+                        childAspectRatio: 1.35,
+                        children: [
+                          FadeSlideIn(delay: const Duration(milliseconds: 200),
+                            child: _QuickActionCard(icon: Icons.event_note_outlined, label: l10n.requestLeave,       iconColor: AppColors.warning,   onTap: () => context.go('/employee/leave'))),
+                          FadeSlideIn(delay: const Duration(milliseconds: 240),
+                            child: _QuickActionCard(icon: Icons.receipt_long,         label: l10n.payslip,            iconColor: AppColors.success,   onTap: () => context.go('/employee/payslip'))),
+                          FadeSlideIn(delay: const Duration(milliseconds: 280),
+                            child: _QuickActionCard(icon: Icons.access_time,           label: l10n.attendanceLogLabel, iconColor: AppColors.primary,   onTap: () => context.go('/employee/attendance'))),
+                          FadeSlideIn(delay: const Duration(milliseconds: 320),
+                            child: _QuickActionCard(icon: Icons.person_outline,        label: l10n.profileQuickLabel,  iconColor: AppColors.secondary, onTap: () => context.go('/employee/profile'))),
+                        ],
+                      );
+                    }),
+                  ),
+                ],
               ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
-                child: GridView.count(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 12,
-                  crossAxisSpacing: 12,
-                  childAspectRatio: 1.35,
-                  children: [
-                    FadeSlideIn(delay: const Duration(milliseconds: 200),
-                      child: _QuickActionCard(icon: Icons.event_note_outlined, label: l10n.requestLeave,      iconColor: AppColors.warning,   onTap: () => context.go('/employee/leave'))),
-                    FadeSlideIn(delay: const Duration(milliseconds: 240),
-                      child: _QuickActionCard(icon: Icons.receipt_long,         label: l10n.payslip,           iconColor: AppColors.success,   onTap: () => context.go('/employee/payslip'))),
-                    FadeSlideIn(delay: const Duration(milliseconds: 280),
-                      child: _QuickActionCard(icon: Icons.access_time,           label: l10n.attendanceLogLabel, iconColor: AppColors.primary,   onTap: () => context.go('/employee/attendance'))),
-                    FadeSlideIn(delay: const Duration(milliseconds: 320),
-                      child: _QuickActionCard(icon: Icons.person_outline,        label: l10n.profileQuickLabel,  iconColor: AppColors.secondary, onTap: () => context.go('/employee/profile'))),
-                  ],
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),

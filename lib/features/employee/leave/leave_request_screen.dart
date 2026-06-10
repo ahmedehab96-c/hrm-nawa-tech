@@ -111,7 +111,11 @@ class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
         appBar: AppBar(
           title: Text(l10n.requestLeave),
         ),
-        body: SingleChildScrollView(
+        body: Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 640),
+            child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -176,6 +180,8 @@ class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
                 child: Text(l10n.cancel),
               ),
             ],
+          ),
+        ),
           ),
         ),
       ),

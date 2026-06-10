@@ -1469,7 +1469,7 @@ abstract class AppLocalizations {
   /// No description provided for @registerSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Create a new company account — multi-tenant HRM'**
+  /// **'Create a new company account — multi-tenant Nawa Tech HRM'**
   String get registerSubtitle;
 
   /// No description provided for @enterCompanyName.
@@ -1871,7 +1871,7 @@ abstract class AppLocalizations {
   /// No description provided for @planStarterDesc.
   ///
   /// In en, this message translates to:
-  /// **'Up to 25 employees • core HRM'**
+  /// **'Up to 25 employees • core Nawa Tech HRM'**
   String get planStarterDesc;
 
   /// No description provided for @planGrowth.

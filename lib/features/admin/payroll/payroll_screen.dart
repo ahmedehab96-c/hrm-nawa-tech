@@ -84,54 +84,82 @@ class _PayrollScreenState extends State<PayrollScreen> {
     });
   }
 
+  // Last 12 months in YYYY-MM format, most recent first
+  static List<String> get _availableMonths {
+    final now = DateTime.now();
+    return List.generate(12, (i) {
+      final d = DateTime(now.year, now.month - i);
+      return '${d.year}-${d.month.toString().padLeft(2, '0')}';
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final months = _availableMonths;
+    // Clamp to a valid month in case state has a value not in the list
+    final safeMonth = months.contains(_month) ? _month : months.first;
+
+    final dropdown = DropdownButton<String>(
+      value: safeMonth,
+      items: months
+          .map((m) => DropdownMenuItem(value: m, child: Text(m)))
+          .toList(),
+      onChanged: (v) {
+        if (v != null) {
+          setState(() => _month = v);
+          _load();
+        }
+      },
+    );
+    final refreshBtn = IconButton(
+      onPressed: _loading ? null : _load,
+      icon: const Icon(Icons.refresh),
+      tooltip: l10n.refreshAction,
+    );
+    final generateBtn = FilledButton.icon(
+      onPressed: _loading ? null : _generatePayslips,
+      icon: const Icon(Icons.receipt_long),
+      label: Text(l10n.generatePayslip),
+    );
+
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
+          LayoutBuilder(builder: (context, constraints) {
+            final isNarrow = constraints.maxWidth < 640;
+            if (isNarrow) {
+              return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(l10n.monthlyPayroll, style: AppTypography.h1),
                   if (_total > 0)
                     Text('$_total ${l10n.employees}', style: AppTypography.caption),
-                ],
-              ),
-              Row(
-                children: [
-                  DropdownButton<String>(
-                    value: _month,
-                    items: [
-                      DropdownMenuItem(value: '2025-02', child: Text(l10n.monthFebruary2025)),
-                      DropdownMenuItem(value: '2025-01', child: Text(l10n.monthJanuary2025)),
-                    ],
-                    onChanged: (v) {
-                      if (v != null) {
-                        setState(() => _month = v);
-                        _load();
-                      }
-                    },
-                  ),
-                  const SizedBox(width: 12),
-                  IconButton(
-                    onPressed: _loading ? null : _load,
-                    icon: const Icon(Icons.refresh),
-                    tooltip: l10n.refreshAction,
-                  ),
-                  FilledButton.icon(
-                    onPressed: _loading ? null : _generatePayslips,
-                    icon: const Icon(Icons.receipt_long),
-                    label: Text(l10n.generatePayslip),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [dropdown, refreshBtn, generateBtn],
                   ),
                 ],
-              ),
-            ],
-          ),
+              );
+            }
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l10n.monthlyPayroll, style: AppTypography.h1),
+                    if (_total > 0)
+                      Text('$_total ${l10n.employees}', style: AppTypography.caption),
+                  ],
+                ),
+                Row(children: [dropdown, const SizedBox(width: 8), refreshBtn, generateBtn]),
+              ],
+            );
+          }),
           const SizedBox(height: 24),
           Card(
             child: Padding(

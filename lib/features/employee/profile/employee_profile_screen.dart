@@ -60,7 +60,11 @@ class _EmployeeProfileScreenState extends State<EmployeeProfileScreen> {
         appBar: AppBar(
           title: Text(l10n.profileQuickLabel),
         ),
-        body: SingleChildScrollView(
+        body: Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 640),
+            child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -196,6 +200,8 @@ class _EmployeeProfileScreenState extends State<EmployeeProfileScreen> {
               ),
               const SizedBox(height: 24),
             ],
+          ),
+        ),
           ),
         ),
       ),
