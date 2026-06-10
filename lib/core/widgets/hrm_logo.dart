@@ -196,7 +196,7 @@ class HrmLogoIcon extends StatelessWidget {
         width: size,
         height: size,
         fit: BoxFit.contain,
-        errorBuilder: (_, __, ___) => SizedBox(
+        errorBuilder: (_, _, _) => SizedBox(
           width: size,
           height: size,
           child: CustomPaint(painter: _LogoPainter()),
@@ -303,7 +303,7 @@ class _HrmLogoWithRingState extends State<HrmLogoWithRing>
         children: [
           AnimatedBuilder(
             animation: _ctrl,
-            builder: (_, __) => Transform.rotate(
+            builder: (_, _) => Transform.rotate(
               angle: _ctrl.value * 2 * math.pi,
               child: CustomPaint(
                 size: Size(widget.size * 1.3, widget.size * 1.3),
