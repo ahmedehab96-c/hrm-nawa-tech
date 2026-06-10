@@ -61,21 +61,41 @@ class _MobileSplashState extends State<_MobileSplash>
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [AppColors.primaryDark, AppColors.primary, Color(0xFF3B6FD4)],
+            stops: [0.0, 0.55, 1.0],
+            colors: [
+              Color(0xFF0C1731),
+              Color(0xFF152244),
+              Color(0xFF0B5E54),
+            ],
           ),
         ),
         child: Center(
           child: FadeTransition(
             opacity: _fade,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const HrmLogoWithRing(size: 96),
-                const SizedBox(height: 28),
-                Text('بوابة الموظفين',
-                    style: AppTypography.bodyLarge.copyWith(
-                        color: Colors.white70, letterSpacing: 1.2)),
-              ],
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const NawaTechFullLogo(onDark: true),
+                  const SizedBox(height: 32),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.10),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.20)),
+                    ),
+                    child: Text(
+                      'بوابة الموظفين',
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: Colors.white60, letterSpacing: 1.4,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -148,11 +168,7 @@ class _Navbar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.people_alt_rounded, color: AppColors.primary, size: 28),
-          const SizedBox(width: 10),
-          Text('Nawa Tech HRM',
-              style: AppTypography.h3.copyWith(
-                  color: AppColors.primary, fontWeight: FontWeight.w900)),
+          const NawaTechNavLogo(),
           const Spacer(),
           if (isWide) ...[
             _navLink('المميزات'),

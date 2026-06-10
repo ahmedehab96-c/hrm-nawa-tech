@@ -333,6 +333,71 @@ class _HexPainter extends CustomPainter {
       old.start != start || old.end != end;
 }
 
+// ─── Compact horizontal logo for navbar / topbar ─────────────────────────────
+/// Shows "N" lettermark + "Nawa Tech" stacked + "HRM" — all in one row.
+/// Designed to fit inside a 64–72 px height navbar.
+class NawaTechNavLogo extends StatelessWidget {
+  const NawaTechNavLogo({super.key, this.onDark = false});
+
+  final bool onDark;
+
+  static const _navy = Color(0xFF1A2B5E);
+  static const _teal = Color(0xFF14B8A6);
+
+  @override
+  Widget build(BuildContext context) {
+    final nStart     = onDark ? Colors.white : _navy;
+    final nEnd       = onDark ? const Color(0xFF2DD4BF) : _teal;
+    final nawaColor  = onDark ? Colors.white : _navy;
+    final techColor  = onDark ? const Color(0xFF5EEAD4) : _teal;
+    final hrmColor   = onDark ? Colors.white : _navy;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // Gradient "N"
+        ShaderMask(
+          shaderCallback: (b) => LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [nStart, nEnd],
+          ).createShader(b),
+          child: const Text('N', style: TextStyle(
+            fontSize: 36, fontWeight: FontWeight.w900,
+            color: Colors.white, height: 1.0, fontFamily: 'Cairo',
+          )),
+        ),
+        const SizedBox(width: 8),
+        // "Nawa Tech" + "HRM" stacked
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(mainAxisSize: MainAxisSize.min, children: [
+              Text('Nawa', style: TextStyle(
+                fontSize: 13, fontWeight: FontWeight.w900,
+                color: nawaColor, fontFamily: 'Cairo', height: 1,
+              )),
+              const SizedBox(width: 4),
+              Text('Tech', style: TextStyle(
+                fontSize: 13, fontWeight: FontWeight.w900,
+                color: techColor, fontFamily: 'Cairo', height: 1,
+              )),
+            ]),
+            const SizedBox(height: 1),
+            Text('HRM', style: TextStyle(
+              fontSize: 15, fontWeight: FontWeight.w900,
+              color: hrmColor, fontFamily: 'Cairo',
+              letterSpacing: 1.0, height: 1,
+            )),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
 // ─── Compact icon-only variant (for collapsed sidebar) ─────────────────────
 
 class HrmLogoIcon extends StatelessWidget {
