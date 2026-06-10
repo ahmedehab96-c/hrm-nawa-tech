@@ -179,6 +179,141 @@ class _LogoPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
+// ─── Full Nawa Tech × HRM identity — used on login / splash ─────────────────
+/// Renders the complete brand lockup matching the Nawa Tech design:
+///   • Stylised gradient "N" letterform
+///   • "Nawa Tech" wordmark
+///   • "Smart IT Solutions, Better Future" tagline
+///   • HRM hexagon badge
+///   • "HRM / Human Resource Management" subtitle
+class NawaTechFullLogo extends StatelessWidget {
+  const NawaTechFullLogo({super.key, this.onDark = false});
+
+  final bool onDark;
+
+  static const _navy = Color(0xFF1A2B5E);
+  static const _teal = Color(0xFF14B8A6);
+
+  @override
+  Widget build(BuildContext context) {
+    final wordmarkColor = onDark ? Colors.white : _navy;
+    final taglineColor  = onDark ? Colors.white70 : const Color(0xFF64748B);
+    final subtitleColor = onDark ? Colors.white70 : _navy;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // ── "N" letterform with blue→teal gradient ──────────────────────
+        ShaderMask(
+          shaderCallback: (b) => const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [_navy, _teal],
+          ).createShader(b),
+          child: const Text(
+            'N',
+            style: TextStyle(
+              fontSize: 80,
+              fontWeight: FontWeight.w900,
+              color: Colors.white,
+              height: 1.0,
+              fontFamily: 'Cairo',
+            ),
+          ),
+        ),
+        const SizedBox(height: 4),
+        // ── "Nawa Tech" wordmark ─────────────────────────────────────────
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Nawa', style: TextStyle(
+              fontSize: 26, fontWeight: FontWeight.w900,
+              color: wordmarkColor, fontFamily: 'Cairo',
+            )),
+            const SizedBox(width: 6),
+            const Text('Tech', style: TextStyle(
+              fontSize: 26, fontWeight: FontWeight.w900,
+              color: _teal, fontFamily: 'Cairo',
+            )),
+          ],
+        ),
+        const SizedBox(height: 6),
+        // ── Tagline with decorative lines ────────────────────────────────
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(width: 22, height: 1.5, color: _teal),
+            const SizedBox(width: 8),
+            Text(
+              'Smart IT Solutions, Better Future',
+              style: TextStyle(fontSize: 11, color: taglineColor, fontFamily: 'Cairo'),
+            ),
+            const SizedBox(width: 8),
+            Container(width: 22, height: 1.5, color: _teal),
+          ],
+        ),
+        const SizedBox(height: 28),
+        // ── HRM hexagon badge ────────────────────────────────────────────
+        SizedBox(
+          width: 76, height: 82,
+          child: CustomPaint(
+            painter: _HexPainter(_navy, _teal),
+            child: const Center(
+              child: Icon(Icons.groups_outlined, color: Colors.white, size: 34),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        // ── "HRM" title ──────────────────────────────────────────────────
+        Text('HRM', style: TextStyle(
+          fontSize: 26, fontWeight: FontWeight.w900,
+          color: wordmarkColor, fontFamily: 'Cairo',
+        )),
+        const SizedBox(height: 2),
+        // ── Subtitle ─────────────────────────────────────────────────────
+        Text('Human Resource Management', style: TextStyle(
+          fontSize: 11, fontWeight: FontWeight.w500,
+          color: subtitleColor, fontFamily: 'Cairo',
+        )),
+      ],
+    );
+  }
+}
+
+class _HexPainter extends CustomPainter {
+  const _HexPainter(this.start, this.end);
+  final Color start, end;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [start, end],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+
+    final cx = size.width / 2;
+    final cy = size.height / 2;
+    final r = math.min(size.width, size.height) / 2 * 0.94;
+    final path = Path();
+
+    for (int i = 0; i < 6; i++) {
+      final angle = -math.pi / 2 + i * math.pi / 3;
+      final x = cx + r * math.cos(angle);
+      final y = cy + r * math.sin(angle);
+      if (i == 0) { path.moveTo(x, y); } else { path.lineTo(x, y); }
+    }
+    path.close();
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _HexPainter old) =>
+      old.start != start || old.end != end;
+}
+
 // ─── Compact icon-only variant (for collapsed sidebar) ─────────────────────
 
 class HrmLogoIcon extends StatelessWidget {

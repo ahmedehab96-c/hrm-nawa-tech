@@ -123,64 +123,55 @@ class _LoginScreenState extends State<LoginScreen>
                     child: SlideTransition(
                       position: _leftSlide,
                       child: Container(
-                        margin: const EdgeInsets.all(26),
-                        padding: const EdgeInsets.all(48),
+                        margin: const EdgeInsets.all(24),
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
-                            colors: [AppColors.primaryDark, AppColors.primary, AppColors.primaryLight],
+                            colors: [Color(0xFF0F1E45), Color(0xFF1A2B5E), Color(0xFF0E7A70)],
                           ),
                           borderRadius: BorderRadius.circular(26),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.primary.withValues(alpha: 0.35),
-                              blurRadius: 34,
-                              offset: const Offset(0, 18),
+                              color: const Color(0xFF1A2B5E).withValues(alpha: 0.45),
+                              blurRadius: 36,
+                              offset: const Offset(0, 16),
                             ),
                           ],
                         ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ScaleTransition(
-                              scale: _logoScale,
-                              child: AnimatedBuilder(
-                                animation: _controller,
-                                builder: (context, child) {
-                                  return Transform.translate(
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 48),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              ScaleTransition(
+                                scale: _logoScale,
+                                child: AnimatedBuilder(
+                                  animation: _controller,
+                                  builder: (context, child) => Transform.translate(
                                     offset: Offset(0, _logoFloat.value),
-                                    child: Transform(
-                                      alignment: Alignment.center,
-                                      transform: Matrix4.identity()
-                                        ..setEntry(3, 2, 0.002)
-                                        ..rotateX(0.04)
-                                        ..rotateY(-0.07),
-                                      child: child,
-                                    ),
-                                  );
-                                },
-                                child: HrmLogo(
-                                  height: 112,
-                                  showTagline: true,
-                                  taglineColor: Colors.white.withValues(alpha: 0.92),
+                                    child: child,
+                                  ),
+                                  child: const NawaTechFullLogo(onDark: true),
                                 ),
                               ),
-                            ),
-                            const SizedBox(height: 52),
-                            Text(
-                              l10n.loginBrandingTitle,
-                              style: AppTypography.h2.copyWith(color: Colors.white),
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              l10n.loginBrandingSubtitle,
-                              style: AppTypography.bodyLarge.copyWith(
-                                color: Colors.white.withValues(alpha: 0.92),
+                              const SizedBox(height: 40),
+                              Text(
+                                l10n.loginBrandingTitle,
+                                textAlign: TextAlign.center,
+                                style: AppTypography.h3.copyWith(color: Colors.white),
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: 12),
+                              Text(
+                                l10n.loginBrandingSubtitle,
+                                textAlign: TextAlign.center,
+                                style: AppTypography.bodyMedium.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.80),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
