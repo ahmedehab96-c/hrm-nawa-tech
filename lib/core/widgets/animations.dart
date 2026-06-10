@@ -133,23 +133,30 @@ class CountUpText extends StatefulWidget {
 class _CountUpTextState extends State<CountUpText>
     with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl;
-  late final int?    _target;
-  late final String  _prefix;
-  late final String  _suffix;
+
+  // نفصل بين "هل القيمة رقمية" و"قيمة الهدف" لتجنّب nullable داخل callbacks
+  late final bool   _isNumeric;
+  late final int    _target; // صالح فقط إذا _isNumeric == true
+  late final String _prefix;
+  late final String _suffix;
 
   @override
   void initState() {
     super.initState();
-    final match = RegExp(r'\d+').firstMatch(widget.value);
-    if (match != null) {
-      _target = int.tryParse(match.group(0) ?? '');
-      _prefix = widget.value.substring(0, match.start);
+    final match  = RegExp(r'\d+').firstMatch(widget.value);
+    final parsed = match != null ? int.tryParse(match.group(0) ?? '') : null;
+
+    _isNumeric = parsed != null;
+    if (_isNumeric) {
+      _target = parsed!;
+      _prefix = widget.value.substring(0, match!.start);
       _suffix = widget.value.substring(match.end);
     } else {
-      _target = null;
+      _target = 0; // غير مستخدمة
       _prefix = widget.value;
       _suffix = '';
     }
+
     _ctrl = AnimationController(vsync: this, duration: widget.duration)
       ..forward();
   }
@@ -163,12 +170,13 @@ class _CountUpTextState extends State<CountUpText>
   @override
   Widget build(BuildContext context) {
     // قيمة غير رقمية → fade بسيط
-    if (_target == null) {
+    if (!_isNumeric) {
       return FadeTransition(
         opacity: CurvedAnimation(parent: _ctrl, curve: Curves.easeOut),
         child: Text(widget.value, style: widget.style),
       );
     }
+    // قيمة رقمية → عدّ من 0 إلى _target (non-nullable, آمن داخل callback)
     return AnimatedBuilder(
       animation: _ctrl,
       builder: (context, child) {
