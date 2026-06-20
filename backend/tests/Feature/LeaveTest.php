@@ -132,4 +132,27 @@ class LeaveTest extends TestCase
         $res = $this->getJson('/api/leave-balances', $h);
         $res->assertOk()->assertJsonStructure([['employee_name', 'annual', 'sick', 'emergency']]);
     }
+
+    public function test_leave_recommendation_endpoint(): void
+    {
+        $h = $this->adminHeaders();
+        $emp = $this->createEmployee();
+        $leave = LeaveRequest::create([
+            'company_id'  => $this->company->id,
+            'employee_id' => $emp->id,
+            'type'        => 'annual',
+            'from_date'   => '2025-06-01',
+            'to_date'     => '2025-06-02',
+            'days'        => 2,
+            'status'      => 'pending',
+        ]);
+
+        $res = $this->postJson("/api/leave-requests/{$leave->id}/recommendation", [], $h);
+        $res->assertOk()->assertJsonStructure([
+            'data' => ['recommended_action', 'confidence_score', 'reason'],
+        ]);
+        $this->assertDatabaseHas('leave_recommendations', [
+            'leave_request_id' => $leave->id,
+        ]);
+    }
 }

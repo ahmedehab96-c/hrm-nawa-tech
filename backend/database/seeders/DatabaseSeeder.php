@@ -357,5 +357,8 @@ class DatabaseSeeder extends Seeder
                 }
             }
         }
+
+        // Keep RBAC tables synchronized with legacy users.role values.
+        $this->call(RbacSeeder::class);
     }
 }

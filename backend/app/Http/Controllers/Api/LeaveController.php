@@ -6,11 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Models\AppNotification;
 use App\Models\Employee;
 use App\Models\LeaveRequest;
+use App\Models\LeaveRecommendation;
+use App\Services\HrInsightsService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class LeaveController extends Controller
 {
+    public function __construct(private readonly HrInsightsService $hrInsightsService) {}
+
     private array $entitlements = [
         'annual' => 21,
         'sick' => 10,
@@ -247,5 +251,54 @@ class LeaveController extends Controller
             ->where('company_id', $user->company_id)
             ->where('email', $user->email)
             ->first();
+    }
+
+    public function recommend(Request $request, string $id)
+    {
+        $user = $request->user();
+        $leave = LeaveRequest::query()
+            ->where('company_id', $user->company_id)
+            ->with('employee:id,name')
+            ->find($id);
+
+        if (! $leave) {
+            return response()->json(['message' => 'Not found'], 404);
+        }
+
+        $balances = $this->getBalancesForEmployees(
+            (int) $user->company_id,
+            [(int) $leave->employee_id],
+        );
+        $typeKey = strtolower(trim((string) $leave->type));
+        $remaining = (float) ($balances[(int) $leave->employee_id][$typeKey] ?? 0.0);
+
+        $recommendation = $this->hrInsightsService->buildLeaveRecommendation(
+            leave: $leave,
+            remainingBalanceForType: $remaining,
+        );
+
+        $record = LeaveRecommendation::query()->create([
+            'company_id' => $user->company_id,
+            'leave_request_id' => $leave->id,
+            'generated_by' => $user->id,
+            'recommended_action' => $recommendation['action'],
+            'confidence_score' => $recommendation['confidence'],
+            'reason' => $recommendation['reason'],
+            'engine' => 'rule-engine-v1',
+        ]);
+
+        return response()->json([
+            'data' => [
+                'recommendation_id' => $record->id,
+                'leave_request_id' => $leave->id,
+                'employee_name' => $leave->employee?->name ?? '',
+                'recommended_action' => $recommendation['action'],
+                'confidence_score' => $recommendation['confidence'],
+                'reason' => $recommendation['reason'],
+                'remaining_balance' => $remaining,
+                'leave_type' => $leave->type,
+                'requested_days' => $leave->days,
+            ],
+        ]);
     }
 }

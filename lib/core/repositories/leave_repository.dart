@@ -48,6 +48,20 @@ class LeaveBalanceItem {
   final String emergencyTotal;
 }
 
+class LeaveRecommendation {
+  LeaveRecommendation({
+    required this.recommendedAction,
+    required this.confidenceScore,
+    required this.reason,
+    this.remainingBalance,
+  });
+
+  final String recommendedAction;
+  final int confidenceScore;
+  final String reason;
+  final double? remainingBalance;
+}
+
 class LeaveRepository {
   static LeaveRequestItem _fromMap(Map<String, dynamic> m) => LeaveRequestItem(
         id: m['id']?.toString() ?? '',
@@ -192,5 +206,34 @@ class LeaveRepository {
       return const ApiSuccess(null);
     }
     return const ApiSuccess(null);
+  }
+
+  static Future<ApiResult<LeaveRecommendation>> getRecommendation(String leaveRequestId) async {
+    await ApiConfig.load();
+    if (ApiConfig.useApi && ApiConfig.baseUrl != null && ApiConfig.baseUrl!.isNotEmpty) {
+      final res = await ApiClient.post('leave-requests/$leaveRequestId/recommendation');
+      if (res is ApiFailure<dynamic>) {
+        return ApiFailure((res as ApiFailure<dynamic>).message, statusCode: (res as ApiFailure<dynamic>).statusCode);
+      }
+      try {
+        final decoded = jsonDecode((res as ApiSuccess).data.body) as Map<String, dynamic>;
+        final data = decoded['data'] as Map<String, dynamic>? ?? decoded;
+        return ApiSuccess(LeaveRecommendation(
+          recommendedAction: data['recommended_action']?.toString() ?? 'review',
+          confidenceScore: (data['confidence_score'] as num?)?.toInt() ?? 50,
+          reason: data['reason']?.toString() ?? '',
+          remainingBalance: (data['remaining_balance'] as num?)?.toDouble(),
+        ));
+      } catch (e) {
+        return ApiFailure('Could not parse leave recommendation: $e');
+      }
+    }
+
+    return ApiSuccess(LeaveRecommendation(
+      recommendedAction: 'approve',
+      confidenceScore: 72,
+      reason: 'Requested days are within remaining balance.',
+      remainingBalance: 8,
+    ));
   }
 }

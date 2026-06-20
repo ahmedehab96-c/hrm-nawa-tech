@@ -138,4 +138,56 @@ class RecruitmentTest extends TestCase
         $res = $this->getJson('/api/jobs', $h);
         $this->assertCount(0, $res->json());
     }
+
+    public function test_parse_candidate_cv(): void
+    {
+        $h = $this->adminHeaders();
+        $job = $this->makeJob();
+        $candidate = Candidate::create([
+            'company_id' => $this->company->id,
+            'job_posting_id' => $job->id,
+            'name' => 'CV User',
+            'stage' => 'new',
+        ]);
+
+        $res = $this->postJson("/api/jobs/{$job->id}/candidates/{$candidate->id}/parse-cv", [
+            'cv_text' => 'Flutter developer with 4 years experience, Dart, REST APIs.',
+            'language_code' => 'en',
+        ], $h);
+
+        $res->assertOk()->assertJsonStructure(['data' => ['id', 'skills', 'cv_summary']]);
+        $this->assertDatabaseHas('candidates', [
+            'id' => $candidate->id,
+        ]);
+    }
+
+    public function test_match_candidates_endpoint(): void
+    {
+        $h = $this->adminHeaders();
+        $job = $this->makeJob(['description' => 'Need Flutter and API integration skills.']);
+        Candidate::create([
+            'company_id' => $this->company->id,
+            'job_posting_id' => $job->id,
+            'name' => 'Match 1',
+            'stage' => 'new',
+            'cv_summary' => 'Flutter engineer building production apps',
+            'skills_json' => ['Flutter', 'Dart', 'REST'],
+            'years_experience' => 4,
+        ]);
+        Candidate::create([
+            'company_id' => $this->company->id,
+            'job_posting_id' => $job->id,
+            'name' => 'Match 2',
+            'stage' => 'new',
+            'cv_summary' => 'Junior support specialist',
+            'skills_json' => ['Support'],
+            'years_experience' => 1,
+        ]);
+
+        $res = $this->postJson("/api/jobs/{$job->id}/match-candidates", [
+            'language_code' => 'en',
+        ], $h);
+
+        $res->assertOk()->assertJsonStructure(['data']);
+    }
 }

@@ -3,12 +3,17 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\AttendanceAlert;
+use App\Models\AttendanceInsight;
 use App\Models\AttendanceRecord;
 use App\Models\Employee;
+use App\Services\HrInsightsService;
 use Illuminate\Http\Request;
 
 class AttendanceController extends Controller
 {
+    public function __construct(private readonly HrInsightsService $hrInsightsService) {}
+
     public function index(Request $request)
     {
         $user = $request->user();
@@ -198,5 +203,89 @@ class AttendanceController extends Controller
         }
 
         return Employee::query()->find($employeeId);
+    }
+
+    public function insights(Request $request)
+    {
+        $user = $request->user();
+        $days = (int) $request->query('days', 30);
+        $summary = $this->hrInsightsService->buildAttendanceInsights(
+            companyId: (int) $user->company_id,
+            days: $days,
+        );
+
+        $insight = AttendanceInsight::query()->create([
+            'company_id' => $user->company_id,
+            'generated_by' => $user->id,
+            'period_start' => $summary['period_start'],
+            'period_end' => $summary['period_end'],
+            'total_records' => $summary['total_records'],
+            'present_count' => $summary['present_count'],
+            'late_count' => $summary['late_count'],
+            'absent_count' => $summary['absent_count'],
+            'risk_employees_json' => $summary['risk_employees'],
+            'summary' => "Late {$summary['late_rate']}% | Absence {$summary['absence_rate']}%",
+        ]);
+
+        $latestAlerts = AttendanceAlert::query()
+            ->where('company_id', $user->company_id)
+            ->where('status', 'open')
+            ->with('employee:id,name')
+            ->orderByDesc('generated_at')
+            ->limit(5)
+            ->get()
+            ->map(fn (AttendanceAlert $alert) => [
+                'id' => $alert->id,
+                'employee_name' => $alert->employee?->name,
+                'alert_type' => $alert->alert_type,
+                'severity' => $alert->severity,
+                'message' => $alert->message,
+                'generated_at' => $alert->generated_at?->toIso8601String(),
+            ])
+            ->values()
+            ->all();
+
+        return response()->json([
+            'data' => [
+                'insight_id' => $insight->id,
+                ...$summary,
+                'latest_alerts' => $latestAlerts,
+            ],
+        ]);
+    }
+
+    public function runAlerts(Request $request)
+    {
+        $user = $request->user();
+        $days = (int) $request->query('days', 30);
+        $summary = $this->hrInsightsService->buildAttendanceInsights(
+            companyId: (int) $user->company_id,
+            days: $days,
+        );
+
+        $created = 0;
+        foreach ($summary['risk_employees'] as $riskEmployee) {
+            $severity = $riskEmployee['absent_count'] >= 3 ? 'high' : 'medium';
+            $message = "Risk pattern detected: {$riskEmployee['late_count']} late, {$riskEmployee['absent_count']} absent in last {$days} days.";
+            AttendanceAlert::query()->create([
+                'company_id' => $user->company_id,
+                'employee_id' => $riskEmployee['id'],
+                'generated_by' => $user->id,
+                'alert_type' => 'attendance_pattern',
+                'severity' => $severity,
+                'status' => 'open',
+                'message' => $message,
+                'generated_at' => now(),
+            ]);
+            $created++;
+        }
+
+        return response()->json([
+            'message' => 'Attendance alerts generated',
+            'data' => [
+                'created_alerts' => $created,
+                'risk_employees' => $summary['risk_employees'],
+            ],
+        ]);
     }
 }

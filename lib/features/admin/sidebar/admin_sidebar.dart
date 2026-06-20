@@ -36,9 +36,14 @@ class AdminSidebar extends StatelessWidget {
       (icon: Icons.people_outline,       label: l10n.employees,   path: '/admin/employees'),
       (icon: Icons.access_time,          label: l10n.attendance,  path: '/admin/attendance'),
       (icon: Icons.event_note_outlined,  label: l10n.leave,       path: '/admin/leave'),
+      (icon: Icons.trending_up_outlined, label: _labelPerformance(context), path: '/admin/performance'),
       (icon: Icons.payments_outlined,    label: l10n.payroll,     path: '/admin/payroll'),
       if (sub.recruitmentEnabled)
         (icon: Icons.work_outline,       label: l10n.recruitment, path: '/admin/recruitment'),
+      if (sub.aiCloudFeaturesEnabled)
+        (icon: Icons.auto_awesome_outlined, label: l10n.aiPanelTitle, path: '/admin/ai'),
+      if (sub.aiCloudFeaturesEnabled)
+        (icon: Icons.analytics_outlined, label: _labelReports(context), path: '/admin/reports'),
     ];
 
     return AnimatedContainer(
@@ -111,6 +116,16 @@ class AdminSidebar extends StatelessWidget {
     );
   }
 }
+
+String _labelPerformance(BuildContext context) =>
+    Localizations.localeOf(context).languageCode == 'ar'
+        ? 'الأداء'
+        : 'Performance';
+
+String _labelReports(BuildContext context) =>
+    Localizations.localeOf(context).languageCode == 'ar'
+        ? 'التقارير'
+        : 'Reports';
 
 // ─── _NavItem ─────────────────────────────────────────────────────────────────
 /// A single navigation item in the sidebar with hover animation and active highlight.

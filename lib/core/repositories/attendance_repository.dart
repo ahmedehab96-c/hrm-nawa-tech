@@ -25,6 +25,60 @@ class AttendanceRecord {
   final String? workDate;
 }
 
+class AttendanceInsight {
+  AttendanceInsight({
+    required this.totalRecords,
+    required this.presentCount,
+    required this.lateCount,
+    required this.absentCount,
+    required this.lateRate,
+    required this.absenceRate,
+    required this.riskEmployees,
+    required this.latestAlerts,
+  });
+
+  final int totalRecords;
+  final int presentCount;
+  final int lateCount;
+  final int absentCount;
+  final double lateRate;
+  final double absenceRate;
+  final List<AttendanceRiskEmployee> riskEmployees;
+  final List<AttendanceAlertItem> latestAlerts;
+}
+
+class AttendanceRiskEmployee {
+  AttendanceRiskEmployee({
+    required this.id,
+    required this.name,
+    required this.lateCount,
+    required this.absentCount,
+  });
+
+  final String id;
+  final String name;
+  final int lateCount;
+  final int absentCount;
+}
+
+class AttendanceAlertItem {
+  AttendanceAlertItem({
+    required this.id,
+    this.employeeName,
+    required this.alertType,
+    required this.severity,
+    required this.message,
+    this.generatedAt,
+  });
+
+  final String id;
+  final String? employeeName;
+  final String alertType;
+  final String severity;
+  final String message;
+  final String? generatedAt;
+}
+
 class AttendanceRepository {
   static Future<ApiResult<List<AttendanceRecord>>> getDailyAttendance({String? date}) async {
     await ApiConfig.load();
@@ -133,5 +187,95 @@ class AttendanceRepository {
       return const ApiSuccess(null);
     }
     return const ApiSuccess(null);
+  }
+
+  static Future<ApiResult<AttendanceInsight>> getInsights({int days = 30}) async {
+    await ApiConfig.load();
+    if (ApiConfig.useApi && ApiConfig.baseUrl != null && ApiConfig.baseUrl!.isNotEmpty) {
+      final res = await ApiClient.get('attendance/insights?days=$days');
+      if (res is ApiFailure<dynamic>) {
+        return ApiFailure((res as ApiFailure<dynamic>).message, statusCode: (res as ApiFailure<dynamic>).statusCode);
+      }
+      try {
+        final decoded = jsonDecode((res as ApiSuccess).data.body) as Map<String, dynamic>;
+        final data = decoded['data'] as Map<String, dynamic>? ?? decoded;
+        final risks = (data['risk_employees'] as List<dynamic>? ?? const [])
+            .map((e) {
+              final m = e as Map<String, dynamic>;
+              return AttendanceRiskEmployee(
+                id: m['id']?.toString() ?? '',
+                name: m['name']?.toString() ?? '',
+                lateCount: (m['late_count'] as num?)?.toInt() ?? 0,
+                absentCount: (m['absent_count'] as num?)?.toInt() ?? 0,
+              );
+            })
+            .toList();
+        final alerts = (data['latest_alerts'] as List<dynamic>? ?? const [])
+            .map((e) {
+              final m = e as Map<String, dynamic>;
+              return AttendanceAlertItem(
+                id: m['id']?.toString() ?? '',
+                employeeName: m['employee_name']?.toString(),
+                alertType: m['alert_type']?.toString() ?? '',
+                severity: m['severity']?.toString() ?? 'medium',
+                message: m['message']?.toString() ?? '',
+                generatedAt: m['generated_at']?.toString(),
+              );
+            })
+            .toList();
+
+        return ApiSuccess(AttendanceInsight(
+          totalRecords: (data['total_records'] as num?)?.toInt() ?? 0,
+          presentCount: (data['present_count'] as num?)?.toInt() ?? 0,
+          lateCount: (data['late_count'] as num?)?.toInt() ?? 0,
+          absentCount: (data['absent_count'] as num?)?.toInt() ?? 0,
+          lateRate: (data['late_rate'] as num?)?.toDouble() ?? 0,
+          absenceRate: (data['absence_rate'] as num?)?.toDouble() ?? 0,
+          riskEmployees: risks,
+          latestAlerts: alerts,
+        ));
+      } catch (e) {
+        return ApiFailure('Could not parse attendance insights: $e');
+      }
+    }
+
+    return ApiSuccess(AttendanceInsight(
+      totalRecords: 120,
+      presentCount: 93,
+      lateCount: 18,
+      absentCount: 9,
+      lateRate: 15.0,
+      absenceRate: 7.5,
+      riskEmployees: [
+        AttendanceRiskEmployee(id: '1', name: 'Mohamed Ahmed', lateCount: 4, absentCount: 1),
+      ],
+      latestAlerts: [
+        AttendanceAlertItem(
+          id: '1',
+          employeeName: 'Mohamed Ahmed',
+          alertType: 'attendance_pattern',
+          severity: 'medium',
+          message: '4 late records in last month.',
+        ),
+      ],
+    ));
+  }
+
+  static Future<ApiResult<int>> runAlerts({int days = 30}) async {
+    await ApiConfig.load();
+    if (ApiConfig.useApi && ApiConfig.baseUrl != null && ApiConfig.baseUrl!.isNotEmpty) {
+      final res = await ApiClient.post('attendance/alerts/run?days=$days');
+      if (res is ApiFailure<dynamic>) {
+        return ApiFailure((res as ApiFailure<dynamic>).message, statusCode: (res as ApiFailure<dynamic>).statusCode);
+      }
+      try {
+        final decoded = jsonDecode((res as ApiSuccess).data.body) as Map<String, dynamic>;
+        final data = decoded['data'] as Map<String, dynamic>? ?? decoded;
+        return ApiSuccess((data['created_alerts'] as num?)?.toInt() ?? 0);
+      } catch (e) {
+        return ApiFailure('Could not parse alerts response: $e');
+      }
+    }
+    return const ApiSuccess(1);
   }
 }

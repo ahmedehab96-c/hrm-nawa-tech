@@ -18,6 +18,7 @@ class _AiAssistantPanelState extends State<AiAssistantPanel> {
   final _msgs = <_Msg>[];
   var _busy = false;
   var _welcome = false;
+  String? _conversationId;
 
   @override
   void dispose() {
@@ -42,10 +43,15 @@ class _AiAssistantPanelState extends State<AiAssistantPanel> {
     });
     _end();
     final lang = Localizations.localeOf(context).languageCode;
-    final reply = await AiAssistantService.getResponse(q, languageCode: lang);
+    final reply = await AiAssistantService.getResponse(
+      q,
+      languageCode: lang,
+      conversationId: _conversationId,
+    );
     if (!mounted) return;
     setState(() {
-      _msgs.add(_Msg(reply, false));
+      _conversationId = reply.conversationId;
+      _msgs.add(_Msg(reply.message, false));
       _busy = false;
     });
     _end();

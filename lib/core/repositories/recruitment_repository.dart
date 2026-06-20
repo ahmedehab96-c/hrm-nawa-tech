@@ -14,6 +14,11 @@ class CandidateItem {
     this.phone,
     required this.stage,
     this.notes,
+    this.cvSummary,
+    this.skills = const [],
+    this.yearsExperience,
+    this.aiFitScore,
+    this.aiMatchReason,
   });
 
   final String id;
@@ -22,6 +27,11 @@ class CandidateItem {
   final String? phone;
   final String stage;
   final String? notes;
+  final String? cvSummary;
+  final List<String> skills;
+  final double? yearsExperience;
+  final int? aiFitScore;
+  final String? aiMatchReason;
 
   factory CandidateItem.fromJson(Map<String, dynamic> json) => CandidateItem(
         id: json['id']?.toString() ?? '',
@@ -30,6 +40,15 @@ class CandidateItem {
         phone: json['phone']?.toString(),
         stage: json['stage']?.toString() ?? 'new',
         notes: json['notes']?.toString(),
+        cvSummary: json['cv_summary']?.toString(),
+        skills: (json['skills'] as List<dynamic>?)
+                ?.map((e) => e.toString())
+                .where((e) => e.trim().isNotEmpty)
+                .toList() ??
+            const [],
+        yearsExperience: (json['years_experience'] as num?)?.toDouble(),
+        aiFitScore: (json['ai_fit_score'] as num?)?.toInt(),
+        aiMatchReason: json['ai_match_reason']?.toString(),
       );
 }
 
@@ -85,8 +104,8 @@ List<JobItem> _demoJobs() => [
         candidatesCount: 3,
         candidates: [
           CandidateItem(id: '1', name: 'Ahmed Ali', email: 'ahmed@demo.com', stage: 'interview'),
-          CandidateItem(id: '2', name: 'Sara Hassan', email: 'sara@demo.com', stage: 'new'),
-          CandidateItem(id: '3', name: 'Omar Khaled', email: 'omar@demo.com', stage: 'offer'),
+          CandidateItem(id: '2', name: 'Sara Hassan', email: 'sara@demo.com', stage: 'new', aiFitScore: 83),
+          CandidateItem(id: '3', name: 'Omar Khaled', email: 'omar@demo.com', stage: 'offer', aiFitScore: 74),
         ],
       ),
       JobItem(
@@ -221,6 +240,7 @@ class RecruitmentRepository {
     String? email,
     String? phone,
     String? notes,
+    String? resumeText,
   }) async {
     if (!ApiConfig.useApi) return const ApiSuccess('demo-candidate-id');
     final result = await ApiClient.post('jobs/$jobId/candidates', body: {
@@ -228,6 +248,7 @@ class RecruitmentRepository {
       'email': ?email,
       'phone': ?phone,
       'notes': ?notes,
+      'resume_text': ?resumeText,
     });
     return switch (result) {
       ApiFailure(:final message, :final statusCode) =>
@@ -267,6 +288,77 @@ class RecruitmentRepository {
       ApiFailure(:final message, :final statusCode) =>
         ApiFailure(message, statusCode: statusCode),
       ApiSuccess() => const ApiSuccess(null),
+    };
+  }
+
+  Future<ApiResult<CandidateItem>> parseCandidateCv(
+    String jobId,
+    String candidateId, {
+    required String cvText,
+    required String languageCode,
+  }) async {
+    if (!ApiConfig.useApi) {
+      return ApiSuccess(CandidateItem(
+        id: candidateId,
+        name: 'Demo Candidate',
+        stage: 'new',
+        cvSummary: 'Demo parsed CV summary',
+        skills: const ['Flutter', 'Dart'],
+        yearsExperience: 3,
+      ));
+    }
+
+    final result = await ApiClient.post(
+      'jobs/$jobId/candidates/$candidateId/parse-cv',
+      body: {
+        'cv_text': cvText,
+        'language_code': languageCode,
+      },
+    );
+
+    return switch (result) {
+      ApiFailure(:final message, :final statusCode) =>
+        ApiFailure(message, statusCode: statusCode),
+      ApiSuccess(:final data) => () {
+          try {
+            final map = jsonDecode(data.body) as Map<String, dynamic>;
+            final raw = map['data'] as Map<String, dynamic>? ?? map;
+            return ApiSuccess(CandidateItem.fromJson(raw));
+          } catch (e) {
+            return ApiFailure<CandidateItem>('Could not parse CV response: $e');
+          }
+        }(),
+    };
+  }
+
+  Future<ApiResult<List<CandidateItem>>> matchCandidates(
+    String jobId, {
+    required String languageCode,
+  }) async {
+    if (!ApiConfig.useApi) {
+      final job = _demoJobs().where((j) => j.id == jobId).firstOrNull;
+      return ApiSuccess(job?.candidates ?? const []);
+    }
+
+    final result = await ApiClient.post(
+      'jobs/$jobId/match-candidates',
+      body: {'language_code': languageCode},
+    );
+
+    return switch (result) {
+      ApiFailure(:final message, :final statusCode) =>
+        ApiFailure(message, statusCode: statusCode),
+      ApiSuccess(:final data) => () {
+          try {
+            final map = jsonDecode(data.body) as Map<String, dynamic>;
+            final list = (map['data'] as List<dynamic>? ?? const []);
+            return ApiSuccess(
+              list.map((e) => CandidateItem.fromJson(e as Map<String, dynamic>)).toList(),
+            );
+          } catch (e) {
+            return ApiFailure<List<CandidateItem>>('Could not parse match response: $e');
+          }
+        }(),
     };
   }
 }

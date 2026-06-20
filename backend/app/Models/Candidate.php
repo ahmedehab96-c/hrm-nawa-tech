@@ -15,7 +15,24 @@ class Candidate extends Model
         'phone',
         'stage',
         'notes',
+        'resume_text',
+        'cv_summary',
+        'skills_json',
+        'years_experience',
+        'ai_fit_score',
+        'ai_match_reason',
+        'ai_parsed_at',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'skills_json' => 'array',
+            'years_experience' => 'float',
+            'ai_fit_score' => 'integer',
+            'ai_parsed_at' => 'datetime',
+        ];
+    }
 
     public function jobPosting(): BelongsTo
     {

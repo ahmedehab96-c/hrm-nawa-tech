@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Employee;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -165,6 +166,7 @@ class EmployeeController extends Controller
                 'password' => Hash::make($request->input('password')),
                 'role' => 'employee',
             ]);
+            $this->syncEmployeeRole($appUser);
             $employee->user_id = $appUser->id;
             $employee->save();
         }
@@ -297,6 +299,7 @@ class EmployeeController extends Controller
                 'role' => 'employee',
             ]
         );
+        $this->syncEmployeeRole($appUser);
         $emp->user_id = $appUser->id;
         $emp->save();
 
@@ -341,5 +344,14 @@ class EmployeeController extends Controller
         ];
 
         return response()->json(['data' => $data]);
+    }
+
+    private function syncEmployeeRole(User $user): void
+    {
+        $role = Role::query()->where('name', 'employee')->first();
+        if (! $role) {
+            return;
+        }
+        $user->roles()->syncWithoutDetaching([$role->id]);
     }
 }

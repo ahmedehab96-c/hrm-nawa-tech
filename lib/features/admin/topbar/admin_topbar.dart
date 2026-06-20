@@ -72,19 +72,38 @@ class AdminTopBar extends StatelessWidget {
             },
           ),
           const Spacer(),
-          // المساعد الذكي
-          IconButton(
-            icon: const Icon(Icons.smart_toy_outlined),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) => Dialog(
-                  backgroundColor: Colors.transparent,
-                  child: AiAssistantPanel(),
-                ),
-              );
-            },
+          // أدوات الذكاء الاصطناعي
+          PopupMenuButton<String>(
             tooltip: l10n.aiPanelTitle,
+            offset: const Offset(0, 44),
+            icon: const Icon(Icons.smart_toy_outlined),
+            itemBuilder: (_) => [
+              PopupMenuItem(
+                value: 'chat',
+                child: Text(Localizations.localeOf(context).languageCode == 'ar'
+                    ? 'محادثة المساعد'
+                    : 'Assistant chat'),
+              ),
+              PopupMenuItem(
+                value: 'center',
+                child: Text(Localizations.localeOf(context).languageCode == 'ar'
+                    ? 'مركز أوامر AI'
+                    : 'AI command center'),
+              ),
+            ],
+            onSelected: (value) {
+              if (value == 'chat') {
+                showDialog(
+                  context: context,
+                  builder: (context) => Dialog(
+                    backgroundColor: Colors.transparent,
+                    child: AiAssistantPanel(),
+                  ),
+                );
+                return;
+              }
+              context.push('/admin/ai');
+            },
           ),
           const SizedBox(width: 8),
           // Language toggle: AR ↔ EN

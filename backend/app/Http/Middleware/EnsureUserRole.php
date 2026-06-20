@@ -27,7 +27,7 @@ class EnsureUserRole
             return $next($request);
         }
 
-        if (! in_array($user->role, $roles, true)) {
+        if (! $user->hasAnyRole($roles)) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 

@@ -23,6 +23,7 @@ class _LeaveScreenState extends State<LeaveScreen> {
   int _total = 0;
   // null = all, 'pending', 'approved', 'rejected'
   String? _statusFilter;
+  final Set<String> _recommending = <String>{};
 
   @override
   void initState() {
@@ -97,6 +98,55 @@ class _LeaveScreenState extends State<LeaveScreen> {
       _load();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text((res as ApiFailure).message), backgroundColor: AppColors.error));
+    }
+  }
+
+  Future<void> _recommend(String id) async {
+    if (_recommending.contains(id)) return;
+    setState(() => _recommending.add(id));
+    final res = await LeaveRepository.getRecommendation(id);
+    if (!mounted) return;
+    setState(() => _recommending.remove(id));
+
+    switch (res) {
+      case ApiSuccess(:final data):
+        final ar = Localizations.localeOf(context).languageCode == 'ar';
+        final action = switch (data.recommendedAction) {
+          'approve' => ar ? 'موافقة' : 'Approve',
+          'reject' => ar ? 'رفض' : 'Reject',
+          _ => ar ? 'مراجعة' : 'Review',
+        };
+        final decision = await showDialog<String>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Text(ar ? 'توصية الإجازة' : 'Leave recommendation'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('${ar ? 'الإجراء المقترح' : 'Suggested action'}: $action'),
+                const SizedBox(height: 6),
+                Text('${ar ? 'درجة الثقة' : 'Confidence'}: ${data.confidenceScore}%'),
+                const SizedBox(height: 6),
+                Text(data.reason),
+              ],
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx, 'close'), child: Text(ar ? 'إغلاق' : 'Close')),
+              TextButton(onPressed: () => Navigator.pop(ctx, 'reject'), child: Text(AppLocalizations.of(context)!.reject)),
+              FilledButton(onPressed: () => Navigator.pop(ctx, 'approve'), child: Text(AppLocalizations.of(context)!.approve)),
+            ],
+          ),
+        );
+        if (decision == 'approve') {
+          await _approve(id);
+        } else if (decision == 'reject') {
+          await _reject(id);
+        }
+      case ApiFailure(:final message):
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message), backgroundColor: AppColors.error),
+        );
     }
   }
 
@@ -263,6 +313,15 @@ class _LeaveScreenState extends State<LeaveScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (isPendingLeaveStatus(r.status)) ...[
+              TextButton(
+                onPressed: _recommending.contains(id) ? null : () => _recommend(id),
+                child: Text(
+                  _recommending.contains(id)
+                      ? (Localizations.localeOf(context).languageCode == 'ar' ? 'جاري التحليل…' : 'Analyzing…')
+                      : (Localizations.localeOf(context).languageCode == 'ar' ? 'توصية AI' : 'AI Recommend'),
+                  style: TextStyle(color: AppColors.info),
+                ),
+              ),
               TextButton(
                 onPressed: () => _approve(id),
                 child: Text(l10n.approve, style: TextStyle(color: AppColors.success)),
