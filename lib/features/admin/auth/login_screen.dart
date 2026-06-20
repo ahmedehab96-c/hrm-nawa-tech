@@ -80,6 +80,10 @@ class _LoginScreenState extends State<LoginScreen>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final size = MediaQuery.sizeOf(context);
+    final isWide = size.width >= 960 && size.height >= 620;
+    final outerPad = isWide ? 24.0 : 12.0;
+
     return Directionality(
       textDirection: textDirectionForContext(context),
       child: Scaffold(
@@ -114,237 +118,301 @@ class _LoginScreenState extends State<LoginScreen>
                 color: AppColors.secondary.withValues(alpha: 0.14),
               ),
             ),
-            FadeTransition(
-              opacity: _fade,
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 1,
-                    child: SlideTransition(
-                      position: _leftSlide,
-                      child: Container(
-                        margin: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          // Deep navy → mid navy → rich teal: dark enough that
-                          // the white/teal logo elements always pop cleanly.
-                          gradient: const LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            stops: [0.0, 0.55, 1.0],
-                            colors: [
-                              Color(0xFF0C1731), // very dark navy
-                              Color(0xFF152244), // mid navy
-                              Color(0xFF0B5E54), // deep teal
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(26),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFF0C1731).withValues(alpha: 0.50),
-                              blurRadius: 40,
-                              offset: const Offset(0, 18),
+            SafeArea(
+              child: FadeTransition(
+                opacity: _fade,
+                child: isWide
+                    ? Row(
+                        children: [
+                          Expanded(child: _buildBrandingPanel(l10n, compact: false, margin: outerPad)),
+                          Expanded(
+                            child: Align(
+                              alignment: Alignment.topCenter,
+                              child: SingleChildScrollView(
+                                padding: EdgeInsets.all(outerPad + 12),
+                                child: _buildLoginForm(l10n, maxWidth: 430),
+                              ),
                             ),
+                          ),
+                        ],
+                      )
+                    : SingleChildScrollView(
+                        padding: EdgeInsets.all(outerPad),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _buildBrandingPanel(l10n, compact: true, margin: 0),
+                            SizedBox(height: outerPad),
+                            _buildLoginForm(l10n, maxWidth: double.infinity),
                           ],
                         ),
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 52),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              ScaleTransition(
-                                scale: _logoScale,
-                                child: AnimatedBuilder(
-                                  animation: _controller,
-                                  builder: (context, child) => Transform.translate(
-                                    offset: Offset(0, _logoFloat.value),
-                                    child: child,
-                                  ),
-                                  child: const NawaTechFullLogo(onDark: true),
-                                ),
-                              ),
-                              const SizedBox(height: 36),
-                              Text(
-                                l10n.loginBrandingTitle,
-                                textAlign: TextAlign.center,
-                                style: AppTypography.h3.copyWith(color: Colors.white),
-                              ),
-                              const SizedBox(height: 10),
-                              Text(
-                                l10n.loginBrandingSubtitle,
-                                textAlign: TextAlign.center,
-                                style: AppTypography.bodyMedium.copyWith(
-                                  color: Colors.white.withValues(alpha: 0.75),
-                                ),
-                              ),
-                            ],
+                      ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBrandingPanel(AppLocalizations l10n, {required bool compact, required double margin}) {
+    final panel = SlideTransition(
+      position: _leftSlide,
+      child: Container(
+        margin: EdgeInsets.all(margin),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            stops: [0.0, 0.55, 1.0],
+            colors: [
+              Color(0xFF0C1731),
+              Color(0xFF152244),
+              Color(0xFF0B5E54),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(compact ? 20 : 26),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF0C1731).withValues(alpha: 0.50),
+              blurRadius: compact ? 24 : 40,
+              offset: Offset(0, compact ? 10 : 18),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: compact ? 20 : 40,
+            vertical: compact ? 28 : 52,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              ScaleTransition(
+                scale: _logoScale,
+                child: AnimatedBuilder(
+                  animation: _controller,
+                  builder: (context, child) => Transform.translate(
+                    offset: Offset(0, compact ? _logoFloat.value * 0.5 : _logoFloat.value),
+                    child: child,
+                  ),
+                  child: NawaTechFullLogo(onDark: true, compact: compact),
+                ),
+              ),
+              SizedBox(height: compact ? 20 : 36),
+              Text(
+                l10n.loginBrandingTitle,
+                textAlign: TextAlign.center,
+                style: (compact ? AppTypography.h4 : AppTypography.h3)
+                    .copyWith(color: Colors.white),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                l10n.loginBrandingSubtitle,
+                textAlign: TextAlign.center,
+                style: AppTypography.bodyMedium.copyWith(
+                  color: Colors.white.withValues(alpha: 0.75),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    return panel;
+  }
+
+  Widget _buildLoginForm(AppLocalizations l10n, {required double maxWidth}) {
+    return SlideTransition(
+      position: _rightSlide,
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxWidth),
+          child: Container(
+            padding: EdgeInsets.all(maxWidth == double.infinity ? 22 : 30),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.84),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.7)),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.textMuted.withValues(alpha: 0.22),
+                  blurRadius: 24,
+                  offset: const Offset(0, 12),
+                ),
+              ],
+            ),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _DemoAccessBanner(isArabic: Localizations.localeOf(context).languageCode == 'ar'),
+                  const SizedBox(height: 16),
+                  _StaggeredReveal(
+                    delayMs: 40,
+                    child: Text(l10n.login, style: AppTypography.h1),
+                  ),
+                  const SizedBox(height: 8),
+                  _StaggeredReveal(
+                    delayMs: 80,
+                    child: Text(
+                      l10n.loginFormSubtitle,
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 26),
+                  _StaggeredReveal(
+                    delayMs: 120,
+                    child: TextFormField(
+                      controller: _emailController,
+                      decoration: InputDecoration(
+                        labelText: l10n.email,
+                        prefixIcon: const Icon(Icons.email_outlined),
+                      ),
+                      keyboardType: TextInputType.emailAddress,
+                      validator: (v) => v?.isEmpty ?? true ? l10n.enterEmail : null,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _StaggeredReveal(
+                    delayMs: 170,
+                    child: TextFormField(
+                      controller: _passwordController,
+                      obscureText: _obscurePassword,
+                      decoration: InputDecoration(
+                        labelText: l10n.password,
+                        prefixIcon: const Icon(Icons.lock_outline),
+                        suffixIcon: IconButton(
+                          icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+                          onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                        ),
+                      ),
+                      validator: (v) => v?.isEmpty ?? true ? l10n.enterPassword : null,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  _StaggeredReveal(
+                    delayMs: 220,
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton(
+                        onPressed: () => context.push('/forgot-password'),
+                        child: Text(l10n.forgotPassword),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _StaggeredReveal(
+                    delayMs: 270,
+                    child: MouseRegion(
+                      onEnter: (_) => setState(() => _hoverLogin = true),
+                      onExit: (_) => setState(() {
+                        _hoverLogin = false;
+                        _pressLogin = false;
+                      }),
+                      child: Listener(
+                        onPointerDown: (_) => setState(() => _pressLogin = true),
+                        onPointerUp: (_) => setState(() => _pressLogin = false),
+                        child: AnimatedScale(
+                          duration: const Duration(milliseconds: 140),
+                          scale: _pressLogin
+                              ? 0.975
+                              : (_hoverLogin ? 1.018 : 1.0),
+                          child: FilledButton(
+                            onPressed: _isLoading
+                                ? null
+                                : () async {
+                                    if (_formKey.currentState?.validate() ?? false) {
+                                      setState(() => _isLoading = true);
+                                      final result = await AuthRepository.login(
+                                        _emailController.text.trim(),
+                                        _passwordController.text,
+                                        surface: LoginSurface.webAdmin,
+                                      );
+                                      if (!mounted) return;
+                                      setState(() => _isLoading = false);
+                                      if (!mounted) return;
+                                      if (result is ApiSuccess) {
+                                        // ignore: use_build_context_synchronously
+                                        context.go('/admin');
+                                      } else {
+                                        // ignore: use_build_context_synchronously
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text((result as ApiFailure).message),
+                                            backgroundColor: AppColors.error,
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  },
+                            child: _isLoading
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                  )
+                                : Text(l10n.login),
                           ),
                         ),
                       ),
                     ),
                   ),
-                  Expanded(
-                    flex: 1,
-                    child: SlideTransition(
-                      position: _rightSlide,
-                      child: Center(
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.all(48),
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 430),
-                            child: Container(
-                              padding: const EdgeInsets.all(30),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.84),
-                                borderRadius: BorderRadius.circular(24),
-                                border: Border.all(color: Colors.white.withValues(alpha: 0.7)),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppColors.textMuted.withValues(alpha: 0.22),
-                                    blurRadius: 24,
-                                    offset: const Offset(0, 12),
-                                  ),
-                                ],
-                              ),
-                              child: Form(
-                                key: _formKey,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: [
-                                    _StaggeredReveal(
-                                      delayMs: 40,
-                                      child: Text(l10n.login, style: AppTypography.h1),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    _StaggeredReveal(
-                                      delayMs: 80,
-                                      child: Text(
-                                        l10n.loginFormSubtitle,
-                                        style: AppTypography.bodyMedium.copyWith(
-                                          color: AppColors.textSecondary,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 26),
-                                    _StaggeredReveal(
-                                      delayMs: 120,
-                                      child: TextFormField(
-                                        controller: _emailController,
-                                        decoration: InputDecoration(
-                                          labelText: l10n.email,
-                                          prefixIcon: const Icon(Icons.email_outlined),
-                                        ),
-                                        keyboardType: TextInputType.emailAddress,
-                                        validator: (v) => v?.isEmpty ?? true ? l10n.enterEmail : null,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    _StaggeredReveal(
-                                      delayMs: 170,
-                                      child: TextFormField(
-                                        controller: _passwordController,
-                                        obscureText: _obscurePassword,
-                                        decoration: InputDecoration(
-                                          labelText: l10n.password,
-                                          prefixIcon: const Icon(Icons.lock_outline),
-                                          suffixIcon: IconButton(
-                                            icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
-                                            onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                                          ),
-                                        ),
-                                        validator: (v) => v?.isEmpty ?? true ? l10n.enterPassword : null,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    _StaggeredReveal(
-                                      delayMs: 220,
-                                      child: Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: TextButton(
-                                          onPressed: () => context.push('/forgot-password'),
-                                          child: Text(l10n.forgotPassword),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    _StaggeredReveal(
-                                      delayMs: 270,
-                                      child: MouseRegion(
-                                        onEnter: (_) => setState(() => _hoverLogin = true),
-                                        onExit: (_) => setState(() {
-                                          _hoverLogin = false;
-                                          _pressLogin = false;
-                                        }),
-                                        child: Listener(
-                                          onPointerDown: (_) => setState(() => _pressLogin = true),
-                                          onPointerUp: (_) => setState(() => _pressLogin = false),
-                                          child: AnimatedScale(
-                                            duration: const Duration(milliseconds: 140),
-                                            scale: _pressLogin
-                                                ? 0.975
-                                                : (_hoverLogin ? 1.018 : 1.0),
-                                            child: FilledButton(
-                                              onPressed: _isLoading
-                                                  ? null
-                                                  : () async {
-                                                      if (_formKey.currentState?.validate() ?? false) {
-                                                        setState(() => _isLoading = true);
-                                                        final result = await AuthRepository.login(
-                                                          _emailController.text.trim(),
-                                                          _passwordController.text,
-                                                          surface: LoginSurface.webAdmin,
-                                                        );
-                                                        if (!mounted) return;
-                                                        setState(() => _isLoading = false);
-                                                        if (!mounted) return;
-                                                        if (result is ApiSuccess) {
-                                                          // ignore: use_build_context_synchronously
-                                                          context.go('/admin');
-                                                        } else {
-                                                          // ignore: use_build_context_synchronously
-                                                          ScaffoldMessenger.of(context).showSnackBar(
-                                                            SnackBar(
-                                                              content: Text((result as ApiFailure).message),
-                                                              backgroundColor: AppColors.error,
-                                                            ),
-                                                          );
-                                                        }
-                                                      }
-                                                    },
-                                              child: _isLoading
-                                                  ? const SizedBox(
-                                                      height: 20,
-                                                      width: 20,
-                                                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                                                    )
-                                                  : Text(l10n.login),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 14),
-                                    _StaggeredReveal(
-                                      delayMs: 320,
-                                      child: OutlinedButton(
-                                        onPressed: () => context.push('/register'),
-                                        child: Text(l10n.registerCompany),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
+                  const SizedBox(height: 14),
+                  _StaggeredReveal(
+                    delayMs: 320,
+                    child: OutlinedButton(
+                      onPressed: () => context.push('/register'),
+                      child: Text(l10n.registerCompany),
                     ),
                   ),
                 ],
               ),
             ),
-          ],
+          ),
         ),
+      ),
+    );
+  }
+}
+
+class _DemoAccessBanner extends StatelessWidget {
+  const _DemoAccessBanner({required this.isArabic});
+
+  final bool isArabic;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.play_circle_outline, color: AppColors.primary, size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              isArabic
+                  ? 'عرض توضيحي SaaS من Nawa Tech\nadmin@demo.com • Admin12345!'
+                  : 'Nawa Tech SaaS live demo\nadmin@demo.com • Admin12345!',
+              style: AppTypography.caption.copyWith(
+                color: AppColors.textSecondary,
+                height: 1.5,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

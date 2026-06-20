@@ -698,7 +698,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get addCompanyTitle => 'إضافة شركة';
 
   @override
-  String get demoCompanyLabel => 'شركة النموذج';
+  String get demoCompanyLabel => 'الشركة';
 
   @override
   String get companyAddedSuccess => 'تم إضافة الشركة بنجاح';

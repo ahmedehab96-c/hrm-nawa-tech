@@ -25,17 +25,40 @@ class DatabaseSeeder extends Seeder
         // Seed شركة + أدمن + 10 موظفين مربوطين بقاعدة البيانات
         // بحيث يمكن عرضهم ثم حذفهم/تعديلهم لاحقًا من واجهة الأدمن.
 
-        $company = Company::query()->firstOrCreate(
-            ['name' => 'Demo Company'],
-            ['status' => 'active']
-        );
+        $company = Company::query()
+            ->whereIn('name', ['Demo Company', 'شركة النخبة — عرض Nawa Tech'])
+            ->first();
+
+        if (! $company) {
+            $company = Company::create([
+                'name' => 'شركة النخبة — عرض Nawa Tech',
+                'status' => 'active',
+                'email' => 'showcase@nawatech.com',
+                'phone' => '+966 11 234 5678',
+                'address' => 'الرياض، المملكة العربية السعودية',
+                'ai_plan' => 'enterprise',
+                'ai_enabled' => true,
+                'ai_provider' => 'openai',
+            ]);
+        } else {
+            $company->update([
+                'name' => 'شركة النخبة — عرض Nawa Tech',
+                'status' => 'active',
+                'email' => 'showcase@nawatech.com',
+                'phone' => '+966 11 234 5678',
+                'address' => 'الرياض، المملكة العربية السعودية',
+                'ai_plan' => 'enterprise',
+                'ai_enabled' => true,
+                'ai_provider' => 'openai',
+            ]);
+        }
 
         $adminEmail = 'admin@demo.com';
         $admin = User::query()->updateOrCreate(
             ['email' => $adminEmail],
             [
                 'company_id' => $company->id,
-                'name' => 'Demo Admin',
+                'name' => 'مدير العرض التوضيحي',
                 'role' => 'company_admin',
                 'password' => Hash::make('Admin12345!'),
             ]

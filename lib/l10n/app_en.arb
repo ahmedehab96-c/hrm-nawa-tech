@@ -263,7 +263,7 @@
   "resetLinkSent": "Link sent",
   "resetLinkSentBody": "Check your email and follow the link to reset your password.",
   "addCompanyTitle": "Add company",
-  "demoCompanyLabel": "Demo company",
+  "demoCompanyLabel": "Company",
   "companyAddedSuccess": "Company added successfully",
   "jobTitleField": "Job title",
   "jobLocationField": "Location",

@@ -700,7 +700,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addCompanyTitle => 'Add company';
 
   @override
-  String get demoCompanyLabel => 'Demo company';
+  String get demoCompanyLabel => 'Company';
 
   @override
   String get companyAddedSuccess => 'Company added successfully';

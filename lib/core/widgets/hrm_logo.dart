@@ -187,9 +187,10 @@ class _LogoPainter extends CustomPainter {
 ///   • HRM hexagon badge
 ///   • "HRM / Human Resource Management" subtitle
 class NawaTechFullLogo extends StatelessWidget {
-  const NawaTechFullLogo({super.key, this.onDark = false});
+  const NawaTechFullLogo({super.key, this.onDark = false, this.compact = false});
 
   final bool onDark;
+  final bool compact;
 
   // Light-mode palette
   static const _navy     = Color(0xFF1A2B5E);
@@ -212,22 +213,29 @@ class NawaTechFullLogo extends StatelessWidget {
     final subtitleColor = onDark ? Colors.white60 : _navy;
     final hexStart      = onDark ? const Color(0xFF2DD4BF) : _navy;
     final hexEnd        = onDark ? Colors.white.withValues(alpha: 0.92) : _teal;
+    final nSize         = compact ? 56.0 : 84.0;
+    final wordSize      = compact ? 20.0 : 28.0;
+    final tagSize       = compact ? 9.0 : 11.0;
+    final hexW          = compact ? 56.0 : 78.0;
+    final hexH          = compact ? 60.0 : 84.0;
+    final iconSize      = compact ? 26.0 : 36.0;
+    final hrmSize       = compact ? 22.0 : 28.0;
+    final subSize       = compact ? 10.0 : 12.0;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // ── "N" letterform — white→teal on dark, navy→teal on light ─────
         ShaderMask(
           shaderCallback: (b) => LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [nGradStart, nGradEnd],
           ).createShader(b),
-          child: const Text(
+          child: Text(
             'N',
             style: TextStyle(
-              fontSize: 84,
+              fontSize: nSize,
               fontWeight: FontWeight.w900,
               color: Colors.white,
               height: 1.0,
@@ -235,64 +243,62 @@ class NawaTechFullLogo extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 4),
-        // ── "Nawa Tech" wordmark ─────────────────────────────────────────
+        SizedBox(height: compact ? 2 : 4),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text('Nawa', style: TextStyle(
-              fontSize: 28, fontWeight: FontWeight.w900,
+              fontSize: wordSize, fontWeight: FontWeight.w900,
               color: nawaColor, fontFamily: 'Cairo',
             )),
-            const SizedBox(width: 7),
+            SizedBox(width: compact ? 5 : 7),
             Text('Tech', style: TextStyle(
-              fontSize: 28, fontWeight: FontWeight.w900,
+              fontSize: wordSize, fontWeight: FontWeight.w900,
               color: techColor, fontFamily: 'Cairo',
             )),
           ],
         ),
-        const SizedBox(height: 7),
-        // ── Tagline with decorative lines ────────────────────────────────
+        SizedBox(height: compact ? 4 : 7),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(width: 24, height: 1.5, color: lineColor),
-            const SizedBox(width: 8),
-            Text(
-              'Smart IT Solutions, Better Future',
-              style: TextStyle(
-                fontSize: 11, color: taglineColor, fontFamily: 'Cairo',
+            Container(width: compact ? 16 : 24, height: 1.5, color: lineColor),
+            SizedBox(width: compact ? 6 : 8),
+            Flexible(
+              child: Text(
+                'Smart IT Solutions, Better Future',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: tagSize, color: taglineColor, fontFamily: 'Cairo',
+                ),
               ),
             ),
-            const SizedBox(width: 8),
-            Container(width: 24, height: 1.5, color: lineColor),
+            SizedBox(width: compact ? 6 : 8),
+            Container(width: compact ? 16 : 24, height: 1.5, color: lineColor),
           ],
         ),
-        const SizedBox(height: 28),
-        // ── HRM hexagon badge ────────────────────────────────────────────
+        SizedBox(height: compact ? 16 : 28),
         SizedBox(
-          width: 78, height: 84,
+          width: hexW, height: hexH,
           child: CustomPaint(
             painter: _HexPainter(hexStart, hexEnd),
             child: Center(
               child: Icon(
                 Icons.groups_outlined,
                 color: onDark ? _navy : Colors.white,
-                size: 36,
+                size: iconSize,
               ),
             ),
           ),
         ),
-        const SizedBox(height: 12),
-        // ── "HRM" title ──────────────────────────────────────────────────
+        SizedBox(height: compact ? 8 : 12),
         Text('HRM', style: TextStyle(
-          fontSize: 28, fontWeight: FontWeight.w900,
+          fontSize: hrmSize, fontWeight: FontWeight.w900,
           color: hrmColor, fontFamily: 'Cairo', letterSpacing: 1,
         )),
-        const SizedBox(height: 3),
-        // ── Subtitle ─────────────────────────────────────────────────────
+        SizedBox(height: compact ? 2 : 3),
         Text('Human Resource Management', style: TextStyle(
-          fontSize: 12, fontWeight: FontWeight.w500,
+          fontSize: subSize, fontWeight: FontWeight.w500,
           color: subtitleColor, fontFamily: 'Cairo',
         )),
       ],
