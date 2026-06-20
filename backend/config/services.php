@@ -35,4 +35,34 @@ return [
         ],
     ],
 
+    'ai' => [
+        'default_provider' => env('AI_DEFAULT_PROVIDER', 'openai'),
+        'timeout_seconds' => env('AI_TIMEOUT_SECONDS', 25),
+        'slack_webhook_url' => env('AI_SLACK_WEBHOOK_URL'),
+        'pricing' => [
+            'openai' => [
+                'gpt-4o-mini' => [
+                    'input_per_million' => (float) env('AI_PRICE_OPENAI_GPT4O_MINI_INPUT', 0.15),
+                    'output_per_million' => (float) env('AI_PRICE_OPENAI_GPT4O_MINI_OUTPUT', 0.60),
+                ],
+            ],
+            'gemini' => [
+                'gemini-1.5-flash' => [
+                    'input_per_million' => (float) env('AI_PRICE_GEMINI_15_FLASH_INPUT', 0.075),
+                    'output_per_million' => (float) env('AI_PRICE_GEMINI_15_FLASH_OUTPUT', 0.30),
+                ],
+            ],
+        ],
+    ],
+
+    'openai' => [
+        'key' => env('OPENAI_API_KEY'),
+        'model' => env('OPENAI_MODEL', 'gpt-4o-mini'),
+    ],
+
+    'gemini' => [
+        'key' => env('GEMINI_API_KEY'),
+        'model' => env('GEMINI_MODEL', 'gemini-1.5-flash'),
+    ],
+
 ];

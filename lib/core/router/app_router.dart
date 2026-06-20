@@ -10,6 +10,9 @@ import '../../features/admin/auth/company_register_screen.dart';
 import '../../features/admin/auth/forgot_password_screen.dart';
 import '../../features/admin/notifications/notifications_screen.dart';
 import '../../features/admin/profile/admin_profile_screen.dart';
+import '../../features/admin/ai/ai_command_center_screen.dart';
+import '../../features/admin/performance/performance_screen.dart';
+import '../../features/admin/reports/reports_screen.dart';
 import '../../features/admin/companies/add_company_screen.dart';
 import '../../features/admin/recruitment/job_detail_screen.dart';
 import '../../features/admin/recruitment/add_job_screen.dart';
@@ -93,6 +96,9 @@ String? _authRedirect(BuildContext context, GoRouterState state) {
 String? _recruitmentGuard(BuildContext context, GoRouterState state) =>
     SubscriptionController.instance.recruitmentEnabled ? null : '/admin/settings';
 
+String? _aiGuard(BuildContext context, GoRouterState state) =>
+    SubscriptionController.instance.aiCloudFeaturesEnabled ? null : '/admin/settings';
+
 // ─── Router ───────────────────────────────────────────────────────────────────
 GoRouter createAppRouter() => GoRouter(
       navigatorKey: _rootKey,
@@ -125,6 +131,9 @@ GoRouter createAppRouter() => GoRouter(
             GoRoute(path: '/admin/settings',       pageBuilder: _fade(const SettingsScreen())),
             GoRoute(path: '/admin/notifications',  pageBuilder: _fade(const NotificationsScreen())),
             GoRoute(path: '/admin/profile',        pageBuilder: _fade(const AdminProfileScreen())),
+            GoRoute(path: '/admin/ai',             redirect: _aiGuard, pageBuilder: _fade(const AiCommandCenterScreen())),
+            GoRoute(path: '/admin/performance',    pageBuilder: _fade(const PerformanceScreen())),
+            GoRoute(path: '/admin/reports',        redirect: _aiGuard, pageBuilder: _fade(const ReportsScreen())),
             GoRoute(path: '/admin/companies/add',  pageBuilder: _fade(const AddCompanyScreen())),
             GoRoute(path: '/admin/recruitment',    redirect: _recruitmentGuard, pageBuilder: _fade(const RecruitmentScreen())),
 

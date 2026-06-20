@@ -14,7 +14,9 @@ class AttendanceScreen extends StatefulWidget {
 
 class _AttendanceScreenState extends State<AttendanceScreen> {
   List<AttendanceRecord> _records = [];
+  AttendanceInsight? _insights;
   bool _loading = true;
+  bool _loadingInsights = false;
   DateTime _selectedDate = DateTime.now();
   final _searchController = TextEditingController();
 
@@ -46,6 +48,43 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             SnackBar(content: Text(message), backgroundColor: AppColors.error),
           );
         }
+    }
+    await _loadInsights();
+  }
+
+  Future<void> _loadInsights() async {
+    setState(() => _loadingInsights = true);
+    final result = await AttendanceRepository.getInsights(days: 30);
+    if (!mounted) return;
+    switch (result) {
+      case ApiSuccess(:final data):
+        setState(() {
+          _insights = data;
+          _loadingInsights = false;
+        });
+      case ApiFailure():
+        setState(() => _loadingInsights = false);
+    }
+  }
+
+  Future<void> _runAlerts() async {
+    final result = await AttendanceRepository.runAlerts(days: 30);
+    if (!mounted) return;
+    switch (result) {
+      case ApiSuccess(:final data):
+        final ar = Localizations.localeOf(context).languageCode == 'ar';
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(ar
+              ? 'تم إنشاء $data تنبيهات حضور'
+              : 'Generated $data attendance alerts'),
+          backgroundColor: AppColors.success,
+        ));
+        _loadInsights();
+      case ApiFailure(:final message):
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(message),
+          backgroundColor: AppColors.error,
+        ));
     }
   }
 
@@ -104,6 +143,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     final dateLabel =
         '${_selectedDate.year}-${_selectedDate.month.toString().padLeft(2, '0')}-${_selectedDate.day.toString().padLeft(2, '0')}';
     final filtered = _filtered;
+    final ar = Localizations.localeOf(context).languageCode == 'ar';
+    String tr(String arText, String enText) => ar ? arText : enText;
 
     // إحصائيات سريعة
     final presentCount = filtered.where((r) {
@@ -172,6 +213,77 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 _StatChip(label: l10n.absent,   count: absentCount,  color: AppColors.error),
               ],
             ),
+          const SizedBox(height: 16),
+
+          // ── AI Insights ───────────────────────────────────────────────────
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.insights_outlined, color: AppColors.info),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          tr('تحليلات الحضور الذكية', 'AI Attendance Insights'),
+                          style: AppTypography.h4,
+                        ),
+                      ),
+                      TextButton.icon(
+                        onPressed: _loadingInsights ? null : _runAlerts,
+                        icon: const Icon(Icons.notifications_active_outlined, size: 18),
+                        label: Text(tr('تشغيل التنبيهات', 'Run alerts')),
+                      ),
+                    ],
+                  ),
+                  if (_loadingInsights)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Center(child: CircularProgressIndicator()),
+                    )
+                  else if (_insights != null) ...[
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _InfoBadge(
+                          label: tr('معدل التأخير', 'Late rate'),
+                          value: '${_insights!.lateRate.toStringAsFixed(1)}%',
+                          color: AppColors.warning,
+                        ),
+                        _InfoBadge(
+                          label: tr('معدل الغياب', 'Absence rate'),
+                          value: '${_insights!.absenceRate.toStringAsFixed(1)}%',
+                          color: AppColors.error,
+                        ),
+                        _InfoBadge(
+                          label: tr('موظفون عاليو المخاطر', 'Risk employees'),
+                          value: '${_insights!.riskEmployees.length}',
+                          color: AppColors.info,
+                        ),
+                      ],
+                    ),
+                    if (_insights!.latestAlerts.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      ..._insights!.latestAlerts.take(3).map((alert) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 6),
+                          child: Text(
+                            '• ${alert.employeeName ?? '—'}: ${alert.message}',
+                            style: AppTypography.caption,
+                          ),
+                        );
+                      }),
+                    ],
+                  ],
+                ],
+              ),
+            ),
+          ),
           const SizedBox(height: 16),
 
           // ── Filters ──────────────────────────────────────────────────────
@@ -500,6 +612,38 @@ class _StatChip extends StatelessWidget {
           ),
           const SizedBox(width: 6),
           Text(label, style: AppTypography.caption.copyWith(color: color)),
+        ],
+      ),
+    );
+  }
+}
+
+class _InfoBadge extends StatelessWidget {
+  const _InfoBadge({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  final String label;
+  final String value;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(value, style: AppTypography.label.copyWith(color: color)),
+          const SizedBox(width: 6),
+          Text(label, style: AppTypography.caption),
         ],
       ),
     );

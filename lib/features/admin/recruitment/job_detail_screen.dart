@@ -20,6 +20,8 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   JobItem? _job;
   String? _error;
   bool _loading = true;
+  final Set<String> _parsingCandidateIds = <String>{};
+  bool _matchingCandidates = false;
 
   @override
   void initState() {
@@ -47,6 +49,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     final emailCtrl = TextEditingController();
     final phoneCtrl = TextEditingController();
     final notesCtrl = TextEditingController();
+    final resumeCtrl = TextEditingController();
     final formKey = GlobalKey<FormState>();
 
     final confirmed = await showDialog<bool>(
@@ -82,6 +85,16 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                   decoration: InputDecoration(labelText: l10n.candidateNotes),
                   maxLines: 2,
                 ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: resumeCtrl,
+                  decoration: InputDecoration(
+                    labelText: Localizations.localeOf(context).languageCode == 'ar'
+                        ? 'نص السيرة الذاتية (اختياري)'
+                        : 'CV text (optional)',
+                  ),
+                  maxLines: 5,
+                ),
               ],
             ),
           ),
@@ -108,6 +121,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
       email: emailCtrl.text.trim().isEmpty ? null : emailCtrl.text.trim(),
       phone: phoneCtrl.text.trim().isEmpty ? null : phoneCtrl.text.trim(),
       notes: notesCtrl.text.trim().isEmpty ? null : notesCtrl.text.trim(),
+      resumeText: resumeCtrl.text.trim().isEmpty ? null : resumeCtrl.text.trim(),
     );
 
     if (!mounted) return;
@@ -122,6 +136,96 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(message), backgroundColor: AppColors.error,
         ));
+    }
+  }
+
+  Future<void> _parseCandidateCv(CandidateItem candidate) async {
+    if (_job == null || _parsingCandidateIds.contains(candidate.id)) return;
+    final ar = Localizations.localeOf(context).languageCode == 'ar';
+    final controller = TextEditingController(text: candidate.cvSummary ?? '');
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(ar ? 'تحليل السيرة الذاتية' : 'Parse candidate CV'),
+        content: TextField(
+          controller: controller,
+          maxLines: 10,
+          decoration: InputDecoration(
+            hintText: ar
+                ? 'الصق نص السيرة الذاتية هنا'
+                : 'Paste candidate CV text here',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(AppLocalizations.of(context)!.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(ar ? 'تحليل' : 'Parse'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+    final cvText = controller.text.trim();
+    if (cvText.isEmpty) return;
+
+    setState(() => _parsingCandidateIds.add(candidate.id));
+    final result = await RecruitmentRepository.instance.parseCandidateCv(
+      _job!.id,
+      candidate.id,
+      cvText: cvText,
+      languageCode: Localizations.localeOf(context).languageCode,
+    );
+    if (!mounted) return;
+    setState(() => _parsingCandidateIds.remove(candidate.id));
+
+    switch (result) {
+      case ApiSuccess():
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(ar ? 'تم تحليل السيرة الذاتية' : 'CV parsed successfully'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+        _load();
+      case ApiFailure(:final message):
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message), backgroundColor: AppColors.error),
+        );
+    }
+  }
+
+  Future<void> _matchCandidates() async {
+    if (_job == null || _matchingCandidates) return;
+    setState(() => _matchingCandidates = true);
+    final result = await RecruitmentRepository.instance.matchCandidates(
+      _job!.id,
+      languageCode: Localizations.localeOf(context).languageCode,
+    );
+    if (!mounted) return;
+    setState(() => _matchingCandidates = false);
+
+    switch (result) {
+      case ApiSuccess(:final data):
+        final top = data.isNotEmpty ? data.first : null;
+        final ar = Localizations.localeOf(context).languageCode == 'ar';
+        final msg = top == null
+            ? (ar ? 'لا يوجد مرشحون للمطابقة' : 'No candidates to match')
+            : (ar
+                ? 'تم تحديث درجات المطابقة. الأفضل: ${top.name} (${top.aiFitScore ?? 0}%)'
+                : 'Matching scores updated. Top: ${top.name} (${top.aiFitScore ?? 0}%)');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(msg), backgroundColor: AppColors.success),
+        );
+        _load();
+      case ApiFailure(:final message):
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message), backgroundColor: AppColors.error),
+        );
     }
   }
 
@@ -224,7 +328,11 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
               const SizedBox(height: 24),
               _CandidatesSection(
                 job: _job!,
+                parsingIds: _parsingCandidateIds,
+                matchingCandidates: _matchingCandidates,
                 onAddCandidate: _addCandidateDialog,
+                onMatchAll: _matchCandidates,
+                onParseCv: _parseCandidateCv,
                 onUpdateStage: _updateStage,
                 onDelete: _deleteCandidate,
                 onConvert: (c) {
@@ -326,14 +434,22 @@ class _DetailRow extends StatelessWidget {
 class _CandidatesSection extends StatelessWidget {
   const _CandidatesSection({
     required this.job,
+    required this.parsingIds,
+    required this.matchingCandidates,
     required this.onAddCandidate,
+    required this.onMatchAll,
+    required this.onParseCv,
     required this.onUpdateStage,
     required this.onDelete,
     required this.onConvert,
   });
 
   final JobItem job;
+  final Set<String> parsingIds;
+  final bool matchingCandidates;
   final VoidCallback onAddCandidate;
+  final VoidCallback onMatchAll;
+  final Future<void> Function(CandidateItem) onParseCv;
   final Future<void> Function(CandidateItem, String) onUpdateStage;
   final Future<void> Function(CandidateItem) onDelete;
   final void Function(CandidateItem) onConvert;
@@ -356,10 +472,28 @@ class _CandidatesSection extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(l10n.candidates, style: AppTypography.h4),
-            FilledButton.icon(
-              onPressed: onAddCandidate,
-              icon: const Icon(Icons.person_add_outlined, size: 18),
-              label: Text(l10n.addCandidate),
+            Wrap(
+              spacing: 8,
+              children: [
+                FilledButton.tonalIcon(
+                  onPressed: matchingCandidates ? null : onMatchAll,
+                  icon: matchingCandidates
+                      ? const SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.insights_outlined, size: 18),
+                  label: Text(Localizations.localeOf(context).languageCode == 'ar'
+                      ? 'مطابقة AI'
+                      : 'AI Match'),
+                ),
+                FilledButton.icon(
+                  onPressed: onAddCandidate,
+                  icon: const Icon(Icons.person_add_outlined, size: 18),
+                  label: Text(l10n.addCandidate),
+                ),
+              ],
             ),
           ],
         ),
@@ -375,7 +509,9 @@ class _CandidatesSection extends StatelessWidget {
         else
           ...job.candidates.map((c) => _CandidateCard(
             candidate: c,
+            parsing: parsingIds.contains(c.id),
             stages: _stages,
+            onParseCv: () => onParseCv(c),
             onUpdateStage: (stage) => onUpdateStage(c, stage),
             onDelete: () => onDelete(c),
             onConvert: () => onConvert(c),
@@ -388,14 +524,18 @@ class _CandidatesSection extends StatelessWidget {
 class _CandidateCard extends StatelessWidget {
   const _CandidateCard({
     required this.candidate,
+    required this.parsing,
     required this.stages,
+    required this.onParseCv,
     required this.onUpdateStage,
     required this.onDelete,
     required this.onConvert,
   });
 
   final CandidateItem candidate;
+  final bool parsing;
   final List<(String, IconData)> stages;
+  final VoidCallback onParseCv;
   final void Function(String) onUpdateStage;
   final VoidCallback onDelete;
   final VoidCallback onConvert;
@@ -450,8 +590,52 @@ class _CandidateCard extends StatelessWidget {
                     style: AppTypography.caption.copyWith(color: color, fontWeight: FontWeight.w600),
                   ),
                 ),
+                if (candidate.aiFitScore != null) ...[
+                  const SizedBox(width: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.info.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      'AI ${candidate.aiFitScore}%',
+                      style: AppTypography.caption.copyWith(
+                        color: AppColors.info,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
+            if (candidate.cvSummary != null && candidate.cvSummary!.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(
+                candidate.cvSummary!,
+                style: AppTypography.caption.copyWith(color: AppColors.textSecondary),
+              ),
+            ],
+            if (candidate.skills.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: candidate.skills.take(6).map((skill) {
+                  return Chip(
+                    label: Text(skill, style: AppTypography.caption),
+                    visualDensity: VisualDensity.compact,
+                  );
+                }).toList(),
+              ),
+            ],
+            if (candidate.aiMatchReason != null && candidate.aiMatchReason!.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(
+                candidate.aiMatchReason!,
+                style: AppTypography.caption.copyWith(color: AppColors.textMuted),
+              ),
+            ],
             if (candidate.notes != null && candidate.notes!.isNotEmpty) ...[
               const SizedBox(height: 8),
               Text(candidate.notes!, style: AppTypography.caption.copyWith(color: AppColors.textSecondary)),
@@ -461,6 +645,22 @@ class _CandidateCard extends StatelessWidget {
               spacing: 6,
               runSpacing: 6,
               children: [
+                ActionChip(
+                  avatar: parsing
+                      ? const SizedBox(
+                          width: 12,
+                          height: 12,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.psychology_alt_outlined, size: 14),
+                  label: Text(
+                    Localizations.localeOf(context).languageCode == 'ar'
+                        ? 'تحليل CV'
+                        : 'Parse CV',
+                    style: AppTypography.caption,
+                  ),
+                  onPressed: parsing ? null : onParseCv,
+                ),
                 ...stages.map((s) {
                   final (key, icon) = s;
                   final isActive = candidate.stage == key;

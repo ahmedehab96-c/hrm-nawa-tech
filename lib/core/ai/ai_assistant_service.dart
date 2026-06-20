@@ -1,35 +1,73 @@
 import '../api/api_config.dart';
+import '../api/api_result.dart';
+import '../repositories/ai_repository.dart';
 import '../saas/subscription_controller.dart';
 
 /// إجابات محلية ثنائية اللغاء؛ طبقة Enterprise جاهزة لاحقاً لربط LLM عبر الخادم فقط (لا تضع مفاتيح في التطبيق).
 class AiAssistantService {
   AiAssistantService._();
 
-  static Future<String> getResponse(
+  static const _fallbackConversationId = 'local-fallback';
+
+  static Future<AiAssistantReply> getResponse(
     String userMessage, {
     required String languageCode,
+    String? conversationId,
   }) async {
-    await Future.delayed(const Duration(milliseconds: 420));
     await ApiConfig.load();
     final apiOn = ApiConfig.useApi && (ApiConfig.baseUrl?.isNotEmpty ?? false);
     final q = userMessage.trim().toLowerCase();
     final ar = languageCode.startsWith('ar');
 
     if (q.isEmpty) {
-      return ar ? 'اكتب سؤالاً وسأساعدك.' : 'Ask me anything about the app.';
+      return AiAssistantReply(
+        message: ar ? 'اكتب سؤالاً وسأساعدك.' : 'Ask me anything about the app.',
+        conversationId: conversationId ?? _fallbackConversationId,
+      );
     }
+
+    if (apiOn && SubscriptionController.instance.aiCloudFeaturesEnabled) {
+      final cloud = await AiRepository.instance.chat(
+        message: userMessage.trim(),
+        languageCode: languageCode,
+        conversationId: conversationId == _fallbackConversationId ? null : conversationId,
+      );
+      if (cloud case ApiSuccess(:final data)) {
+        return AiAssistantReply(
+          message: data.reply,
+          conversationId: data.conversationId.isNotEmpty
+              ? data.conversationId
+              : (conversationId ?? _fallbackConversationId),
+          provider: data.provider,
+          model: data.model,
+        );
+      }
+    }
+
+    await Future.delayed(const Duration(milliseconds: 420));
 
     final hit = _match(q, ar, apiOn);
-    if (hit != null) return hit;
+    if (hit != null) {
+      return AiAssistantReply(
+        message: hit,
+        conversationId: conversationId ?? _fallbackConversationId,
+      );
+    }
 
     if (SubscriptionController.instance.aiCloudFeaturesEnabled) {
-      return ar
-          ? 'وضع المؤسسات: يمكن ربط نموذج لغوي عبر الـ API الخاص بك لاحقاً.'
-          : 'Enterprise: plug in an LLM via your own API when ready.';
+      return AiAssistantReply(
+        message: ar
+            ? 'وضع المؤسسات: يمكن ربط نموذج لغوي عبر الـ API الخاص بك لاحقاً.'
+            : 'Enterprise: plug in an LLM via your own API when ready.',
+        conversationId: conversationId ?? _fallbackConversationId,
+      );
     }
-    return ar
-        ? 'جرّب: إضافة موظف، حضور، إجازات، رواتب، أو اشتراك.'
-        : 'Try: add employee, attendance, leave, payroll, or subscription.';
+    return AiAssistantReply(
+      message: ar
+          ? 'جرّب: إضافة موظف، حضور، إجازات، رواتب، أو اشتراك.'
+          : 'Try: add employee, attendance, leave, payroll, or subscription.',
+      conversationId: conversationId ?? _fallbackConversationId,
+    );
   }
 
   static String? _match(String q, bool ar, bool apiOn) {
@@ -65,4 +103,18 @@ class AiAssistantService {
     }
     return null;
   }
+}
+
+class AiAssistantReply {
+  const AiAssistantReply({
+    required this.message,
+    required this.conversationId,
+    this.provider,
+    this.model,
+  });
+
+  final String message;
+  final String conversationId;
+  final String? provider;
+  final String? model;
 }

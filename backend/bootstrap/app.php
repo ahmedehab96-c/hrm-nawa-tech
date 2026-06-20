@@ -1,6 +1,10 @@
 <?php
 
 use App\Http\Middleware\EnsureUserRole;
+use App\Http\Middleware\EnsureUserPermission;
+use App\Http\Middleware\EnsureAiEnabled;
+use App\Http\Middleware\EnsureAiQuota;
+use App\Http\Middleware\EnsureAiRollout;
 use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -19,6 +23,10 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'role' => EnsureUserRole::class,
+            'permission' => EnsureUserPermission::class,
+            'ai.enabled' => EnsureAiEnabled::class,
+            'ai.quota' => EnsureAiQuota::class,
+            'ai.rollout' => EnsureAiRollout::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

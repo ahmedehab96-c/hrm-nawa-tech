@@ -146,4 +146,39 @@ class AttendanceTest extends TestCase
         $res->assertOk();
         $this->assertCount(0, $res->json());
     }
+
+    public function test_attendance_insights_endpoint(): void
+    {
+        $h = $this->adminHeaders();
+        [$user, $emp] = $this->createEmployeeWithUser();
+        AttendanceRecord::create([
+            'company_id'  => $this->company->id,
+            'employee_id' => $emp->id,
+            'work_date'   => now()->toDateString(),
+            'status'      => 'late',
+        ]);
+
+        $res = $this->getJson('/api/attendance/insights?days=30', $h);
+        $res->assertOk()->assertJsonStructure([
+            'data' => ['total_records', 'late_count', 'absence_rate', 'risk_employees'],
+        ]);
+    }
+
+    public function test_attendance_run_alerts_endpoint(): void
+    {
+        $h = $this->adminHeaders();
+        [$user, $emp] = $this->createEmployeeWithUser();
+        for ($i = 0; $i < 4; $i++) {
+            AttendanceRecord::create([
+                'company_id'  => $this->company->id,
+                'employee_id' => $emp->id,
+                'work_date'   => now()->subDays($i)->toDateString(),
+                'status'      => 'late',
+            ]);
+        }
+
+        $res = $this->postJson('/api/attendance/alerts/run?days=30', [], $h);
+        $res->assertOk()->assertJsonStructure(['data' => ['created_alerts']]);
+        $this->assertDatabaseCount('attendance_alerts', 1);
+    }
 }

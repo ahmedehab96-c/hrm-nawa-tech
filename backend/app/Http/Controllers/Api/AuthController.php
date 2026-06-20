@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Company;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
@@ -37,6 +38,7 @@ class AuthController extends Controller
             'password' => Hash::make($validated['password']),
             'role' => 'company_admin',
         ]);
+        $this->syncUserRole($user);
 
         $token = $user->createToken('hrm-flutter')->plainTextToken;
 
@@ -112,6 +114,7 @@ class AuthController extends Controller
 
         /** @var User $user */
         $user = Auth::user();
+        $this->syncUserRole($user);
         $user->tokens()->delete();
         $token = $user->createToken('hrm-flutter')->plainTextToken;
 
@@ -124,5 +127,14 @@ class AuthController extends Controller
                 'role' => $user->role,
             ],
         ]);
+    }
+
+    private function syncUserRole(User $user): void
+    {
+        $role = Role::query()->where('name', $user->role)->first();
+        if (! $role) {
+            return;
+        }
+        $user->roles()->syncWithoutDetaching([$role->id]);
     }
 }
