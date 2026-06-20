@@ -127,9 +127,9 @@ class CompanySettings {
 
   static CompanySettings get demo => CompanySettings(
     id: '1',
-    name: 'شركة النموذج',
-    email: 'info@company.com',
-    phone: '+966 50 123 4567',
+    name: 'شركة النخبة — عرض Nawa Tech',
+    email: 'showcase@nawatech.com',
+    phone: '+966 11 234 5678',
     address: 'الرياض، المملكة العربية السعودية',
     wifiSsid: '',
     status: 'active',

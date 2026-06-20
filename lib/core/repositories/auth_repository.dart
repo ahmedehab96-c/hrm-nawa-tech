@@ -6,6 +6,8 @@ import '../api/api_localized.dart';
 import '../api/api_result.dart';
 import '../auth/auth_session.dart';
 import '../auth/user_role.dart';
+import '../saas/company_context.dart';
+import 'settings_repository.dart';
 
 class AuthRepository {
   /// تسجيل الدخول — POST `login` (نسبة لـ base URL الذي ينتهي بـ `/api/`)
@@ -49,6 +51,7 @@ class AuthRepository {
         user = Map<String, dynamic>.from(user);
         await ApiConfig.setUser(user);
         await AuthSession.instance.syncFromStorage();
+        await CompanyContext.instance.load(force: true);
         return ApiSuccess({'token': token, 'user': user});
       } catch (e) {
         return ApiFailure(l10n.apiReadResponseFailed(e.toString()));
@@ -61,6 +64,7 @@ class AuthRepository {
     final mockUser = {'email': email, 'name': l10n.demoUserName, 'role': mockRole};
     await ApiConfig.setUser(mockUser);
     await AuthSession.instance.syncFromStorage();
+    CompanyContext.instance.apply(CompanySettings.demo);
     return ApiSuccess({
       'token': 'mock_token',
       'user': mockUser,
@@ -104,6 +108,7 @@ class AuthRepository {
           user.putIfAbsent('role', () => UserRole.companyAdmin);
           await ApiConfig.setUser(user);
           await AuthSession.instance.syncFromStorage();
+          await CompanyContext.instance.load(force: true);
           return ApiSuccess({'token': token, 'user': user});
         }
         return ApiSuccess({'registered': true, 'user': map['user']});
@@ -193,6 +198,7 @@ class AuthRepository {
     }
     await ApiConfig.setToken(null);
     await ApiConfig.setUser(null);
+    CompanyContext.instance.clear();
     await AuthSession.instance.syncFromStorage();
   }
 

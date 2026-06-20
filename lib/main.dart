@@ -10,6 +10,7 @@ import 'core/api/api_config.dart';
 import 'core/auth/auth_session.dart';
 import 'core/locale/locale_controller.dart';
 import 'core/saas/subscription_controller.dart';
+import 'core/saas/company_context.dart';
 import 'l10n/app_localizations.dart';
 
 void main() async {
@@ -19,6 +20,9 @@ void main() async {
   await AuthSession.instance.syncFromStorage();
   await LocaleController.instance.load();
   await SubscriptionController.instance.load();
+  if (AuthSession.instance.hasSession) {
+    await CompanyContext.instance.load();
+  }
   runApp(const HrmSaasApp());
 }
 

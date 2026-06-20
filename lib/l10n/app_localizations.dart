@@ -1427,7 +1427,7 @@ abstract class AppLocalizations {
   /// No description provided for @demoCompanyLabel.
   ///
   /// In en, this message translates to:
-  /// **'Demo company'**
+  /// **'Company'**
   String get demoCompanyLabel;
 
   /// No description provided for @companyAddedSuccess.

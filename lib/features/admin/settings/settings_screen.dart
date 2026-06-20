@@ -9,6 +9,7 @@ import '../../../core/auth/auth_session.dart';
 import '../../../core/locale/locale_controller.dart';
 import '../../../core/repositories/settings_repository.dart';
 import '../../../core/saas/subscription_controller.dart';
+import '../../../core/saas/company_context.dart';
 import '../../../core/services/wifi_attendance_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_scope.dart';
@@ -75,7 +76,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void initState() {
     super.initState();
-    _companyController = TextEditingController(text: 'شركة النموذج');
+    _companyController = TextEditingController(text: 'شركة النخبة — عرض Nawa Tech');
     _emailController = TextEditingController(text: 'info@company.com');
     _phoneController = TextEditingController(text: '+966 50 123 4567');
     _addressController = TextEditingController(
@@ -270,7 +271,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (!mounted) return;
     setState(() => _savingCompany = false);
     switch (result) {
-      case ApiSuccess():
+      case ApiSuccess(:final data):
+        CompanyContext.instance.apply(data);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.formSavedSuccess),
