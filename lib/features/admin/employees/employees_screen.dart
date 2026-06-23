@@ -6,7 +6,6 @@ import '../../../core/widgets/status_badge.dart';
 import '../../../core/api/api_result.dart';
 import '../../../core/api/api_config.dart';
 import '../../../core/repositories/employees_repository.dart';
-import '../../../core/saas/subscription_controller.dart';
 
 class EmployeesScreen extends StatefulWidget {
   const EmployeesScreen({super.key});
@@ -175,17 +174,7 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
           LayoutBuilder(builder: (context, constraints) {
             final isNarrow = constraints.maxWidth < 640;
             final addBtn = FilledButton.icon(
-              onPressed: () {
-                final max = SubscriptionController.instance.maxEmployees;
-                if (_total >= max) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text(l10n.employeeLimitReached),
-                    backgroundColor: AppColors.warning,
-                  ));
-                  return;
-                }
-                context.push('/admin/employees/add');
-              },
+              onPressed: () => context.push('/admin/employees/add'),
               icon: const Icon(Icons.add),
               label: Text(l10n.addEmployee),
             );
