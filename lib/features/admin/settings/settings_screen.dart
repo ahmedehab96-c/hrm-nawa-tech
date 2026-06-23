@@ -8,7 +8,6 @@ import '../../../core/api/api_result.dart';
 import '../../../core/auth/auth_session.dart';
 import '../../../core/locale/locale_controller.dart';
 import '../../../core/repositories/settings_repository.dart';
-import '../../../core/saas/subscription_controller.dart';
 import '../../../core/saas/company_context.dart';
 import '../../../core/services/wifi_attendance_service.dart';
 import '../../../core/theme/app_theme.dart';
@@ -76,7 +75,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void initState() {
     super.initState();
-    _companyController = TextEditingController(text: 'شركة النخبة — عرض Nawa Tech');
+    _companyController = TextEditingController(text: 'HRM Portfolio Demo');
     _emailController = TextEditingController(text: 'info@company.com');
     _phoneController = TextEditingController(text: '+966 50 123 4567');
     _addressController = TextEditingController(
@@ -1198,121 +1197,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 24),
-            AnimatedBuilder(
-              animation: SubscriptionController.instance,
-              builder: (context, _) {
-                final sub = SubscriptionController.instance;
-                return _SectionCard(
-                  title: l10n.subscriptionBilling,
-                  icon: Icons.credit_card,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(l10n.saasPlanSection, style: AppTypography.label),
-                      const SizedBox(height: 8),
-                      SegmentedButton<String>(
-                        showSelectedIcon: false,
-                        segments: [
-                          ButtonSegment(
-                            value: 'starter',
-                            label: Text(l10n.planStarter),
-                          ),
-                          ButtonSegment(
-                            value: 'growth',
-                            label: Text(l10n.planGrowth),
-                          ),
-                          ButtonSegment(
-                            value: 'enterprise',
-                            label: Text(l10n.planEnterprise),
-                          ),
-                        ],
-                        selected: {sub.planId},
-                        onSelectionChanged: (s) async {
-                          if (s.isEmpty) return;
-                          await sub.setPlan(s.first);
-                        },
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        sub.planId == 'enterprise'
-                            ? l10n.planEnterpriseDesc
-                            : sub.planId == 'growth'
-                            ? l10n.planGrowthDesc
-                            : l10n.planStarterDesc,
-                        style: AppTypography.caption,
-                      ),
-                      const SizedBox(height: 12),
-                      Card(
-                        color: AppColors.primary.withValues(alpha: 0.1),
-                        child: Padding(
-                          padding: const EdgeInsets.all(20),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.star,
-                                color: AppColors.primary,
-                                size: 40,
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      sub.planId == 'enterprise'
-                                          ? l10n.planEnterprise
-                                          : sub.planId == 'growth'
-                                          ? l10n.planGrowth
-                                          : l10n.planStarter,
-                                      style: AppTypography.h4,
-                                    ),
-                                    Text(
-                                      sub.planId == 'enterprise'
-                                          ? l10n.planEnterpriseDesc
-                                          : sub.planId == 'growth'
-                                          ? l10n.planGrowthDesc
-                                          : l10n.planStarterDesc,
-                                      style: AppTypography.bodySmall,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              OutlinedButton(
-                                onPressed: () {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(l10n.paymentPortalLater),
-                                      backgroundColor: AppColors.info,
-                                    ),
-                                  );
-                                },
-                                child: Text(l10n.upgradePlan),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          _FeatureChip(l10n.featureEmployees, true),
-                          _FeatureChip(l10n.featureAttendance, true),
-                          _FeatureChip(l10n.featureLeave, true),
-                          _FeatureChip(l10n.featurePayroll, true),
-                          _FeatureChip(
-                            l10n.featureRecruitment,
-                            sub.recruitmentEnabled,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
           ],
         ),
       ),
@@ -1348,34 +1232,6 @@ class _SectionCard extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             child,
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _FeatureChip extends StatelessWidget {
-  const _FeatureChip(this.label, this.enabled);
-
-  final String label;
-  final bool enabled;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 8),
-      child: Chip(
-        label: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              enabled ? Icons.check_circle : Icons.cancel,
-              size: 16,
-              color: enabled ? AppColors.success : AppColors.textMuted,
-            ),
-            const SizedBox(width: 4),
-            Text(label),
           ],
         ),
       ),

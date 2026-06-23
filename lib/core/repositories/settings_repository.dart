@@ -127,7 +127,7 @@ class CompanySettings {
 
   static CompanySettings get demo => CompanySettings(
     id: '1',
-    name: 'شركة النخبة — عرض Nawa Tech',
+    name: 'HRM Portfolio Demo',
     email: 'showcase@nawatech.com',
     phone: '+966 11 234 5678',
     address: 'الرياض، المملكة العربية السعودية',

@@ -51,39 +51,27 @@ class AdminTopBar extends StatelessWidget {
               listenable: CompanyContext.instance,
               builder: (context, _) {
                 final companyName = CompanyContext.instance.displayName;
-                return PopupMenuButton<String>(
-                  offset: const Offset(0, 48),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: colorScheme.outline),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.business, size: 20),
-                        const SizedBox(width: 8),
-                        ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 220),
-                          child: Text(
-                            companyName,
-                            style: AppTypography.bodyMedium,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        const Icon(Icons.arrow_drop_down, size: 24),
-                      ],
-                    ),
+                return Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: colorScheme.outline),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  itemBuilder: (context) => [
-                    PopupMenuItem(value: '1', child: Text(companyName)),
-                    PopupMenuItem(value: '2', child: Text(l10n.addCompanyTitle)),
-                  ],
-                  onSelected: (value) {
-                    if (value == '2') context.push('/admin/companies/add');
-                  },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.business, size: 20),
+                      const SizedBox(width: 8),
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 200),
+                        child: Text(
+                          companyName,
+                          style: AppTypography.bodyMedium,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
                 );
               },
             ),

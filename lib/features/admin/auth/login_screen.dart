@@ -365,13 +365,6 @@ class _LoginScreenState extends State<LoginScreen>
                     ),
                   ),
                   const SizedBox(height: 14),
-                  _StaggeredReveal(
-                    delayMs: 320,
-                    child: OutlinedButton(
-                      onPressed: () => context.push('/register'),
-                      child: Text(l10n.registerCompany),
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -404,8 +397,8 @@ class _DemoAccessBanner extends StatelessWidget {
           Expanded(
             child: Text(
               isArabic
-                  ? 'عرض توضيحي SaaS من Nawa Tech\nadmin@demo.com • Admin12345!'
-                  : 'Nawa Tech SaaS live demo\nadmin@demo.com • Admin12345!',
+                  ? 'مشروع Portfolio — للعرض فقط\nadmin@demo.com • Admin12345!'
+                  : 'Portfolio demo project\nadmin@demo.com • Admin12345!',
               style: AppTypography.caption.copyWith(
                 color: AppColors.textSecondary,
                 height: 1.5,

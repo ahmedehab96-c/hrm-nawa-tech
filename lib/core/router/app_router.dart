@@ -3,17 +3,14 @@ import 'package:go_router/go_router.dart';
 
 import '../api/api_config.dart';
 import '../auth/auth_session.dart';
-import '../saas/subscription_controller.dart';
 import '../../core/utils/platform_helper.dart';
 import '../../features/admin/auth/login_screen.dart';
-import '../../features/admin/auth/company_register_screen.dart';
 import '../../features/admin/auth/forgot_password_screen.dart';
 import '../../features/admin/notifications/notifications_screen.dart';
 import '../../features/admin/profile/admin_profile_screen.dart';
 import '../../features/admin/ai/ai_command_center_screen.dart';
 import '../../features/admin/performance/performance_screen.dart';
 import '../../features/admin/reports/reports_screen.dart';
-import '../../features/admin/companies/add_company_screen.dart';
 import '../../features/admin/recruitment/job_detail_screen.dart';
 import '../../features/admin/recruitment/add_job_screen.dart';
 import '../../core/repositories/recruitment_repository.dart' show JobItem;
@@ -40,27 +37,9 @@ import '../../features/employee/notifications/employee_notifications_screen.dart
 import '../../features/welcome/welcome_screen.dart';
 import '../../l10n/app_localizations.dart';
 
-// ─── Keys ────────────────────────────────────────────────────────────────────
-
 final _rootKey  = GlobalKey<NavigatorState>();
 final _adminKey = GlobalKey<NavigatorState>();
 
-// ─── Fade transition helper ────────────────────────────────────────────────────
-/// Builds a page with a fade transition instead of the platform default.
-/// بناء صفحة بتأثير fade بدلاً من الانتقال الافتراضي.
-///
-/// Use [pageBuilder] (not [builder]) on any GoRoute you want to animate.
-/// استخدم [pageBuilder] بدل [builder] في أي GoRoute تريد التأثير عليه.
-///
-/// Static routes | للـ routes الثابتة:
-/// ```dart
-/// GoRoute(path: '/admin', pageBuilder: _fade(const DashboardScreen()))
-/// ```
-/// Dynamic routes (path parameters) | للـ routes الديناميكية:
-/// ```dart
-/// GoRoute(path: '/admin/:id',
-///   pageBuilder: (ctx, state) => _fadeOf(ctx, state, MyScreen(id: state.pathParameters['id'])))
-/// ```
 Page<void> Function(BuildContext, GoRouterState) _fade(Widget child) =>
     (ctx, state) => _fadeOf(ctx, state, child);
 
@@ -73,12 +52,10 @@ CustomTransitionPage<void> _fadeOf(BuildContext ctx, GoRouterState state, Widget
           FadeTransition(opacity: animation, child: child),
     );
 
-// ─── Auth redirect ────────────────────────────────────────────────────────────
-/// Redirects unauthenticated users to /login and logged-in users away from /login.
-/// يُعيد التوجيه إذا لم يكن المستخدم مسجّلاً دخوله.
 String? _authRedirect(BuildContext context, GoRouterState state) {
   final path = state.uri.path;
-  if (path == '/register' || path == '/forgot-password') return null;
+  if (path == '/register') return '/login';
+  if (path == '/forgot-password') return null;
   if (path == '/login') {
     if (ApiConfig.useApi && AuthSession.instance.hasSession) {
       return PlatformHelper.isAdminApp ? '/admin' : '/employee';
@@ -90,38 +67,24 @@ String? _authRedirect(BuildContext context, GoRouterState state) {
   return null;
 }
 
-// ─── Subscription redirect ─────────────────────────────────────────────────────
-/// Blocks access to recruitment pages if the company's plan doesn't include it.
-/// يمنع الوصول لصفحات التوظيف إذا لم يكن الاشتراك يدعمها.
-String? _recruitmentGuard(BuildContext context, GoRouterState state) =>
-    SubscriptionController.instance.recruitmentEnabled ? null : '/admin/settings';
-
-String? _aiGuard(BuildContext context, GoRouterState state) =>
-    SubscriptionController.instance.aiCloudFeaturesEnabled ? null : '/admin/settings';
-
-// ─── Router ───────────────────────────────────────────────────────────────────
 GoRouter createAppRouter() => GoRouter(
       navigatorKey: _rootKey,
       initialLocation: '/welcome',
       refreshListenable: AuthSession.instance,
       redirect: _authRedirect,
       routes: [
-        // ── عام ──────────────────────────────────────────────────────────────
         GoRoute(
           path: '/',
-          redirect: (context, state) => PlatformHelper.isAdminApp ? '/admin' : '/employee',
+          redirect: (context, state) => PlatformHelper.isAdminApp ? '/welcome' : '/employee',
         ),
         GoRoute(path: '/welcome',         pageBuilder: _fade(const WelcomeScreen())),
         GoRoute(path: '/login',           pageBuilder: _fade(PlatformHelper.isAdminApp ? const LoginScreen() : const EmployeeLoginScreen())),
-        GoRoute(path: '/register',        pageBuilder: _fade(const CompanyRegisterScreen())),
         GoRoute(path: '/forgot-password', pageBuilder: _fade(const ForgotPasswordScreen())),
 
-        // ── لوحة الأدمن (ويب) ────────────────────────────────────────────────
         ShellRoute(
           navigatorKey: _adminKey,
           builder: (context, state, child) => AdminShell(child: child),
           routes: [
-            // صفحات ثابتة
             GoRoute(path: '/admin',               pageBuilder: _fade(const DashboardScreen())),
             GoRoute(path: '/admin/employees',      pageBuilder: _fade(const EmployeesScreen())),
             GoRoute(path: '/admin/employees/add',  pageBuilder: _fade(const EmployeeFormScreen())),
@@ -131,13 +94,10 @@ GoRouter createAppRouter() => GoRouter(
             GoRoute(path: '/admin/settings',       pageBuilder: _fade(const SettingsScreen())),
             GoRoute(path: '/admin/notifications',  pageBuilder: _fade(const NotificationsScreen())),
             GoRoute(path: '/admin/profile',        pageBuilder: _fade(const AdminProfileScreen())),
-            GoRoute(path: '/admin/ai',             redirect: _aiGuard, pageBuilder: _fade(const AiCommandCenterScreen())),
+            GoRoute(path: '/admin/ai',             pageBuilder: _fade(const AiCommandCenterScreen())),
             GoRoute(path: '/admin/performance',    pageBuilder: _fade(const PerformanceScreen())),
-            GoRoute(path: '/admin/reports',        redirect: _aiGuard, pageBuilder: _fade(const ReportsScreen())),
-            GoRoute(path: '/admin/companies/add',  pageBuilder: _fade(const AddCompanyScreen())),
-            GoRoute(path: '/admin/recruitment',    redirect: _recruitmentGuard, pageBuilder: _fade(const RecruitmentScreen())),
-
-            // صفحات ديناميكية (تحتاج path parameters)
+            GoRoute(path: '/admin/reports',        pageBuilder: _fade(const ReportsScreen())),
+            GoRoute(path: '/admin/recruitment',    pageBuilder: _fade(const RecruitmentScreen())),
             GoRoute(
               path: '/admin/employees/:id',
               pageBuilder: (ctx, state) => _fadeOf(ctx, state,
@@ -158,13 +118,11 @@ GoRouter createAppRouter() => GoRouter(
             ),
             GoRoute(
               path: '/admin/recruitment/add',
-              redirect: _recruitmentGuard,
               pageBuilder: (ctx, state) => _fadeOf(ctx, state,
                   AddJobScreen(editJob: state.extra is JobItem ? state.extra as JobItem : null)),
             ),
             GoRoute(
               path: '/admin/recruitment/job/:id',
-              redirect: _recruitmentGuard,
               pageBuilder: (ctx, state) => _fadeOf(ctx, state,
                   JobDetailScreen(jobId: state.pathParameters['id'])),
             ),
@@ -176,7 +134,6 @@ GoRouter createAppRouter() => GoRouter(
           ],
         ),
 
-        // ── تطبيق الموظف (موبايل) ────────────────────────────────────────────
         ShellRoute(
           builder: (context, state, child) => EmployeeShell(child: child),
           routes: [
@@ -192,9 +149,6 @@ GoRouter createAppRouter() => GoRouter(
       ],
     );
 
-// ─── AdminShell ────────────────────────────────────────────────────────────────
-/// Renders AdminLayout on web; passes [child] through on other platforms.
-/// يعرض AdminLayout على الويب فقط.
 class AdminShell extends StatelessWidget {
   const AdminShell({super.key, required this.child});
   final Widget child;
@@ -204,15 +158,10 @@ class AdminShell extends StatelessWidget {
       PlatformHelper.isAdminApp ? AdminLayout(child: child) : child;
 }
 
-// ─── EmployeeShell ────────────────────────────────────────────────────────────
-/// Wraps employee screens with a bottom navigation bar on mobile.
-/// يُغلّف شاشات الموظف بـ bottom navigation bar.
 class EmployeeShell extends StatelessWidget {
   const EmployeeShell({super.key, required this.child});
   final Widget child;
 
-  // Tab paths in order — add a new tab by appending here only
-  // مسارات التبويبات بالترتيب — عدّل هنا لإضافة تبويب جديد
   static const _paths = [
     '/employee',
     '/employee/attendance',
@@ -223,8 +172,6 @@ class EmployeeShell extends StatelessWidget {
 
   int _selectedIndex(BuildContext context) {
     final path = GoRouterState.of(context).uri.path;
-    // Start from most-specific path to avoid '/employee' matching everything
-    // نبدأ من الأكثر تحديداً لتجنّب مطابقة '/employee' مع كل شيء
     for (var i = _paths.length - 1; i > 0; i--) {
       if (path.startsWith(_paths[i])) return i;
     }

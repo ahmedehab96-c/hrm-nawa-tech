@@ -132,12 +132,10 @@ class _LandingPageState extends State<_LandingPage> {
         slivers: [
           SliverToBoxAdapter(child: _Navbar(scrollCtrl: _scrollCtrl)),
           const SliverToBoxAdapter(child: _HeroSection()),
-          const SliverToBoxAdapter(child: _SaasProductStrip()),
-          const SliverToBoxAdapter(child: _StatsRow()),
+          const SliverToBoxAdapter(child: _PortfolioStrip()),
           const SliverToBoxAdapter(child: _FeaturesSection()),
           const SliverToBoxAdapter(child: _ScreenshotSection()),
-          const SliverToBoxAdapter(child: _PricingSection()),
-          const SliverToBoxAdapter(child: _TestimonialsSection()),
+          const SliverToBoxAdapter(child: _TechStackSection()),
           const SliverToBoxAdapter(child: _CtaSection()),
           const SliverToBoxAdapter(child: _Footer()),
         ],
@@ -178,7 +176,7 @@ class _Navbar extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'منتج SaaS',
+                  'Portfolio Project',
                   style: AppTypography.caption.copyWith(
                     color: AppColors.textMuted,
                     fontSize: 10,
@@ -204,27 +202,16 @@ class _Navbar extends StatelessWidget {
           const Spacer(),
           if (isWide) ...[
             _navLink('المميزات'),
-            _navLink('الأسعار'),
-            _navLink('العرض التجريبي'),
+            _navLink('التقنيات'),
             const SizedBox(width: 12),
           ],
-          OutlinedButton(
-            onPressed: () => context.go('/login'),
-            style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: AppColors.primary),
-              foregroundColor: AppColors.primary,
-              padding: EdgeInsets.symmetric(horizontal: isWide ? 20 : 12, vertical: 12),
-            ),
-            child: Text(isWide ? 'تسجيل دخول' : 'دخول'),
-          ),
-          const SizedBox(width: 8),
           FilledButton(
-            onPressed: () => context.go('/register'),
+            onPressed: () => context.go('/login'),
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.primary,
               padding: EdgeInsets.symmetric(horizontal: isWide ? 24 : 14, vertical: 12),
             ),
-            child: Text(isWide ? 'ابدأ مجاناً' : 'تجربة'),
+            child: Text(isWide ? 'جرّب العرض' : 'عرض'),
           ),
         ],
       ),
@@ -293,7 +280,7 @@ class _HeroSection extends StatelessWidget {
             children: [
               const Icon(Icons.verified_rounded, color: AppColors.primary, size: 16),
               const SizedBox(width: 6),
-              Text('منتج SaaS من Nawa Tech',
+              Text('مشروع Portfolio — Full-Stack HRM',
                   style: AppTypography.caption
                       .copyWith(color: AppColors.primary, fontWeight: FontWeight.w600)),
             ],
@@ -301,7 +288,7 @@ class _HeroSection extends StatelessWidget {
         ),
         const SizedBox(height: 24),
         Text(
-          'نظام HRM ذكي\nللشركات العربية',
+          'منصة HRM متكاملة\nبذكاء اصطناعي',
           style: AppTypography.h1.copyWith(
             fontSize: 44,
             fontWeight: FontWeight.w900,
@@ -311,7 +298,7 @@ class _HeroSection extends StatelessWidget {
         ),
         const SizedBox(height: 20),
         Text(
-          'منصة متعددة الشركات (Multi-tenant) لإدارة الموظفين، الحضور، الإجازات، الرواتب، والذكاء الاصطناعي.\nلوحة ويب للإدارة + تطبيق جوال للموظفين — جاهزة للبيع كـ SaaS.',
+          'مشروع عملي يعرض مهارات Flutter + Laravel + AI في نظام إدارة موارد بشرية كامل.\nلوحة ويب للإدارة وتطبيق جوال للموظفين — للعرض في Portfolio والبحث عن عمل.',
           style: AppTypography.bodyLarge.copyWith(
             color: AppColors.textSecondary,
             height: 1.7,
@@ -323,9 +310,9 @@ class _HeroSection extends StatelessWidget {
           runSpacing: 12,
           children: [
             FilledButton.icon(
-              onPressed: () => context.go('/register'),
-              icon: const Icon(Icons.rocket_launch_rounded, size: 20),
-              label: const Text('ابدأ تجربة مجانية 14 يوم'),
+              onPressed: () => context.go('/login'),
+              icon: const Icon(Icons.play_circle_outline_rounded, size: 20),
+              label: const Text('جرّب لوحة الإدارة'),
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 padding:
@@ -335,28 +322,11 @@ class _HeroSection extends StatelessWidget {
               ),
             ),
             OutlinedButton.icon(
-              onPressed: () => context.go('/login'),
-              icon: const Icon(Icons.play_circle_outline_rounded, size: 20),
-              label: const Text('جرّب العرض المباشر'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.primary,
-                side: const BorderSide(color: AppColors.primary),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              onPressed: () => openExternalLink(
+                'https://github.com/ahmedehab96-c/hrm-nawa-tech/blob/main/DEMO.md',
               ),
-            ),
-            OutlinedButton.icon(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'تواصل مع فريق Nawa Tech للحصول على رابط تطبيق الموظف',
-                    ),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.phone_iphone_rounded, size: 20),
-              label: const Text('تطبيق الموظف (iOS/Android)'),
+              icon: const Icon(Icons.menu_book_outlined, size: 20),
+              label: const Text('Demo Guide / دليل التجربة'),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.textSecondary,
                 side: BorderSide(color: AppColors.border),
@@ -367,25 +337,14 @@ class _HeroSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 32),
-        Row(
-          children: [
-            _avatarStack(),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(children: [
-                    ...List.generate(5,
-                        (_) => const Icon(Icons.star_rounded, color: Color(0xFFFBBF24), size: 16)),
-                  ]),
-                  const SizedBox(height: 2),
-                  Text('يثق بنا 500+ شركة عربية',
-                      style: AppTypography.caption
-                          .copyWith(color: AppColors.textSecondary)),
-                ],
-              ),
-            ),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: const [
+            Chip(label: Text('Flutter')),
+            Chip(label: Text('Laravel')),
+            Chip(label: Text('OpenAI')),
+            Chip(label: Text('Clean Architecture')),
           ],
         ),
       ],
@@ -582,19 +541,19 @@ class _HeroSection extends StatelessWidget {
   }
 }
 
-// ─── SaaS product strip ───────────────────────────────────────────────────────
+// ─── Portfolio strip ────────────────────────────────────────────────────────────
 
-class _SaasProductStrip extends StatelessWidget {
-  const _SaasProductStrip();
+class _PortfolioStrip extends StatelessWidget {
+  const _PortfolioStrip();
 
   @override
   Widget build(BuildContext context) {
     final isWide = MediaQuery.of(context).size.width > 800;
     final items = [
-      (Icons.language_rounded, 'لوحة ويب للإدارة', 'Dashboard كامل للـ HR والمديرين'),
-      (Icons.phone_iphone_rounded, 'تطبيق الموظف', 'حضور، إجازات، إشعارات — iOS & Android'),
-      (Icons.auto_awesome_rounded, 'ذكاء اصطناعي مدمج', 'مساعد HR، تقارير، توظيف، تحليلات'),
-      (Icons.apartment_rounded, 'Multi-tenant SaaS', 'كل عميل له شركته المعزولة'),
+      (Icons.language_rounded, 'لوحة ويب', 'Admin Dashboard — Flutter Web'),
+      (Icons.phone_iphone_rounded, 'تطبيق الموظف', 'iOS & Android — Flutter'),
+      (Icons.auto_awesome_rounded, 'ذكاء اصطناعي', 'مساعد HR، تقارير، توظيف'),
+      (Icons.architecture_rounded, 'Backend API', 'Laravel + Multi-tenant'),
     ];
 
     return Padding(
@@ -657,6 +616,43 @@ class _SaasProductStrip extends StatelessWidget {
                         color: AppColors.textSecondary, height: 1.4)),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TechStackSection extends StatelessWidget {
+  const _TechStackSection();
+
+  @override
+  Widget build(BuildContext context) {
+    final stacks = [
+      'Flutter / Dart',
+      'Laravel / PHP',
+      'SQLite / MySQL',
+      'OpenAI / Gemini',
+      'REST API + Sanctum',
+      'RBAC + AI Governance',
+    ];
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 48),
+      child: Column(
+        children: [
+          Text('التقنيات المستخدمة',
+              style: AppTypography.h1.copyWith(fontSize: 28, fontWeight: FontWeight.w900)),
+          const SizedBox(height: 24),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            alignment: WrapAlignment.center,
+            children: stacks
+                .map((s) => Chip(
+                      label: Text(s),
+                      backgroundColor: AppColors.primary.withValues(alpha: 0.08),
+                    ))
+                .toList(),
           ),
         ],
       ),
@@ -1413,7 +1409,7 @@ class _CtaSection extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Text('جاهز لتحويل إدارة فريقك؟',
+          Text('مهتم بالمشروع؟',
               textAlign: TextAlign.center,
               style: AppTypography.h1.copyWith(
                   color: Colors.white,
@@ -1421,7 +1417,7 @@ class _CtaSection extends StatelessWidget {
                   fontWeight: FontWeight.w900)),
           const SizedBox(height: 16),
           Text(
-            'اعرض نظام Nawa Tech HRM لعملائك — SaaS جاهز للنشر\nابدأ تجربتك المجانية أو احجز عرضاً مباشراً مع فريقنا',
+            'جرّب لوحة الإدارة مباشرة أو تواصل معي عبر Portfolio\nمشروع Full-Stack HRM — للعرض والتوظيف',
             textAlign: TextAlign.center,
             style: AppTypography.bodyLarge
                 .copyWith(color: Colors.white70, height: 1.6),
@@ -1433,7 +1429,7 @@ class _CtaSection extends StatelessWidget {
             alignment: WrapAlignment.center,
             children: [
               FilledButton(
-                onPressed: () => context.go('/register'),
+                onPressed: () => context.go('/login'),
                 style: FilledButton.styleFrom(
                   backgroundColor: Colors.white,
                   foregroundColor: AppColors.primary,
@@ -1441,27 +1437,16 @@ class _CtaSection extends StatelessWidget {
                   textStyle: AppTypography.bodyLarge
                       .copyWith(fontWeight: FontWeight.w700),
                 ),
-                child: const Text('ابدأ تجربة مجانية'),
+                child: const Text('جرّب العرض'),
               ),
               OutlinedButton(
-                onPressed: () => context.go('/login'),
+                onPressed: () => openExternalLink('https://nawatech.com'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: Colors.white,
                   side: const BorderSide(color: Colors.white54),
                   padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18),
                 ),
-                child: const Text('العرض التوضيحي'),
-              ),
-              OutlinedButton(
-                onPressed: () => openExternalLink(
-                  'mailto:info@nawatech.com?subject=HRM%20SaaS%20Demo',
-                ),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  side: const BorderSide(color: Colors.white38),
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
-                ),
-                child: const Text('تواصل مع المبيعات'),
+                child: const Text('Portfolio — nawatech.com'),
               ),
             ],
           ),
@@ -1498,7 +1483,7 @@ class _Footer extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('© 2026 Nawa Tech — HRM SaaS. جميع الحقوق محفوظة.',
+              Text('© 2026 Nawa Tech — HRM Portfolio Project.',
                   style: AppTypography.caption.copyWith(color: Colors.white38)),
               Row(children: [
                 _socialIcon(Icons.telegram),
@@ -1526,7 +1511,7 @@ class _Footer extends StatelessWidget {
                   color: Colors.white, fontWeight: FontWeight.w900)),
         ]),
         const SizedBox(height: 12),
-        Text('منصة HRM SaaS من Nawa Tech\nويب + موبايل + ذكاء اصطناعي للشركات العربية',
+        Text('مشروع Portfolio — Full-Stack HRM\nFlutter + Laravel + AI',
             style: AppTypography.bodySmall.copyWith(
                 color: Colors.white38, height: 1.6)),
         const SizedBox(height: 12),

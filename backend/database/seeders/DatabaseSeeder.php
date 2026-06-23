@@ -26,12 +26,16 @@ class DatabaseSeeder extends Seeder
         // بحيث يمكن عرضهم ثم حذفهم/تعديلهم لاحقًا من واجهة الأدمن.
 
         $company = Company::query()
-            ->whereIn('name', ['Demo Company', 'شركة النخبة — عرض Nawa Tech'])
+            ->whereIn('name', [
+                'Demo Company',
+                'شركة النخبة — عرض Nawa Tech',
+                'HRM Portfolio Demo',
+            ])
             ->first();
 
         if (! $company) {
             $company = Company::create([
-                'name' => 'شركة النخبة — عرض Nawa Tech',
+                'name' => 'HRM Portfolio Demo',
                 'status' => 'active',
                 'email' => 'showcase@nawatech.com',
                 'phone' => '+966 11 234 5678',
@@ -42,7 +46,7 @@ class DatabaseSeeder extends Seeder
             ]);
         } else {
             $company->update([
-                'name' => 'شركة النخبة — عرض Nawa Tech',
+                'name' => 'HRM Portfolio Demo',
                 'status' => 'active',
                 'email' => 'showcase@nawatech.com',
                 'phone' => '+966 11 234 5678',

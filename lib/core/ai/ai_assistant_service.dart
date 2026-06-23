@@ -1,9 +1,8 @@
 import '../api/api_config.dart';
 import '../api/api_result.dart';
 import '../repositories/ai_repository.dart';
-import '../saas/subscription_controller.dart';
 
-/// إجابات محلية ثنائية اللغاء؛ طبقة Enterprise جاهزة لاحقاً لربط LLM عبر الخادم فقط (لا تضع مفاتيح في التطبيق).
+/// إجابات محلية ثنائية اللغة؛ مع تفعيل API تُستخدم خدمة الذكاء الاصطناعي من الخادم.
 class AiAssistantService {
   AiAssistantService._();
 
@@ -26,7 +25,7 @@ class AiAssistantService {
       );
     }
 
-    if (apiOn && SubscriptionController.instance.aiCloudFeaturesEnabled) {
+    if (apiOn) {
       final cloud = await AiRepository.instance.chat(
         message: userMessage.trim(),
         languageCode: languageCode,
@@ -54,18 +53,10 @@ class AiAssistantService {
       );
     }
 
-    if (SubscriptionController.instance.aiCloudFeaturesEnabled) {
-      return AiAssistantReply(
-        message: ar
-            ? 'وضع المؤسسات: يمكن ربط نموذج لغوي عبر الـ API الخاص بك لاحقاً.'
-            : 'Enterprise: plug in an LLM via your own API when ready.',
-        conversationId: conversationId ?? _fallbackConversationId,
-      );
-    }
     return AiAssistantReply(
       message: ar
-          ? 'جرّب: إضافة موظف، حضور، إجازات، رواتب، أو اشتراك.'
-          : 'Try: add employee, attendance, leave, payroll, or subscription.',
+          ? 'جرّب: إضافة موظف، حضور، إجازات، رواتب، أو التوظيف.'
+          : 'Try: add employee, attendance, leave, payroll, or recruitment.',
       conversationId: conversationId ?? _fallbackConversationId,
     );
   }
