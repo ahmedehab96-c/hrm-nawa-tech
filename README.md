@@ -1,174 +1,37 @@
-# HRM Platform — Portfolio Project
-# منصة HRM — مشروع Portfolio
+# HRM NAWA TECH
 
-> **Full-Stack HR Management with AI** | **نظام إدارة موارد بشرية متكامل مع ذكاء اصطناعي**
+## About
 
-A **portfolio demo project** by **Nawa Tech** — built with **Flutter + Laravel** to showcase full-stack, mobile, and AI skills.  
-**Not a commercial SaaS product** — for employers and recruiters to explore the live demo.
+HRM NAWA TECH is a cloud-based human resources management platform built for NAWA TECH. It provides separate admin and employee experiences for managing attendance, payroll, leave requests, and company operations from web and mobile.
 
-مشروع **Portfolio** من **Nawa Tech** — مبني بـ **Flutter + Laravel** لعرض مهارات Full-Stack والموبايل والـ AI.  
-**ليس منتج SaaS تجاري** — للعرض والتجربة عند البحث عن عمل.
+The admin dashboard offers real-time visibility into employees, attendance, pending leave requests, and payroll status. Employees can clock in, request leave, and access HR services from the mobile app. The system supports role-based access, PDF report generation, and full Arabic/English localization.
 
 ---
 
-## 🎮 Try the Demo | جرّب المشروع
+HRM NAWA TECH هو نظام سحابي لإدارة الموارد البشرية مبني لشركة NAWA TECH. يوفر تجربة منفصلة للمدير والموظف لإدارة الحضور والرواتب وطلبات الإجازة وعمليات الشركة من الويب والموبايل.
 
-### English — Quick start
+لوحة تحكم المدير تعرض نظرة فورية على الموظفين والحضور وطلبات الإجازة المعلقة وحالة الرواتب. يمكن للموظفين تسجيل الحضور وطلب الإجازات والوصول لخدمات الموارد البشرية من تطبيق الموبايل. يدعم النظام صلاحيات حسب الدور وتصدير تقارير PDF ودعم كامل للعربية والإنجليزية.
 
-1. **Clone & run backend**
-   ```bash
-   cd backend
-   composer install
-   cp .env.example .env
-   php artisan key:generate
-   php artisan migrate:fresh --seed
-   php artisan serve
-   ```
-   API runs at: `http://127.0.0.1:8000/api`
+## Features
 
-2. **Run Admin panel (Web)**
-   ```bash
-   flutter pub get
-   flutter run -d chrome --web-port=3000
-   ```
-   Open: `http://localhost:3000/welcome` → click **Try Admin Dashboard**  
-   Web debug mode auto-connects to `http://127.0.0.1:8000/api`.
-
-3. **Run Employee app (Mobile)**
-   ```bash
-   flutter run -d ios    # or android
-   ```
-   In **Settings → Server**: enable API and set `http://127.0.0.1:8000/api`  
-   (Use your machine IP instead of `127.0.0.1` on a physical device.)
-
-4. **Login credentials**
-
-   | Role | Email | Password |
-   |------|-------|----------|
-   | **Admin (Web)** | `admin@demo.com` | `Admin12345!` |
-   | **Employee (Mobile)** | `emp01@demo.com` | `Employee12345!` |
-   | Employee 2 | `emp02@demo.com` | `Employee12345!` |
-
-5. **What to explore**
-   - Admin: Dashboard, Employees, Attendance, Leave, Payroll, Recruitment, **AI Command Center**
-   - Employee: Check-in/out, leave requests, payslip, notifications
-   - Toggle **Arabic / English** and **Dark / Light** theme in Settings
+- Admin and employee dashboards
+- Attendance tracking and reporting
+- Payroll management with PDF export
+- Leave request and approval workflow
+- Role-based access control
+- Bilingual Arabic and English support
+- Secure local storage with encrypted tokens
 
 ---
 
-### العربية — البدء السريع
+- لوحات تحكم للمدير والموظف
+- تتبع الحضور والتقارير
+- إدارة الرواتب مع تصدير PDF
+- طلبات الإجازة وسير الموافقة
+- صلاحيات حسب الدور
+- دعم العربية والإنجليزية
+- تخزين محلي آمن مع تشفير الرموز
 
-1. **تشغيل الباكند**
-   ```bash
-   cd backend
-   composer install
-   cp .env.example .env
-   php artisan key:generate
-   php artisan migrate:fresh --seed
-   php artisan serve
-   ```
-   عنوان الـ API: `http://127.0.0.1:8000/api`
+## Tech Stack
 
-2. **تشغيل لوحة الإدارة (ويب)**
-   ```bash
-   flutter pub get
-   flutter run -d chrome --web-port=3000
-   ```
-   افتح: `http://localhost:3000/welcome` → اضغط **جرّب لوحة الإدارة**  
-   في وضع التطوير على الويب يتصل تلقائياً بـ `http://127.0.0.1:8000/api`.
-
-3. **تشغيل تطبيق الموظف (موبايل)**
-   ```bash
-   flutter run -d ios    # أو android
-   ```
-   من **الإعدادات → Server**: فعّل API وضع العنوان `http://127.0.0.1:8000/api`  
-   (على جهاز حقيقي استخدم IP الجهاز بدلاً من `127.0.0.1`.)
-
-4. **بيانات الدخول**
-
-   | الدور | البريد | كلمة المرور |
-   |-------|--------|-------------|
-   | **أدمن (ويب)** | `admin@demo.com` | `Admin12345!` |
-   | **موظف (موبايل)** | `emp01@demo.com` | `Employee12345!` |
-   | موظف 2 | `emp02@demo.com` | `Employee12345!` |
-
-5. **ماذا تجرب؟**
-   - الأدمن: لوحة التحكم، الموظفون، الحضور، الإجازات، الرواتب، التوظيف، **مركز AI**
-   - الموظف: حضور/انصراف، طلب إجازة، قسيمة راتب، إشعارات
-   - جرّب **العربية / English** و**الوضع الليلي / النهاري** من الإعدادات
-
----
-
-## 🎯 Features | المميزات
-
-### Admin Panel (Web) | لوحة الأدمن (ويب)
-
-| Feature | Details |
-|---------|---------|
-| **Dashboard** | Stats, pending leaves, activity |
-| **Employees** | CRUD, profiles, search & pagination |
-| **Attendance** | Daily records, edit status, export |
-| **Leave** | Approve/reject, balances |
-| **Payroll** | Generate payslips, PDF |
-| **Recruitment** | Jobs, candidates, AI matching |
-| **AI Command Center** | Assistant, SLO, escalations, reports |
-| **Performance & Reports** | AI-powered HR insights |
-| **Settings** | Company info, WiFi attendance, RBAC, AI governance |
-
-### Employee App (Mobile) | تطبيق الموظف
-
-| Feature | Details |
-|---------|---------|
-| **Home** | Check-in/out, quick actions |
-| **Attendance** | WiFi-gated check-in, history |
-| **Leave** | Submit requests, view balance |
-| **Payslip** | Monthly view, PDF |
-| **Notifications** | In-app alerts |
-
----
-
-## 🏗️ Architecture | المعمارية
-
-```
-hrm-nawa-tech/
-├── lib/                 # Flutter — Web Admin + Mobile Employee
-│   ├── core/            # API, auth, repositories, AI
-│   └── features/        # admin/ + employee/ + welcome/
-├── backend/             # Laravel 13 REST API + AI services
-└── test/                # Flutter + PHPUnit tests
-```
-
----
-
-## 🛠️ Tech Stack | التقنيات
-
-| Layer | Stack |
-|-------|-------|
-| **Frontend** | Flutter 3, GoRouter, ARB i18n (AR/EN) |
-| **Backend** | Laravel 13, Sanctum, SQLite/MySQL |
-| **AI** | OpenAI / Gemini gateway, prompt registry, governance |
-| **Patterns** | Clean Architecture, Repository Pattern, Multi-tenant |
-
----
-
-## 🧪 Tests | الاختبارات
-
-```bash
-cd backend && php artisan test
-flutter test
-```
-
----
-
-## 👨‍💻 Developer | المطوّر
-
-**Ahmed Ehab Mohammed — Nawa Tech**  
-📧 ahmed96it96@gmail.com  
-🌐 [nawatech.com](https://nawatech.com)  
-💻 [GitHub — hrm-nawa-tech](https://github.com/ahmedehab96-c/hrm-nawa-tech)
-
----
-
-## 📄 License
-
-Portfolio demonstration project. Contact the author for reuse permissions.
+Flutter · Laravel · REST API · go_router
