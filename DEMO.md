@@ -1,15 +1,29 @@
 # Demo Guide | دليل التجربة
 
+> Quick reference for recruiters and employers.  
+> مرجع سريع لأصحاب العمل والمسؤولين عن التوظيف.
+
 ---
 
 ## English
 
 ### Purpose
 
-This is a **portfolio project** to demonstrate full-stack HR software skills (Flutter + Laravel + AI).  
-Use the credentials below — **no registration required**.
+This is a **portfolio project** demonstrating full-stack HR software (Flutter + Laravel + AI).  
+**No registration required** — use the demo credentials below.
 
-### Step 1 — Backend
+### Demo credentials
+
+| Role | Platform | Email | Password |
+|------|----------|-------|----------|
+| **Admin** | Web (Chrome) | `admin@demo.com` | `Admin12345!` |
+| **Employee** | Mobile (iOS/Android) | `emp01@demo.com` | `Employee12345!` |
+
+Demo company: **HRM Portfolio Demo**
+
+---
+
+### Step 1 — Backend API
 
 ```bash
 cd backend
@@ -20,48 +34,56 @@ php artisan migrate:fresh --seed
 php artisan serve
 ```
 
-### Step 2 — Admin (Web)
+API: `http://127.0.0.1:8000/api`
+
+---
+
+### Step 2 — Admin Dashboard (Web)
 
 ```bash
 flutter pub get
 flutter run -d chrome --web-port=3000
 ```
 
-- Open **http://localhost:3000/welcome**
-- Click **Try Admin Dashboard** / **جرّب لوحة الإدارة**
-- Or go directly to **http://localhost:3000/login**
+1. Open `http://localhost:3000/welcome`
+2. Click **Try Admin Dashboard**
+3. Login with `admin@demo.com` / `Admin12345!`
 
-| Field | Value |
-|-------|-------|
-| Email | `admin@demo.com` |
-| Password | `Admin12345!` |
+**Explore:** Dashboard → Employees → Attendance → Leave → Payroll → Recruitment → **AI Command Center**
 
-### Step 3 — Employee (Mobile)
+---
+
+### Step 3 — Employee App (Mobile)
 
 ```bash
-flutter run -d ios   # or: flutter run -d android
+flutter run -d ios     # or: flutter run -d android
 ```
 
-1. Open **Settings**
-2. Enable **Use server API**
-3. Base URL: `http://127.0.0.1:8000/api`
-4. Login:
+1. **Settings** → enable **Use server API**
+2. Base URL: `http://127.0.0.1:8000/api`
+3. Login with `emp01@demo.com` / `Employee12345!`
 
-| Field | Value |
-|-------|-------|
-| Email | `emp01@demo.com` |
-| Password | `Employee12345!` |
+> **Physical phone:** use your PC's LAN IP, e.g. `http://192.168.1.10:8000/api`
 
-> On a **physical phone**, replace `127.0.0.1` with your computer's LAN IP (e.g. `http://192.168.1.10:8000/api`).
+**Explore:** Home → Check-in/out → Leave request → Payslip → Notifications
 
-### Recommended tour
+---
 
-1. **Dashboard** — overview stats  
-2. **Employees** — list & profiles  
-3. **Attendance** — daily records  
-4. **AI Command Center** — assistant, reports, monitoring  
-5. **Recruitment** — jobs & candidate matching  
-6. Switch language **AR ↔ EN** in the top bar  
+### Step 4 — Language & Theme
+
+- Toggle **AR ↔ EN** from the top bar (admin) or settings
+- Toggle **Dark / Light** mode from settings
+
+---
+
+### Troubleshooting
+
+| Issue | Fix |
+|-------|-----|
+| Login fails | Ensure `php artisan serve` is running |
+| Mobile can't connect | Use LAN IP, not `127.0.0.1` on real device |
+| Old Flutter icon | Uninstall app, run `flutter run` again |
+| Empty data | Run `php artisan migrate:fresh --seed` |
 
 ---
 
@@ -69,10 +91,21 @@ flutter run -d ios   # or: flutter run -d android
 
 ### الغرض
 
-هذا **مشروع Portfolio** لعرض مهارات بناء أنظمة HR (Flutter + Laravel + AI).  
-استخدم بيانات الدخول أدناه — **لا يلزم تسجيل حساب جديد**.
+هذا **مشروع Portfolio** يعرض بناء أنظمة HR (Flutter + Laravel + AI).  
+**لا يلزم تسجيل** — استخدم بيانات الدخول التجريبية أدناه.
 
-### الخطوة 1 — الباكند
+### بيانات الدخول
+
+| الدور | المنصة | البريد | كلمة المرور |
+|-------|--------|--------|-------------|
+| **أدمن** | ويب (Chrome) | `admin@demo.com` | `Admin12345!` |
+| **موظف** | موبايل (iOS/Android) | `emp01@demo.com` | `Employee12345!` |
+
+شركة العرض: **HRM Portfolio Demo**
+
+---
+
+### الخطوة 1 — API الباكند
 
 ```bash
 cd backend
@@ -82,6 +115,10 @@ php artisan key:generate
 php artisan migrate:fresh --seed
 php artisan serve
 ```
+
+الـ API: `http://127.0.0.1:8000/api`
+
+---
 
 ### الخطوة 2 — لوحة الإدارة (ويب)
 
@@ -90,46 +127,54 @@ flutter pub get
 flutter run -d chrome --web-port=3000
 ```
 
-- افتح **http://localhost:3000/welcome**
-- اضغط **جرّب لوحة الإدارة**
-- أو مباشرة: **http://localhost:3000/login**
+1. افتح `http://localhost:3000/welcome`
+2. اضغط **جرّب لوحة الإدارة**
+3. سجّل دخول: `admin@demo.com` / `Admin12345!`
 
-| الحقل | القيمة |
-|-------|--------|
-| البريد | `admin@demo.com` |
-| كلمة المرور | `Admin12345!` |
+**جرّب:** لوحة التحكم → الموظفون → الحضور → الإجازات → الرواتب → التوظيف → **مركز AI**
+
+---
 
 ### الخطوة 3 — تطبيق الموظف (موبايل)
 
 ```bash
-flutter run -d ios   # أو: flutter run -d android
+flutter run -d ios     # أو: flutter run -d android
 ```
 
-1. افتح **الإعدادات**
-2. فعّل **Use server API**
-3. العنوان: `http://127.0.0.1:8000/api`
-4. سجّل الدخول:
+1. **الإعدادات** → فعّل **Use server API**
+2. العنوان: `http://127.0.0.1:8000/api`
+3. سجّل دخول: `emp01@demo.com` / `Employee12345!`
 
-| الحقل | القيمة |
-|-------|--------|
-| البريد | `emp01@demo.com` |
-| كلمة المرور | `Employee12345!` |
+> **هاتف حقيقي:** استخدم IP جهازك على الشبكة، مثل `http://192.168.1.10:8000/api`
 
-> على **هاتف حقيقي**، استبدل `127.0.0.1` بـ IP جهازك على الشبكة (مثل `http://192.168.1.10:8000/api`).
-
-### جولة مقترحة
-
-1. **لوحة التحكم** — إحصائيات عامة  
-2. **الموظفون** — القائمة والملفات  
-3. **الحضور** — سجلات اليوم  
-4. **مركز AI** — المساعد والتقارير والمراقبة  
-5. **التوظيف** — الوظائف ومطابقة المرشحين  
-6. بدّل اللغة **عربي ↔ English** من الشريط العلوي  
+**جرّب:** الرئيسية → حضور/انصراف → طلب إجازة → قسيمة راتب → إشعارات
 
 ---
 
-## Demo company | شركة العرض
+### الخطوة 4 — اللغة والثيم
 
-- **Name:** HRM Portfolio Demo  
-- **Admin:** `admin@demo.com`  
-- **Employees:** `emp01@demo.com` … `emp10@demo.com` (password: `Employee12345!`)
+- بدّل **عربي ↔ English** من الشريط العلوي (أدمن) أو الإعدادات
+- بدّل **الوضع الليلي / النهاري** من الإعدادات
+
+---
+
+### حل المشاكل
+
+| المشكلة | الحل |
+|---------|------|
+| فشل تسجيل الدخول | تأكد أن `php artisan serve` يعمل |
+| الموبايل لا يتصل | استخدم IP الشبكة وليس `127.0.0.1` على جهاز حقيقي |
+| أيقونة Flutter القديمة | احذف التطبيق وأعد `flutter run` |
+| بيانات فارغة | شغّل `php artisan migrate:fresh --seed` |
+
+---
+
+## Future SaaS | التحويل لاحقاً إلى SaaS
+
+This project can be extended to a **multi-company SaaS platform** with subscription billing.  
+The backend already uses `company_id` tenant isolation — only billing and registration UI need to be added.
+
+يمكن توسيع المشروع لاحقاً إلى **منصة SaaS متعددة الشركات** مع اشتراكات مدفوعة.  
+الباكند يدعم عزل الشركات عبر `company_id` — يبقى إضافة الفوترة وواجهة التسجيل.
+
+See [README.md — Future SaaS section](./README.md#-future-saas-multi-tenant-platform--المستقبل-منصة-saas-متعددة-الشركات)
