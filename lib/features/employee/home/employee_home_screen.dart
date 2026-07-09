@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/ai/show_ai_assistant.dart';
 import '../../../core/api/api_result.dart';
 import '../../../core/repositories/attendance_repository.dart';
 import '../../../core/services/wifi_attendance_service.dart';
@@ -102,6 +103,12 @@ class _EmployeeHomeScreenState extends State<EmployeeHomeScreen> {
               tooltip: l10n.notificationsTooltip,
             ),
           ],
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () => showAiAssistantDialog(context),
+          icon: const Icon(Icons.smart_toy_outlined),
+          label: Text(l10n.openAiAssistant),
+          tooltip: l10n.askAiAboutHr,
         ),
         body: SingleChildScrollView(
           child: Center(

@@ -5,6 +5,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/utils/open_external_link.dart';
 import '../../core/utils/platform_helper.dart';
 import '../../core/widgets/hrm_logo.dart';
+import '../../core/ai/show_ai_assistant.dart';
 import '../../l10n/app_localizations.dart';
 
 // ─── Entry Point ─────────────────────────────────────────────────────────────
@@ -320,6 +321,17 @@ class _HeroSection extends StatelessWidget {
                     const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
                 textStyle: AppTypography.bodyLarge.copyWith(
                     fontWeight: FontWeight.w700, color: Colors.white),
+              ),
+            ),
+            OutlinedButton.icon(
+              onPressed: () => showAiAssistantDialog(context),
+              icon: const Icon(Icons.smart_toy_outlined, size: 20),
+              label: Text(AppLocalizations.of(context)!.tryAiAssistant),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.primary,
+                side: BorderSide(color: AppColors.primary.withValues(alpha: 0.4)),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               ),
             ),
             OutlinedButton.icon(

@@ -263,7 +263,26 @@ class AiContentRepository {
     String tone = 'professional',
   }) async {
     if (!ApiConfig.useApi) {
-      return const ApiFailure('API is disabled');
+      final isAr = languageCode == 'ar';
+      final dept = department?.trim();
+      final loc = location?.trim();
+      final content = isAr
+          ? 'نبحث عن $jobTitle${dept != null && dept.isNotEmpty ? ' — قسم $dept' : ''}'
+              '${loc != null && loc.isNotEmpty ? ' ($loc)' : ''}.\n\n'
+              'المسؤوليات: تنفيذ المهام اليومية، التعاون مع الفريق، والالتزام بسياسات الشركة.\n\n'
+              'المتطلبات: خبرة عملية، مهارات تواصل، والقدرة على العمل ضمن فريق.'
+          : 'We are hiring a $jobTitle'
+              '${dept != null && dept.isNotEmpty ? ' — $dept department' : ''}'
+              '${loc != null && loc.isNotEmpty ? ' ($loc)' : ''}.\n\n'
+              'Responsibilities: deliver daily tasks, collaborate with the team, and follow company policies.\n\n'
+              'Requirements: practical experience, communication skills, and teamwork.';
+      return ApiSuccess(
+        AiGeneratedContent(
+          content: content,
+          provider: 'demo',
+          status: 'demo',
+        ),
+      );
     }
 
     final result = await ApiClient.post(

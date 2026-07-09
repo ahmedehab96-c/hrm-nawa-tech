@@ -498,5 +498,14 @@
   "welcomeStep2Title": "Open the employee app",
   "welcomeStep2Desc": "Use the mobile app with demo credentials to try attendance, leave, and payslip.",
   "welcomeStep3Title": "Explore AI & recruitment",
-  "welcomeStep3Desc": "Try AI Command Center, recruitment matching, performance reviews, and reports."
+  "welcomeStep3Desc": "Try AI Command Center, recruitment matching, performance reviews, and reports.",
+
+  "generateWithAi": "Generate with AI",
+  "aiBriefingTitle": "AI HR Briefing",
+  "aiBriefingSubtitle": "Smart 30-day summary for your team",
+  "generateBriefing": "Generate briefing",
+  "openAiAssistant": "AI Assistant",
+  "tryAiAssistant": "Try AI Assistant",
+  "aiJobGenerated": "Job description generated",
+  "askAiAboutHr": "Ask about leave, payslip, attendance…"
 }

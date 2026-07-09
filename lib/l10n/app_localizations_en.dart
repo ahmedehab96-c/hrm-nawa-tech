@@ -1202,4 +1202,28 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get welcomeStep3Desc =>
       'Try AI Command Center, recruitment matching, performance reviews, and reports.';
+
+  @override
+  String get generateWithAi => 'Generate with AI';
+
+  @override
+  String get aiBriefingTitle => 'AI HR Briefing';
+
+  @override
+  String get aiBriefingSubtitle => 'Smart 30-day summary for your team';
+
+  @override
+  String get generateBriefing => 'Generate briefing';
+
+  @override
+  String get openAiAssistant => 'AI Assistant';
+
+  @override
+  String get tryAiAssistant => 'Try AI Assistant';
+
+  @override
+  String get aiJobGenerated => 'Job description generated';
+
+  @override
+  String get askAiAboutHr => 'Ask about leave, payslip, attendance…';
 }

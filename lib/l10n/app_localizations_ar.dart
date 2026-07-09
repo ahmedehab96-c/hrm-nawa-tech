@@ -1197,4 +1197,28 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get welcomeStep3Desc =>
       'جرّب مركز AI، مطابقة التوظيف، تقييمات الأداء، والتقارير الذكية.';
+
+  @override
+  String get generateWithAi => 'توليد بالذكاء الاصطناعي';
+
+  @override
+  String get aiBriefingTitle => 'ملخص HR بالذكاء الاصطناعي';
+
+  @override
+  String get aiBriefingSubtitle => 'ملخص ذكي لآخر 30 يوماً';
+
+  @override
+  String get generateBriefing => 'توليد الملخص';
+
+  @override
+  String get openAiAssistant => 'المساعد الذكي';
+
+  @override
+  String get tryAiAssistant => 'جرّب المساعد الذكي';
+
+  @override
+  String get aiJobGenerated => 'تم توليد وصف الوظيفة';
+
+  @override
+  String get askAiAboutHr => 'اسأل عن الإجازات، الراتب، الحضور…';
 }
