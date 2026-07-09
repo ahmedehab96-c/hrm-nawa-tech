@@ -370,6 +370,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get retryAction => 'إعادة المحاولة';
 
   @override
+  String get dashboardPartialLoadError =>
+      'تعذّر تحميل بعض بيانات لوحة التحكم. تحقق من إعدادات الـ API ثم أعد المحاولة.';
+
+  @override
+  String get payslipNotFound => 'لا توجد قسيمة راتب لهذا الشهر.';
+
+  @override
   String get noNotifications => 'لا توجد إشعارات';
 
   @override

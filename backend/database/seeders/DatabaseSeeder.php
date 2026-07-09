@@ -7,6 +7,10 @@ use App\Models\Employee;
 use App\Models\AttendanceRecord;
 use App\Models\LeaveRequest;
 use App\Models\PayrollRecord;
+use App\Models\AppNotification;
+use App\Models\JobPosting;
+use App\Models\Candidate;
+use App\Models\PerformanceReview;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -382,6 +386,90 @@ class DatabaseSeeder extends Seeder
                         ]
                     );
                 }
+            }
+
+            // Notifications for admin and employees
+            $firstEmployee = $employees->first();
+            if ($firstEmployee) {
+                AppNotification::query()->updateOrCreate(
+                    [
+                        'company_id' => $company->id,
+                        'employee_id' => $firstEmployee->id,
+                        'title' => 'Payroll processed',
+                    ],
+                    [
+                        'body' => 'Your monthly payroll has been processed successfully.',
+                        'type' => 'payroll',
+                        'read_at' => null,
+                    ]
+                );
+
+                AppNotification::query()->updateOrCreate(
+                    [
+                        'company_id' => $company->id,
+                        'employee_id' => $firstEmployee->id,
+                        'title' => 'Leave request approved',
+                    ],
+                    [
+                        'body' => 'Your annual leave request was approved.',
+                        'type' => 'leave',
+                        'read_at' => $now->copy()->subDay(),
+                    ]
+                );
+            }
+
+            // Recruitment demo data (jobs + candidates)
+            $job = JobPosting::query()->updateOrCreate(
+                [
+                    'company_id' => $company->id,
+                    'title' => 'Senior Flutter Developer',
+                ],
+                [
+                    'department' => 'Engineering',
+                    'location' => 'Riyadh',
+                    'description' => 'Build and maintain Flutter mobile/web apps for HR operations.',
+                    'status' => 'open',
+                ]
+            );
+
+            Candidate::query()->updateOrCreate(
+                [
+                    'company_id' => $company->id,
+                    'job_posting_id' => $job->id,
+                    'email' => 'candidate.flutter@example.com',
+                ],
+                [
+                    'name' => 'Mona Saad',
+                    'phone' => '+966500123456',
+                    'stage' => 'interview',
+                    'notes' => 'Strong Flutter architecture and state management background.',
+                    'skills_json' => ['Flutter', 'Dart', 'REST APIs'],
+                    'years_experience' => 5,
+                    'ai_fit_score' => 88,
+                    'ai_match_reason' => 'Strong match for Flutter and clean architecture requirements.',
+                    'ai_parsed_at' => $now,
+                ]
+            );
+
+            // Performance review sample
+            if ($firstEmployee) {
+                PerformanceReview::query()->updateOrCreate(
+                    [
+                        'company_id' => $company->id,
+                        'employee_id' => $firstEmployee->id,
+                        'period_label' => 'Q2 2026',
+                    ],
+                    [
+                        'reviewer_user_id' => $admin->id,
+                        'rating' => 4,
+                        'goals_summary' => 'Delivered key dashboard enhancements and fixed production issues.',
+                        'strengths' => 'Ownership, communication, and execution speed.',
+                        'improvement_areas' => 'Improve test coverage for edge cases.',
+                        'manager_comment' => 'Consistent performer with high reliability.',
+                        'ai_summary' => 'Strong performer with positive trend.',
+                        'reviewed_at' => $now->copy()->subWeek(),
+                    ]
+                );
             }
         }
 

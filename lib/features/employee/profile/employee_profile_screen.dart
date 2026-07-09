@@ -5,6 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_scope.dart';
 import '../../../core/utils/text_direction_helper.dart';
 import '../../../core/api/api_result.dart';
+import '../../../core/api/api_config.dart';
 import '../../../core/repositories/employees_repository.dart';
 import '../../../l10n/app_localizations.dart';
 
@@ -19,11 +20,29 @@ class _EmployeeProfileScreenState extends State<EmployeeProfileScreen> {
   bool _loading = true;
   EmployeeItem? _employee;
   String? _error;
+  bool _useApi = false;
+  final TextEditingController _baseUrlCtrl = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+    _loadApiSettings();
     _load();
+  }
+
+  @override
+  void dispose() {
+    _baseUrlCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadApiSettings() async {
+    await ApiConfig.load();
+    if (!mounted) return;
+    setState(() {
+      _useApi = ApiConfig.useApi;
+      _baseUrlCtrl.text = ApiConfig.baseUrl ?? '';
+    });
   }
 
   Future<void> _load() async {
@@ -46,6 +65,25 @@ class _EmployeeProfileScreenState extends State<EmployeeProfileScreen> {
         _loading = false;
       });
     }
+  }
+
+  Future<void> _saveApiSettings() async {
+    final l10n = AppLocalizations.of(context)!;
+    final code = ApiConfig.validateBaseUrl(_baseUrlCtrl.text);
+    if (_useApi && code != null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(code == 'needs_https' ? l10n.apiHttpsRequired : l10n.invalidApiUrl)),
+      );
+      return;
+    }
+    await ApiConfig.setBaseUrl(_baseUrlCtrl.text);
+    await ApiConfig.setUseApi(_useApi);
+    await _load();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.serverSettingsSaved)),
+    );
   }
 
   @override
@@ -196,6 +234,49 @@ class _EmployeeProfileScreenState extends State<EmployeeProfileScreen> {
                       );
                     }),
                   ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(l10n.serverBindingTitle, style: AppTypography.h4),
+              const SizedBox(height: 8),
+              Text(
+                l10n.serverBindingDescription,
+                style: AppTypography.caption.copyWith(color: AppColors.textSecondary),
+              ),
+              const SizedBox(height: 16),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(l10n.useServer),
+                        subtitle: Text(
+                          _useApi ? l10n.serverEnabled : l10n.serverDisabled,
+                          style: AppTypography.caption,
+                        ),
+                        value: _useApi,
+                        onChanged: (v) => setState(() => _useApi = v),
+                      ),
+                      TextField(
+                        controller: _baseUrlCtrl,
+                        enabled: _useApi,
+                        decoration: InputDecoration(
+                          labelText: l10n.baseUrlLabel,
+                          hintText: l10n.baseUrlHint,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton(
+                          onPressed: _saveApiSettings,
+                          child: Text(l10n.save),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 24),

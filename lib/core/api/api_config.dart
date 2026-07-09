@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -33,6 +35,18 @@ class ApiConfig {
     final userTouchedUse = prefs.containsKey(_keyUseApi);
     if (userTouchedBase || userTouchedUse) return;
     await setBaseUrl('http://127.0.0.1:8000/api');
+    await setUseApi(true);
+  }
+
+  /// أول تشغيل على الموبايل في وضع التطوير: ربط تلقائي بـ Laravel المحلي.
+  static Future<void> applyDebugMobileDefaults() async {
+    if (!kDebugMode || kIsWeb) return;
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.containsKey(_keyBaseUrl) || prefs.containsKey(_keyUseApi)) return;
+    final url = Platform.isAndroid
+        ? 'http://10.0.2.2:8000/api'
+        : 'http://127.0.0.1:8000/api';
+    await setBaseUrl(url);
     await setUseApi(true);
   }
 
