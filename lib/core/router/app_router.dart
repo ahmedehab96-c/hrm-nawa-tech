@@ -167,6 +167,7 @@ class EmployeeShell extends StatelessWidget {
     '/employee/attendance',
     '/employee/leave',
     '/employee/payslip',
+    '/employee/notifications',
     '/employee/profile',
   ];
 
@@ -194,6 +195,7 @@ class EmployeeShell extends StatelessWidget {
           NavigationDestination(icon: const Icon(Icons.access_time_outlined), selectedIcon: const Icon(Icons.access_time),  label: l10n.employeeNavAttendance),
           NavigationDestination(icon: const Icon(Icons.event_note_outlined),  selectedIcon: const Icon(Icons.event_note),   label: l10n.employeeNavLeave),
           NavigationDestination(icon: const Icon(Icons.receipt_long_outlined),selectedIcon: const Icon(Icons.receipt_long), label: l10n.employeeNavPayroll),
+          NavigationDestination(icon: const Icon(Icons.notifications_outlined), selectedIcon: const Icon(Icons.notifications), label: l10n.employeeNavNotifications),
           NavigationDestination(icon: const Icon(Icons.person_outline),       selectedIcon: const Icon(Icons.person),       label: l10n.employeeNavProfile),
         ],
       ),

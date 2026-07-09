@@ -129,6 +129,7 @@
   "employeeNavAttendance": "Attendance",
   "employeeNavLeave": "Leave",
   "employeeNavPayroll": "Payroll",
+  "employeeNavNotifications": "Alerts",
   "employeeNavProfile": "Profile",
   "myNotifications": "My notifications",
   "retryAction": "Retry",
@@ -489,5 +490,13 @@
   "generateSummary": "Generate summary",
   "reportQueued": "Report queued and will appear once completed",
   "executiveNarrative": "Executive Narrative",
-  "loadDataFailed": "Could not load data. Check API settings and try again."
+  "loadDataFailed": "Could not load data. Check API settings and try again.",
+
+  "welcomeHowItWorks": "How it works",
+  "welcomeStep1Title": "Start the API & admin demo",
+  "welcomeStep1Desc": "Run Laravel, seed demo data, and sign in to the web admin dashboard.",
+  "welcomeStep2Title": "Open the employee app",
+  "welcomeStep2Desc": "Use the mobile app with demo credentials to try attendance, leave, and payslip.",
+  "welcomeStep3Title": "Explore AI & recruitment",
+  "welcomeStep3Desc": "Try AI Command Center, recruitment matching, performance reviews, and reports."
 }
