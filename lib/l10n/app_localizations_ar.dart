@@ -1079,4 +1079,95 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get editJob => 'تعديل الوظيفة';
+
+  @override
+  String get performance => 'الأداء';
+
+  @override
+  String get reports => 'التقارير';
+
+  @override
+  String get performanceTitle => 'تحليل أداء الموظفين';
+
+  @override
+  String get performanceNewReview => 'إدخال تقييم جديد';
+
+  @override
+  String get periodLabel => 'الفترة';
+
+  @override
+  String get ratingLabel => 'التقييم';
+
+  @override
+  String get goalsSummary => 'ملخص الأهداف';
+
+  @override
+  String get strengths => 'نقاط القوة';
+
+  @override
+  String get improvementAreas => 'مجالات التحسين';
+
+  @override
+  String get managerComment => 'تعليق المدير';
+
+  @override
+  String get saveReview => 'حفظ التقييم';
+
+  @override
+  String get reviewSaved => 'تم حفظ التقييم';
+
+  @override
+  String get aiSummaryCol => 'ملخص ذكي';
+
+  @override
+  String get noAnalysisYet => 'لا يوجد تحليل بعد';
+
+  @override
+  String get analyzing => 'جاري...';
+
+  @override
+  String get queueAiAnalysis => 'جدولة تحليل AI';
+
+  @override
+  String get analyzeAi => 'تحليل AI';
+
+  @override
+  String get analysisQueued => 'تمت جدولة التحليل وسيتم التحديث تلقائياً';
+
+  @override
+  String get aiAnalysisGenerated => 'تم توليد التحليل الذكي';
+
+  @override
+  String get aiAnalysisCompleted => 'اكتمل التحليل الذكي';
+
+  @override
+  String get asyncMode => 'وضع Async';
+
+  @override
+  String get processing => 'قيد المعالجة...';
+
+  @override
+  String get taskFailed => 'فشلت المهمة';
+
+  @override
+  String get reportsTitle => 'تقارير ذكية وملخصات الإدارة';
+
+  @override
+  String get fromDate => 'من';
+
+  @override
+  String get toDate => 'إلى';
+
+  @override
+  String get generateSummary => 'توليد الملخص';
+
+  @override
+  String get reportQueued => 'تمت جدولة التقرير وسيظهر فور اكتماله';
+
+  @override
+  String get executiveNarrative => 'السرد التنفيذي';
+
+  @override
+  String get loadDataFailed =>
+      'تعذّر تحميل البيانات. تحقق من إعدادات الـ API ثم أعد المحاولة.';
 }

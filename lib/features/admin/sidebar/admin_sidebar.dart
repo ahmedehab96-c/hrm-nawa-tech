@@ -24,11 +24,11 @@ class AdminSidebar extends StatelessWidget {
       (icon: Icons.people_outline,       label: l10n.employees,   path: '/admin/employees'),
       (icon: Icons.access_time,          label: l10n.attendance,  path: '/admin/attendance'),
       (icon: Icons.event_note_outlined,  label: l10n.leave,       path: '/admin/leave'),
-      (icon: Icons.trending_up_outlined, label: _labelPerformance(context), path: '/admin/performance'),
+      (icon: Icons.trending_up_outlined, label: l10n.performance, path: '/admin/performance'),
       (icon: Icons.payments_outlined,    label: l10n.payroll,     path: '/admin/payroll'),
       (icon: Icons.work_outline,         label: l10n.recruitment, path: '/admin/recruitment'),
       (icon: Icons.auto_awesome_outlined, label: l10n.aiPanelTitle, path: '/admin/ai'),
-      (icon: Icons.analytics_outlined,   label: _labelReports(context), path: '/admin/reports'),
+      (icon: Icons.analytics_outlined,   label: l10n.reports, path: '/admin/reports'),
     ];
 
     return AnimatedContainer(
@@ -96,16 +96,6 @@ class AdminSidebar extends StatelessWidget {
     );
   }
 }
-
-String _labelPerformance(BuildContext context) =>
-    Localizations.localeOf(context).languageCode == 'ar'
-        ? 'الأداء'
-        : 'Performance';
-
-String _labelReports(BuildContext context) =>
-    Localizations.localeOf(context).languageCode == 'ar'
-        ? 'التقارير'
-        : 'Reports';
 
 class _NavItem extends StatefulWidget {
   const _NavItem({
