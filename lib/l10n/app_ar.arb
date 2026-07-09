@@ -129,6 +129,7 @@
   "employeeNavAttendance": "الحضور",
   "employeeNavLeave": "الإجازات",
   "employeeNavPayroll": "الرواتب",
+  "employeeNavNotifications": "إشعارات",
   "employeeNavProfile": "الملف",
   "myNotifications": "إشعاراتي",
   "retryAction": "إعادة المحاولة",
@@ -489,5 +490,13 @@
   "generateSummary": "توليد الملخص",
   "reportQueued": "تمت جدولة التقرير وسيظهر فور اكتماله",
   "executiveNarrative": "السرد التنفيذي",
-  "loadDataFailed": "تعذّر تحميل البيانات. تحقق من إعدادات الـ API ثم أعد المحاولة."
+  "loadDataFailed": "تعذّر تحميل البيانات. تحقق من إعدادات الـ API ثم أعد المحاولة.",
+
+  "welcomeHowItWorks": "كيف يعمل",
+  "welcomeStep1Title": "شغّل الـ API ولوحة الإدارة",
+  "welcomeStep1Desc": "شغّل Laravel، زرّع البيانات التجريبية، وسجّل دخول لوحة الأدمن على الويب.",
+  "welcomeStep2Title": "افتح تطبيق الموظف",
+  "welcomeStep2Desc": "استخدم تطبيق الموبايل بحسابات العرض التجريبي للحضور والإجازات وقسيمة الراتب.",
+  "welcomeStep3Title": "استكشف AI والتوظيف",
+  "welcomeStep3Desc": "جرّب مركز AI، مطابقة التوظيف، تقييمات الأداء، والتقارير الذكية."
 }

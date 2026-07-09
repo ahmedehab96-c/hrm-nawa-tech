@@ -5,6 +5,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/utils/open_external_link.dart';
 import '../../core/utils/platform_helper.dart';
 import '../../core/widgets/hrm_logo.dart';
+import '../../l10n/app_localizations.dart';
 
 // ─── Entry Point ─────────────────────────────────────────────────────────────
 
@@ -872,7 +873,7 @@ class _ScreenshotSection extends StatelessWidget {
       color: AppColors.background,
       child: Column(
         children: [
-          _sectionBadge('كيف يعمل'),
+          _sectionBadge(AppLocalizations.of(context)!.welcomeHowItWorks),
           const SizedBox(height: 16),
           Text('واجهة بسيطة وقوية',
               textAlign: TextAlign.center,
@@ -882,7 +883,7 @@ class _ScreenshotSection extends StatelessWidget {
           isWide
               ? Row(
                   children: [
-                    Expanded(child: _stepsList()),
+                    Expanded(child: _stepsList(context)),
                     const SizedBox(width: 60),
                     Expanded(child: _mockPhone()),
                   ],
@@ -891,7 +892,7 @@ class _ScreenshotSection extends StatelessWidget {
                   children: [
                     _mockPhone(),
                     const SizedBox(height: 40),
-                    _stepsList(),
+                    _stepsList(context),
                   ],
                 ),
         ],
@@ -899,11 +900,12 @@ class _ScreenshotSection extends StatelessWidget {
     );
   }
 
-  Widget _stepsList() {
+  Widget _stepsList(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final steps = [
-      (Icons.app_registration_rounded, 'سجّل شركتك', 'أنشئ حساب في دقيقة واحدة واضبط إعدادات الشركة'),
-      (Icons.person_add_rounded, 'أضف الموظفين', 'أدخل بيانات الفريق وفعّل حساباتهم على الجوال'),
-      (Icons.auto_awesome_rounded, 'يعمل تلقائياً', 'حضور، إجازات، رواتب — كلها تُدار تلقائياً'),
+      (Icons.play_circle_outline_rounded, l10n.welcomeStep1Title, l10n.welcomeStep1Desc),
+      (Icons.phone_iphone_rounded, l10n.welcomeStep2Title, l10n.welcomeStep2Desc),
+      (Icons.auto_awesome_rounded, l10n.welcomeStep3Title, l10n.welcomeStep3Desc),
     ];
     return Column(
       children: steps.asMap().entries.map((e) {

@@ -788,6 +788,12 @@ abstract class AppLocalizations {
   /// **'Payroll'**
   String get employeeNavPayroll;
 
+  /// No description provided for @employeeNavNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Alerts'**
+  String get employeeNavNotifications;
+
   /// No description provided for @employeeNavProfile.
   ///
   /// In en, this message translates to:
@@ -2305,6 +2311,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not load data. Check API settings and try again.'**
   String get loadDataFailed;
+
+  /// No description provided for @welcomeHowItWorks.
+  ///
+  /// In en, this message translates to:
+  /// **'How it works'**
+  String get welcomeHowItWorks;
+
+  /// No description provided for @welcomeStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Start the API & admin demo'**
+  String get welcomeStep1Title;
+
+  /// No description provided for @welcomeStep1Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Run Laravel, seed demo data, and sign in to the web admin dashboard.'**
+  String get welcomeStep1Desc;
+
+  /// No description provided for @welcomeStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the employee app'**
+  String get welcomeStep2Title;
+
+  /// No description provided for @welcomeStep2Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the mobile app with demo credentials to try attendance, leave, and payslip.'**
+  String get welcomeStep2Desc;
+
+  /// No description provided for @welcomeStep3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore AI & recruitment'**
+  String get welcomeStep3Title;
+
+  /// No description provided for @welcomeStep3Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Try AI Command Center, recruitment matching, performance reviews, and reports.'**
+  String get welcomeStep3Desc;
 }
 
 class _AppLocalizationsDelegate

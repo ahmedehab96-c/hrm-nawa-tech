@@ -361,6 +361,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get employeeNavPayroll => 'الرواتب';
 
   @override
+  String get employeeNavNotifications => 'إشعارات';
+
+  @override
   String get employeeNavProfile => 'الملف';
 
   @override
@@ -1170,4 +1173,28 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get loadDataFailed =>
       'تعذّر تحميل البيانات. تحقق من إعدادات الـ API ثم أعد المحاولة.';
+
+  @override
+  String get welcomeHowItWorks => 'كيف يعمل';
+
+  @override
+  String get welcomeStep1Title => 'شغّل الـ API ولوحة الإدارة';
+
+  @override
+  String get welcomeStep1Desc =>
+      'شغّل Laravel، زرّع البيانات التجريبية، وسجّل دخول لوحة الأدمن على الويب.';
+
+  @override
+  String get welcomeStep2Title => 'افتح تطبيق الموظف';
+
+  @override
+  String get welcomeStep2Desc =>
+      'استخدم تطبيق الموبايل بحسابات العرض التجريبي للحضور والإجازات وقسيمة الراتب.';
+
+  @override
+  String get welcomeStep3Title => 'استكشف AI والتوظيف';
+
+  @override
+  String get welcomeStep3Desc =>
+      'جرّب مركز AI، مطابقة التوظيف، تقييمات الأداء، والتقارير الذكية.';
 }

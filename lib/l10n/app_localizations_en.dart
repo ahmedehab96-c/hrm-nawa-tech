@@ -361,6 +361,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get employeeNavPayroll => 'Payroll';
 
   @override
+  String get employeeNavNotifications => 'Alerts';
+
+  @override
   String get employeeNavProfile => 'Profile';
 
   @override
@@ -1175,4 +1178,28 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get loadDataFailed =>
       'Could not load data. Check API settings and try again.';
+
+  @override
+  String get welcomeHowItWorks => 'How it works';
+
+  @override
+  String get welcomeStep1Title => 'Start the API & admin demo';
+
+  @override
+  String get welcomeStep1Desc =>
+      'Run Laravel, seed demo data, and sign in to the web admin dashboard.';
+
+  @override
+  String get welcomeStep2Title => 'Open the employee app';
+
+  @override
+  String get welcomeStep2Desc =>
+      'Use the mobile app with demo credentials to try attendance, leave, and payslip.';
+
+  @override
+  String get welcomeStep3Title => 'Explore AI & recruitment';
+
+  @override
+  String get welcomeStep3Desc =>
+      'Try AI Command Center, recruitment matching, performance reviews, and reports.';
 }
