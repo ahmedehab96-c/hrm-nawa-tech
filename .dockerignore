@@ -1,0 +1,16 @@
+.git
+.metadata
+.dart_tool
+build
+.idea
+.vscode
+**/node_modules
+backend/vendor
+backend/.env
+devtools_options.yaml
+android
+ios
+linux
+macos
+windows
+test

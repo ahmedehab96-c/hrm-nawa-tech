@@ -15,6 +15,7 @@ import 'l10n/app_localizations.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await ApiConfig.load();
+  await ApiConfig.applyReleaseDefaults();
   await ApiConfig.applyDebugWebDefaults();
   await ApiConfig.applyDebugMobileDefaults();
   await AuthSession.instance.syncFromStorage();
