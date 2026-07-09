@@ -5,7 +5,7 @@ import '../../../core/saas/company_context.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_scope.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../../core/ai/ai_assistant_panel.dart';
+import '../../../core/ai/show_ai_assistant.dart';
 import '../../../core/repositories/auth_repository.dart';
 import '../../../core/api/current_user.dart';
 
@@ -97,13 +97,7 @@ class AdminTopBar extends StatelessWidget {
             ],
             onSelected: (value) {
               if (value == 'chat') {
-                showDialog(
-                  context: context,
-                  builder: (context) => Dialog(
-                    backgroundColor: Colors.transparent,
-                    child: AiAssistantPanel(),
-                  ),
-                );
+                showAiAssistantDialog(context);
                 return;
               }
               context.push('/admin/ai');

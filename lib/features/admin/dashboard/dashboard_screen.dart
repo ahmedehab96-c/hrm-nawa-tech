@@ -7,6 +7,7 @@ import '../../../core/repositories/employees_repository.dart';
 import '../../../core/repositories/leave_repository.dart';
 import '../../../core/repositories/notifications_repository.dart';
 import '../../../core/repositories/payroll_repository.dart';
+import '../../../core/repositories/reports_repository.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/leave_status_util.dart';
 import '../../../core/widgets/animations.dart';
@@ -31,6 +32,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   String _payrollMonthLabel = '';
   List<_LeaveRow>    _pendingRows = [];
   List<_ActivityRow> _activities  = [];
+  String? _aiBriefing;
+  bool _aiBriefingLoading = false;
+  String? _aiBriefingError;
 
   @override
   void initState() {
@@ -114,6 +118,37 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
+  String _fmtDate(DateTime d) =>
+      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+  Future<void> _generateAiBriefing() async {
+    setState(() {
+      _aiBriefingLoading = true;
+      _aiBriefingError = null;
+    });
+    final now = DateTime.now();
+    final start = now.subtract(const Duration(days: 30));
+    final lang = Localizations.localeOf(context).languageCode;
+    final res = await ReportsRepository.instance.generateSummary(
+      periodStart: _fmtDate(start),
+      periodEnd: _fmtDate(now),
+      languageCode: lang,
+    );
+    if (!mounted) return;
+    switch (res) {
+      case ApiSuccess(:final data):
+        setState(() {
+          _aiBriefing = data.narrative;
+          _aiBriefingLoading = false;
+        });
+      case ApiFailure(:final message):
+        setState(() {
+          _aiBriefingError = message;
+          _aiBriefingLoading = false;
+        });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -164,6 +199,68 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     payrollMonthLabel: _payrollMonthLabel,
                   ),
           ),
+
+          if (!_loading) ...[
+            const SizedBox(height: 24),
+            FadeSlideIn(
+              delay: const Duration(milliseconds: 200),
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.auto_awesome, color: AppColors.primary),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(l10n.aiBriefingTitle, style: AppTypography.h4),
+                                Text(
+                                  l10n.aiBriefingSubtitle,
+                                  style: AppTypography.caption.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          FilledButton.tonalIcon(
+                            onPressed: _aiBriefingLoading ? null : _generateAiBriefing,
+                            icon: _aiBriefingLoading
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  )
+                                : const Icon(Icons.refresh),
+                            label: Text(l10n.generateBriefing),
+                          ),
+                        ],
+                      ),
+                      if (_aiBriefingError != null) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                          _aiBriefingError!,
+                          style: AppTypography.bodySmall.copyWith(color: AppColors.error),
+                        ),
+                      ],
+                      if (_aiBriefing != null) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                          _aiBriefing!,
+                          style: AppTypography.bodyMedium.copyWith(height: 1.5),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
 
           // Bottom section: pending leaves + recent activity | إجازات معلقة + نشاط أخير
           if (!_loading) ...[

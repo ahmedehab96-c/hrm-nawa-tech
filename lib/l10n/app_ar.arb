@@ -498,5 +498,14 @@
   "welcomeStep2Title": "افتح تطبيق الموظف",
   "welcomeStep2Desc": "استخدم تطبيق الموبايل بحسابات العرض التجريبي للحضور والإجازات وقسيمة الراتب.",
   "welcomeStep3Title": "استكشف AI والتوظيف",
-  "welcomeStep3Desc": "جرّب مركز AI، مطابقة التوظيف، تقييمات الأداء، والتقارير الذكية."
+  "welcomeStep3Desc": "جرّب مركز AI، مطابقة التوظيف، تقييمات الأداء، والتقارير الذكية.",
+
+  "generateWithAi": "توليد بالذكاء الاصطناعي",
+  "aiBriefingTitle": "ملخص HR بالذكاء الاصطناعي",
+  "aiBriefingSubtitle": "ملخص ذكي لآخر 30 يوماً",
+  "generateBriefing": "توليد الملخص",
+  "openAiAssistant": "المساعد الذكي",
+  "tryAiAssistant": "جرّب المساعد الذكي",
+  "aiJobGenerated": "تم توليد وصف الوظيفة",
+  "askAiAboutHr": "اسأل عن الإجازات، الراتب، الحضور…"
 }

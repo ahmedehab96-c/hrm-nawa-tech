@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/repositories/recruitment_repository.dart';
+import '../../../core/repositories/ai_content_repository.dart';
 import '../../../core/api/api_result.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../l10n/app_localizations.dart';
@@ -23,6 +24,7 @@ class _AddJobScreenState extends State<AddJobScreen> {
   late final TextEditingController _descCtrl;
   String _status = 'open';
   bool _saving = false;
+  bool _generatingAi = false;
 
   bool get _isEditing => widget.editJob != null;
 
@@ -90,6 +92,40 @@ class _AddJobScreenState extends State<AddJobScreen> {
     }
   }
 
+  Future<void> _generateDescriptionWithAi() async {
+    final title = _titleCtrl.text.trim();
+    if (title.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.fieldRequired)),
+      );
+      return;
+    }
+    setState(() => _generatingAi = true);
+    final lang = Localizations.localeOf(context).languageCode;
+    final res = await AiContentRepository.instance.generateJobDescription(
+      jobTitle: title,
+      languageCode: lang,
+      department: _deptCtrl.text.trim(),
+      location: _locationCtrl.text.trim(),
+    );
+    if (!mounted) return;
+    setState(() => _generatingAi = false);
+    switch (res) {
+      case ApiSuccess(:final data):
+        _descCtrl.text = data.content;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.aiJobGenerated),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      case ApiFailure(:final message):
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message), backgroundColor: AppColors.error),
+        );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -138,6 +174,21 @@ class _AddJobScreenState extends State<AddJobScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
+                    Align(
+                      alignment: AlignmentDirectional.centerEnd,
+                      child: OutlinedButton.icon(
+                        onPressed: _generatingAi ? null : _generateDescriptionWithAi,
+                        icon: _generatingAi
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Icon(Icons.auto_awesome_outlined),
+                        label: Text(l10n.generateWithAi),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
                     TextFormField(
                       controller: _descCtrl,
                       decoration: InputDecoration(

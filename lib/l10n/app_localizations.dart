@@ -2353,6 +2353,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Try AI Command Center, recruitment matching, performance reviews, and reports.'**
   String get welcomeStep3Desc;
+
+  /// No description provided for @generateWithAi.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate with AI'**
+  String get generateWithAi;
+
+  /// No description provided for @aiBriefingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AI HR Briefing'**
+  String get aiBriefingTitle;
+
+  /// No description provided for @aiBriefingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart 30-day summary for your team'**
+  String get aiBriefingSubtitle;
+
+  /// No description provided for @generateBriefing.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate briefing'**
+  String get generateBriefing;
+
+  /// No description provided for @openAiAssistant.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Assistant'**
+  String get openAiAssistant;
+
+  /// No description provided for @tryAiAssistant.
+  ///
+  /// In en, this message translates to:
+  /// **'Try AI Assistant'**
+  String get tryAiAssistant;
+
+  /// No description provided for @aiJobGenerated.
+  ///
+  /// In en, this message translates to:
+  /// **'Job description generated'**
+  String get aiJobGenerated;
+
+  /// No description provided for @askAiAboutHr.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask about leave, payslip, attendance…'**
+  String get askAiAboutHr;
 }
 
 class _AppLocalizationsDelegate
