@@ -19,6 +19,7 @@ class EmployeePayslipScreen extends StatefulWidget {
 class _EmployeePayslipScreenState extends State<EmployeePayslipScreen> {
   bool _loading = true;
   bool _generatingPdf = false;
+  String? _error;
   String _month = '';
   List<String> _monthChoices = [];
   PayslipItem? _slip;
@@ -47,12 +48,16 @@ class _EmployeePayslipScreenState extends State<EmployeePayslipScreen> {
   }
 
   Future<void> _load() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
     await ApiConfig.load();
     final name = await currentUserDisplayName();
     final res = await PayrollRepository.getPayroll(_month);
 
     PayslipItem? slip;
+    String? error;
     if (res is ApiSuccess<List<PayslipItem>>) {
       for (final p in res.data) {
         if (name != null &&
@@ -63,12 +68,16 @@ class _EmployeePayslipScreenState extends State<EmployeePayslipScreen> {
         }
       }
       slip ??= res.data.isNotEmpty ? res.data.first : null;
+    } else if (res is ApiFailure<List<PayslipItem>>) {
+      error = res.message;
     }
 
     if (!mounted) return;
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _loading = false;
       _slip = slip;
+      _error = error ?? (slip == null ? l10n.payslipNotFound : null);
     });
   }
 
@@ -139,10 +148,37 @@ class _EmployeePayslipScreenState extends State<EmployeePayslipScreen> {
                       },
                     ),
                     const SizedBox(height: 24),
-                    if (s == null)
-                      Text(
-                        '—',
-                        style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+                    if (_error != null)
+                      Card(
+                        color: AppColors.error.withValues(alpha: 0.08),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.error_outline, color: AppColors.error),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  _error!,
+                                  style: AppTypography.bodySmall.copyWith(color: AppColors.error),
+                                ),
+                              ),
+                              TextButton(onPressed: _load, child: Text(l10n.retryAction)),
+                            ],
+                          ),
+                        ),
+                      )
+                    else if (s == null)
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Center(
+                            child: Text(
+                              l10n.payslipNotFound,
+                              style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+                            ),
+                          ),
+                        ),
                       )
                     else
                       Card(

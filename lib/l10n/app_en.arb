@@ -132,6 +132,8 @@
   "employeeNavProfile": "Profile",
   "myNotifications": "My notifications",
   "retryAction": "Retry",
+  "dashboardPartialLoadError": "Some dashboard data could not be loaded. Check API settings and try again.",
+  "payslipNotFound": "No payslip found for this month.",
   "noNotifications": "No notifications",
   "refreshTooltip": "Refresh",
   "payslipDownloadLater": "PDF download will use the server in production (demo: planned).",

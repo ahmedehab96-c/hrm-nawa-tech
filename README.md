@@ -61,11 +61,12 @@ flutter run -d ios        # iPhone Simulator
 flutter run -d android  # Android Emulator
 ```
 
-Before login:
-1. Open **Settings**
-2. Enable **Use server API**
-3. Set Base URL: `http://127.0.0.1:8000/api`
-4. Save
+In **debug mode**, simulators auto-connect to the local API (`127.0.0.1` on iOS, `10.0.2.2` on Android emulator).
+
+Or open **Profile** → **Server (Laravel API)**:
+1. Enable **Use server**
+2. Set Base URL: `http://127.0.0.1:8000/api`
+3. Save
 
 | Role | Email | Password |
 |------|-------|----------|
@@ -141,11 +142,12 @@ flutter run -d ios        # محاكي iPhone
 flutter run -d android    # محاكي Android
 ```
 
-قبل تسجيل الدخول:
-1. افتح **الإعدادات**
-2. فعّل **Use server API**
-3. ضع العنوان: `http://127.0.0.1:8000/api`
-4. احفظ
+في **وضع التطوير**، المحاكي يتصل تلقائياً بالـ API المحلي (`127.0.0.1` على iOS، `10.0.2.2` على Android).
+
+أو افتح **الملف الشخصي** → **الخادم (Laravel API)**:
+1. فعّل **استخدام الخادم**
+2. ضع العنوان: `http://127.0.0.1:8000/api`
+3. احفظ
 
 | الدور | البريد | كلمة المرور |
 |-------|--------|-------------|

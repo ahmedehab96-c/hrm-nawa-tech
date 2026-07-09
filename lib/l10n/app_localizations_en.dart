@@ -370,6 +370,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get retryAction => 'Retry';
 
   @override
+  String get dashboardPartialLoadError =>
+      'Some dashboard data could not be loaded. Check API settings and try again.';
+
+  @override
+  String get payslipNotFound => 'No payslip found for this month.';
+
+  @override
   String get noNotifications => 'No notifications';
 
   @override

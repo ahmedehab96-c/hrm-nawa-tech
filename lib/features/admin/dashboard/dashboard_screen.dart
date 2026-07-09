@@ -24,6 +24,7 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   bool   _loading = true;
+  String? _loadWarning;
   int    _employeesCount    = 0;
   int    _present = 0, _late = 0, _absent = 0;
   int    _pendingLeaveCount = 0;
@@ -39,7 +40,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   // Fetch all data in parallel to minimize wait time | تحميل البيانات بالتوازي
   Future<void> _load() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _loadWarning = null;
+    });
 
     final month = '${DateTime.now().year}-'
         '${DateTime.now().month.toString().padLeft(2, '0')}';
@@ -53,6 +57,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
     ]);
 
     if (!mounted) return;
+
+    final warnings = <String>[];
+    void collectFailure(dynamic result) {
+      if (result is ApiFailure<dynamic>) warnings.add(result.message);
+    }
+    for (final r in results) {
+      collectFailure(r);
+    }
 
     // Employee count | الموظفون
     final empCount = results[0] is ApiSuccess<List<EmployeeItem>>
@@ -92,6 +104,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     setState(() {
       _loading           = false;
+      _loadWarning       = warnings.isEmpty ? null : warnings.first;
       _employeesCount    = empCount;
       _present = p; _late = l; _absent = a;
       _pendingLeaveCount = pc;
@@ -117,6 +130,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary)),
           ),
           const SizedBox(height: 32),
+
+          if (_loadWarning != null) ...[
+            FadeSlideIn(
+              child: MaterialBanner(
+                backgroundColor: AppColors.warning.withValues(alpha: 0.12),
+                content: Text(
+                  l10n.dashboardPartialLoadError,
+                  style: AppTypography.bodySmall.copyWith(color: AppColors.textPrimary),
+                ),
+                leading: const Icon(Icons.warning_amber_rounded, color: AppColors.warning),
+                actions: [
+                  TextButton(onPressed: _load, child: Text(l10n.retryAction)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
 
           // Stat cards — fade transition between loading skeleton and real data
           // بطاقات الإحصاء مع fade حين تتغير من loading → data

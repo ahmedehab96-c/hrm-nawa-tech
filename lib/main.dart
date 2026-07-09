@@ -16,6 +16,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await ApiConfig.load();
   await ApiConfig.applyDebugWebDefaults();
+  await ApiConfig.applyDebugMobileDefaults();
   await AuthSession.instance.syncFromStorage();
   await LocaleController.instance.load();
   if (AuthSession.instance.hasSession) {

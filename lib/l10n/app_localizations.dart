@@ -806,6 +806,18 @@ abstract class AppLocalizations {
   /// **'Retry'**
   String get retryAction;
 
+  /// No description provided for @dashboardPartialLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Some dashboard data could not be loaded. Check API settings and try again.'**
+  String get dashboardPartialLoadError;
+
+  /// No description provided for @payslipNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No payslip found for this month.'**
+  String get payslipNotFound;
+
   /// No description provided for @noNotifications.
   ///
   /// In en, this message translates to:

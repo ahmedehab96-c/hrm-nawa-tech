@@ -85,6 +85,45 @@ class PagedResult<T> {
 }
 
 class EmployeesRepository {
+  static const List<Map<String, String>> _demoEmployees = [
+    {
+      'id': '1',
+      'name': 'Mohamed Ahmed',
+      'email': 'emp01@demo.com',
+      'department': 'Sales',
+      'position': 'Sales coordinator',
+      'phone': '+966501000001',
+      'hire_date': '2024-01-01',
+      'base_salary': '6000',
+      'allowances': '800',
+      'deductions': '200',
+    },
+    {
+      'id': '2',
+      'name': 'Sara Ali',
+      'email': 'emp02@demo.com',
+      'department': 'Finance',
+      'position': 'Accountant',
+      'phone': '+966501000002',
+      'hire_date': '2024-02-01',
+      'base_salary': '5200',
+      'allowances': '600',
+      'deductions': '180',
+    },
+    {
+      'id': '3',
+      'name': 'Khalid Hassan',
+      'email': 'emp03@demo.com',
+      'department': 'IT',
+      'position': 'Developer',
+      'phone': '+966501000003',
+      'hire_date': '2023-11-01',
+      'base_salary': '7200',
+      'allowances': '1000',
+      'deductions': '250',
+    },
+  ];
+
   /// إرجاع قائمة مرقّمة مع دعم البحث والفلترة
   static Future<ApiResult<PagedResult<EmployeeItem>>> getEmployeesPaged({
     int page = 1,
@@ -117,7 +156,29 @@ class EmployeesRepository {
         return ApiFailure(ApiLocalized.strings.apiErrorEmployeesList(e.toString()));
       }
     }
-    return ApiFailure(ApiLocalized.strings.apiErrorEmployeesList('API disabled'));
+    final allItems = _demoEmployees.map(EmployeeItem.fromJson).toList();
+    final filtered = allItems.where((e) {
+      final bySearch = search == null ||
+          search.isEmpty ||
+          e.name.toLowerCase().contains(search.toLowerCase()) ||
+          e.email.toLowerCase().contains(search.toLowerCase());
+      final byDepartment = department == null ||
+          department.isEmpty ||
+          (e.department ?? '').toLowerCase() == department.toLowerCase();
+      return bySearch && byDepartment;
+    }).toList();
+    final start = (page - 1) * perPage;
+    final end = (start + perPage).clamp(0, filtered.length);
+    final pageItems =
+        start >= filtered.length ? <EmployeeItem>[] : filtered.sublist(start, end);
+    return ApiSuccess(
+      PagedResult(
+        items: pageItems,
+        currentPage: page,
+        lastPage: (filtered.length / perPage).ceil().clamp(1, 9999),
+        total: filtered.length,
+      ),
+    );
   }
 
   /// للتوافق مع الأجزاء التي تحتاج القائمة الكاملة (employee form, etc.)
@@ -144,7 +205,10 @@ class EmployeesRepository {
         return ApiFailure(ApiLocalized.strings.apiErrorEmployeeDetail(e.toString()));
       }
     }
-    return ApiFailure(ApiLocalized.strings.apiErrorEmployeeDetail('API disabled'));
+    for (final item in _demoEmployees.map(EmployeeItem.fromJson)) {
+      if (item.id == id) return ApiSuccess(item);
+    }
+    return ApiFailure(ApiLocalized.strings.apiErrorEmployeeDetail('Employee not found'));
   }
 
   /// GET `/employees/me` — الموظف يحمّل بياناته الذاتية من نفس الـ Company.
@@ -168,7 +232,7 @@ class EmployeesRepository {
         return ApiFailure(ApiLocalized.strings.apiErrorEmployeeDetail(e.toString()));
       }
     }
-    return ApiFailure(ApiLocalized.strings.apiErrorEmployeeDetail('API disabled'));
+    return ApiSuccess(EmployeeItem.fromJson(_demoEmployees.first));
   }
 
   static Future<ApiResult<void>> createEmployee(Map<String, dynamic> data) async {

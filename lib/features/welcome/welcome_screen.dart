@@ -1128,7 +1128,7 @@ class _PricingSection extends StatelessWidget {
           employees: '25',
           features: ['إدارة الموظفين', 'الحضور (WiFi)', 'الإجازات', 'الرواتب', 'الإشعارات'],
           isPopular: false,
-          onTap: () => context.go('/register'),
+          onTap: () => context.go('/login'),
         ),
         _PlanCard(
           name: 'Growth',
@@ -1138,7 +1138,7 @@ class _PricingSection extends StatelessWidget {
           employees: '50',
           features: ['كل مميزات Starter', 'التوظيف والمرشحين', 'تقارير متقدمة', 'دعم بالبريد', 'PDF للرواتب'],
           isPopular: true,
-          onTap: () => context.go('/register'),
+          onTap: () => context.go('/login'),
         ),
         _PlanCard(
           name: 'Enterprise',
@@ -1148,7 +1148,7 @@ class _PricingSection extends StatelessWidget {
           employees: '200',
           features: ['كل مميزات Growth', 'AI مساعد ذكي', 'API مفتوح', 'مدير حساب مخصص', 'SLA 99.9%'],
           isPopular: false,
-          onTap: () => context.go('/register'),
+          onTap: () => context.go('/login'),
         ),
       ];
 }

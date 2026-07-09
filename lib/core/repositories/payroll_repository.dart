@@ -27,6 +27,36 @@ class PayslipItem {
 }
 
 class PayrollRepository {
+  static List<PayslipItem> _demoPayroll(String month) => [
+        PayslipItem(
+          employeeId: '1',
+          employeeName: 'Mohamed Ahmed',
+          baseSalary: '6000',
+          allowances: '800',
+          deductions: '200',
+          netSalary: '6600',
+          status: 'processed',
+        ),
+        PayslipItem(
+          employeeId: '2',
+          employeeName: 'Sara Ali',
+          baseSalary: '5200',
+          allowances: '600',
+          deductions: '180',
+          netSalary: '5620',
+          status: 'processed',
+        ),
+        PayslipItem(
+          employeeId: '3',
+          employeeName: 'Khalid Hassan',
+          baseSalary: '7200',
+          allowances: '1000',
+          deductions: '250',
+          netSalary: '7950',
+          status: 'processed',
+        ),
+      ];
+
   static PayslipItem _fromMap(Map<String, dynamic> m) => PayslipItem(
         employeeId: m['employee_id']?.toString() ?? m['id']?.toString() ?? '',
         employeeName: m['employee_name']?.toString() ?? m['name']?.toString() ?? '',
@@ -63,7 +93,18 @@ class PayrollRepository {
         return ApiFailure(ApiLocalized.strings.apiErrorPayroll(e.toString()));
       }
     }
-    return ApiFailure(ApiLocalized.strings.apiErrorPayroll('API disabled'));
+    final items = _demoPayroll(month);
+    final start = (page - 1) * perPage;
+    final end = (start + perPage).clamp(0, items.length);
+    final pageItems = start >= items.length ? <PayslipItem>[] : items.sublist(start, end);
+    return ApiSuccess(
+      PagedResult(
+        items: pageItems,
+        currentPage: page,
+        lastPage: (items.length / perPage).ceil().clamp(1, 9999),
+        total: items.length,
+      ),
+    );
   }
 
   /// للتوافق مع الشاشات التي تحتاج القائمة كاملة (payslip detail)
@@ -87,6 +128,6 @@ class PayrollRepository {
       }
       return const ApiSuccess(null);
     }
-    return ApiFailure(ApiLocalized.strings.apiErrorPayroll('API disabled'));
+    return const ApiSuccess(null);
   }
 }

@@ -59,8 +59,8 @@ flutter run -d chrome --web-port=3000
 flutter run -d ios     # or: flutter run -d android
 ```
 
-1. **Settings** → enable **Use server API**
-2. Base URL: `http://127.0.0.1:8000/api`
+1. In **debug mode**, the app auto-connects to the local API on simulators (`127.0.0.1` on iOS, `10.0.2.2` on Android emulator)
+2. Or open **Profile** → **Server (Laravel API)** → enable **Use server** and set Base URL: `http://127.0.0.1:8000/api`
 3. Login with `emp01@demo.com` / `Employee12345!`
 
 > **Physical phone:** use your PC's LAN IP, e.g. `http://192.168.1.10:8000/api`
@@ -141,8 +141,8 @@ flutter run -d chrome --web-port=3000
 flutter run -d ios     # أو: flutter run -d android
 ```
 
-1. **الإعدادات** → فعّل **Use server API**
-2. العنوان: `http://127.0.0.1:8000/api`
+1. في **وضع التطوير**، التطبيق يتصل تلقائياً بالـ API المحلي على المحاكي (`127.0.0.1` على iOS، `10.0.2.2` على Android)
+2. أو افتح **الملف الشخصي** → **الخادم (Laravel API)** → فعّل **استخدام الخادم** وضع العنوان: `http://127.0.0.1:8000/api`
 3. سجّل دخول: `emp01@demo.com` / `Employee12345!`
 
 > **هاتف حقيقي:** استخدم IP جهازك على الشبكة، مثل `http://192.168.1.10:8000/api`

@@ -132,6 +132,8 @@
   "employeeNavProfile": "الملف",
   "myNotifications": "إشعاراتي",
   "retryAction": "إعادة المحاولة",
+  "dashboardPartialLoadError": "تعذّر تحميل بعض بيانات لوحة التحكم. تحقق من إعدادات الـ API ثم أعد المحاولة.",
+  "payslipNotFound": "لا توجد قسيمة راتب لهذا الشهر.",
   "noNotifications": "لا توجد إشعارات",
   "refreshTooltip": "تحديث",
   "payslipDownloadLater": "تنزيل قسيمة PDF يُربَط بالخادم — التجربة: تم التخطيط",
