@@ -50,10 +50,21 @@ class ApiConfig {
     await setUseApi(true);
   }
 
+  /// Production web builds: `--dart-define=API_BASE_URL=/api` or full HTTPS URL.
+  static Future<void> applyReleaseDefaults() async {
+    const envUrl = String.fromEnvironment('API_BASE_URL');
+    if (envUrl.isEmpty) return;
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.containsKey(_keyBaseUrl) || prefs.containsKey(_keyUseApi)) return;
+    await setBaseUrl(envUrl);
+    await setUseApi(true);
+  }
+
   /// `null` إذا العنوان صالح أو فارغ؛ وإلا رمز: `needs_https` أو `invalid`.
   static String? validateBaseUrl(String? url) {
     final trimmed = url?.trim();
     if (trimmed == null || trimmed.isEmpty) return null;
+    if (trimmed.startsWith('/')) return null;
     final uri = Uri.tryParse(trimmed);
     if (uri == null || !uri.hasScheme || uri.host.isEmpty) {
       return 'invalid';
@@ -150,9 +161,15 @@ class ApiConfig {
   }
 
   static String url(String path) {
-    final base = _baseUrl ?? '';
+    var base = _baseUrl ?? '';
     if (base.isEmpty) return '';
     final p = path.startsWith('/') ? path.substring(1) : path;
+    if (base.startsWith('/')) {
+      final origin = Uri.base.origin;
+      if (!base.endsWith('/')) base = '$base/';
+      return '$origin$base$p';
+    }
+    if (!base.endsWith('/')) base = '$base/';
     return '$base$p';
   }
 }

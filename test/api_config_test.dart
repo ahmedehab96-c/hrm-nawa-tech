@@ -20,6 +20,11 @@ void main() {
       expect(ApiConfig.validateBaseUrl('http://myapp.local/api'), isNull);
     });
 
+    test('allows relative same-origin API path', () {
+      expect(ApiConfig.validateBaseUrl('/api'), isNull);
+      expect(ApiConfig.validateBaseUrl('/api/'), isNull);
+    });
+
     test('rejects http on public hosts', () {
       expect(ApiConfig.validateBaseUrl('http://api.example.com/api'), 'needs_https');
     });

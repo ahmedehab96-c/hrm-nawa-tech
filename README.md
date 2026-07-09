@@ -7,7 +7,8 @@ A **portfolio demo project** by **Nawa Tech** — built with **Flutter + Laravel
 
 مشروع **Portfolio** من **Nawa Tech** — مبني بـ **Flutter + Laravel** لعرض مهارات Full-Stack والموبايل والـ AI عند البحث عن عمل.
 
-📖 **Detailed demo guide:** [DEMO.md](./DEMO.md) | **دليل التجربة التفصيلي:** [DEMO.md](./DEMO.md)
+📖 **Detailed demo guide:** [DEMO.md](./DEMO.md) | **دليل التجربة التفصيلي:** [DEMO.md](./DEMO.md)  
+🚀 **Live deploy guide:** [DEPLOY.md](./DEPLOY.md) | **دليل النشر:** [DEPLOY.md](./DEPLOY.md)
 
 ---
 
