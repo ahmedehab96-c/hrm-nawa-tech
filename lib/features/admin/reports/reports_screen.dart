@@ -6,6 +6,7 @@ import '../../../core/api/api_result.dart';
 import '../../../core/repositories/ai_tasks_repository.dart';
 import '../../../core/repositories/reports_repository.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/app_localizations.dart';
 
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key});
@@ -22,9 +23,6 @@ class _ReportsScreenState extends State<ReportsScreen> {
   String? _runningTaskId;
   Timer? _taskPoller;
   ReportSummaryResult? _summary;
-
-  bool get _ar => Localizations.localeOf(context).languageCode == 'ar';
-  String tr(String ar, String en) => _ar ? ar : en;
 
   String _fmt(DateTime d) =>
       '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
@@ -56,6 +54,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
   }
 
   Future<void> _generate() async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() => _loading = true);
     final localeCode = Localizations.localeOf(context).languageCode;
     if (_useAsyncAi) {
@@ -72,12 +71,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
           setState(() => _runningTaskId = data);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(
-                tr(
-                  'تمت جدولة التقرير وسيظهر فور اكتماله',
-                  'Report queued and will appear once completed',
-                ),
-              ),
+              content: Text(l10n.reportQueued),
               backgroundColor: AppColors.info,
             ),
           );
@@ -109,6 +103,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
   }
 
   void _startTaskPolling(String taskId) {
+    final l10n = AppLocalizations.of(context)!;
     _taskPoller?.cancel();
     _taskPoller = Timer.periodic(const Duration(seconds: 2), (_) async {
       final statusRes = await AiTasksRepository.instance.getTaskStatus(taskId);
@@ -134,9 +129,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
             setState(() => _runningTaskId = null);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(
-                  data.errorMessage ?? tr('فشلت المهمة', 'Task failed'),
-                ),
+                content: Text(data.errorMessage ?? l10n.taskFailed),
                 backgroundColor: AppColors.error,
               ),
             );
@@ -149,18 +142,13 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final metrics = _summary?.metrics ?? const <String, dynamic>{};
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            tr(
-              'تقارير ذكية وملخصات الإدارة',
-              'AI Reports & Dashboard Summaries',
-            ),
-            style: AppTypography.h1,
-          ),
+          Text(l10n.reportsTitle, style: AppTypography.h1),
           const SizedBox(height: 16),
           Card(
             child: Padding(
@@ -173,12 +161,12 @@ class _ReportsScreenState extends State<ReportsScreen> {
                   OutlinedButton.icon(
                     onPressed: _pickStart,
                     icon: const Icon(Icons.calendar_month_outlined),
-                    label: Text('${tr('من', 'From')}: ${_fmt(_start)}'),
+                    label: Text('${l10n.fromDate}: ${_fmt(_start)}'),
                   ),
                   OutlinedButton.icon(
                     onPressed: _pickEnd,
                     icon: const Icon(Icons.calendar_month),
-                    label: Text('${tr('إلى', 'To')}: ${_fmt(_end)}'),
+                    label: Text('${l10n.toDate}: ${_fmt(_end)}'),
                   ),
                   FilledButton.icon(
                     onPressed: _loading ? null : _generate,
@@ -192,22 +180,19 @@ class _ReportsScreenState extends State<ReportsScreen> {
                             ),
                           )
                         : const Icon(Icons.auto_graph_outlined),
-                    label: Text(tr('توليد الملخص', 'Generate summary')),
+                    label: Text(l10n.generateSummary),
                   ),
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        tr('وضع Async', 'Async mode'),
-                        style: AppTypography.caption,
-                      ),
+                      Text(l10n.asyncMode, style: AppTypography.caption),
                       Switch(
                         value: _useAsyncAi,
                         onChanged: (v) => setState(() => _useAsyncAi = v),
                       ),
                       if (_runningTaskId != null)
                         Text(
-                          tr('قيد المعالجة...', 'Processing...'),
+                          l10n.processing,
                           style: AppTypography.caption.copyWith(
                             color: AppColors.info,
                           ),
@@ -234,10 +219,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      tr('السرد التنفيذي', 'Executive Narrative'),
-                      style: AppTypography.h4,
-                    ),
+                    Text(l10n.executiveNarrative, style: AppTypography.h4),
                     const SizedBox(height: 8),
                     SelectableText(
                       _summary!.narrative,

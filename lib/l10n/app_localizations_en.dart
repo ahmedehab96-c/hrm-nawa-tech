@@ -1084,4 +1084,95 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get editJob => 'Edit job';
+
+  @override
+  String get performance => 'Performance';
+
+  @override
+  String get reports => 'Reports';
+
+  @override
+  String get performanceTitle => 'Employee Performance Analysis';
+
+  @override
+  String get performanceNewReview => 'New Review Input';
+
+  @override
+  String get periodLabel => 'Period';
+
+  @override
+  String get ratingLabel => 'Rating';
+
+  @override
+  String get goalsSummary => 'Goals summary';
+
+  @override
+  String get strengths => 'Strengths';
+
+  @override
+  String get improvementAreas => 'Improvement areas';
+
+  @override
+  String get managerComment => 'Manager comment';
+
+  @override
+  String get saveReview => 'Save review';
+
+  @override
+  String get reviewSaved => 'Review saved';
+
+  @override
+  String get aiSummaryCol => 'AI summary';
+
+  @override
+  String get noAnalysisYet => 'No analysis yet';
+
+  @override
+  String get analyzing => 'Analyzing...';
+
+  @override
+  String get queueAiAnalysis => 'Queue AI analysis';
+
+  @override
+  String get analyzeAi => 'Analyze AI';
+
+  @override
+  String get analysisQueued => 'Analysis queued and auto-refresh enabled';
+
+  @override
+  String get aiAnalysisGenerated => 'AI analysis generated';
+
+  @override
+  String get aiAnalysisCompleted => 'AI analysis completed';
+
+  @override
+  String get asyncMode => 'Async mode';
+
+  @override
+  String get processing => 'Processing...';
+
+  @override
+  String get taskFailed => 'Task failed';
+
+  @override
+  String get reportsTitle => 'AI Reports & Dashboard Summaries';
+
+  @override
+  String get fromDate => 'From';
+
+  @override
+  String get toDate => 'To';
+
+  @override
+  String get generateSummary => 'Generate summary';
+
+  @override
+  String get reportQueued => 'Report queued and will appear once completed';
+
+  @override
+  String get executiveNarrative => 'Executive Narrative';
+
+  @override
+  String get loadDataFailed =>
+      'Could not load data. Check API settings and try again.';
 }

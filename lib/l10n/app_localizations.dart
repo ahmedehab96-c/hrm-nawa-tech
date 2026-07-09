@@ -2125,6 +2125,186 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Edit job'**
   String get editJob;
+
+  /// No description provided for @performance.
+  ///
+  /// In en, this message translates to:
+  /// **'Performance'**
+  String get performance;
+
+  /// No description provided for @reports.
+  ///
+  /// In en, this message translates to:
+  /// **'Reports'**
+  String get reports;
+
+  /// No description provided for @performanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Employee Performance Analysis'**
+  String get performanceTitle;
+
+  /// No description provided for @performanceNewReview.
+  ///
+  /// In en, this message translates to:
+  /// **'New Review Input'**
+  String get performanceNewReview;
+
+  /// No description provided for @periodLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Period'**
+  String get periodLabel;
+
+  /// No description provided for @ratingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Rating'**
+  String get ratingLabel;
+
+  /// No description provided for @goalsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Goals summary'**
+  String get goalsSummary;
+
+  /// No description provided for @strengths.
+  ///
+  /// In en, this message translates to:
+  /// **'Strengths'**
+  String get strengths;
+
+  /// No description provided for @improvementAreas.
+  ///
+  /// In en, this message translates to:
+  /// **'Improvement areas'**
+  String get improvementAreas;
+
+  /// No description provided for @managerComment.
+  ///
+  /// In en, this message translates to:
+  /// **'Manager comment'**
+  String get managerComment;
+
+  /// No description provided for @saveReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Save review'**
+  String get saveReview;
+
+  /// No description provided for @reviewSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Review saved'**
+  String get reviewSaved;
+
+  /// No description provided for @aiSummaryCol.
+  ///
+  /// In en, this message translates to:
+  /// **'AI summary'**
+  String get aiSummaryCol;
+
+  /// No description provided for @noAnalysisYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No analysis yet'**
+  String get noAnalysisYet;
+
+  /// No description provided for @analyzing.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzing...'**
+  String get analyzing;
+
+  /// No description provided for @queueAiAnalysis.
+  ///
+  /// In en, this message translates to:
+  /// **'Queue AI analysis'**
+  String get queueAiAnalysis;
+
+  /// No description provided for @analyzeAi.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyze AI'**
+  String get analyzeAi;
+
+  /// No description provided for @analysisQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Analysis queued and auto-refresh enabled'**
+  String get analysisQueued;
+
+  /// No description provided for @aiAnalysisGenerated.
+  ///
+  /// In en, this message translates to:
+  /// **'AI analysis generated'**
+  String get aiAnalysisGenerated;
+
+  /// No description provided for @aiAnalysisCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'AI analysis completed'**
+  String get aiAnalysisCompleted;
+
+  /// No description provided for @asyncMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Async mode'**
+  String get asyncMode;
+
+  /// No description provided for @processing.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing...'**
+  String get processing;
+
+  /// No description provided for @taskFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Task failed'**
+  String get taskFailed;
+
+  /// No description provided for @reportsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Reports & Dashboard Summaries'**
+  String get reportsTitle;
+
+  /// No description provided for @fromDate.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get fromDate;
+
+  /// No description provided for @toDate.
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get toDate;
+
+  /// No description provided for @generateSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate summary'**
+  String get generateSummary;
+
+  /// No description provided for @reportQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Report queued and will appear once completed'**
+  String get reportQueued;
+
+  /// No description provided for @executiveNarrative.
+  ///
+  /// In en, this message translates to:
+  /// **'Executive Narrative'**
+  String get executiveNarrative;
+
+  /// No description provided for @loadDataFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load data. Check API settings and try again.'**
+  String get loadDataFailed;
 }
 
 class _AppLocalizationsDelegate

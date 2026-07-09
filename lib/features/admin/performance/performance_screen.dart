@@ -7,6 +7,7 @@ import '../../../core/repositories/ai_tasks_repository.dart';
 import '../../../core/repositories/employees_repository.dart';
 import '../../../core/repositories/performance_repository.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/app_localizations.dart';
 
 class PerformanceScreen extends StatefulWidget {
   const PerformanceScreen({super.key});
@@ -20,6 +21,7 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
   List<EmployeeItem> _employees = const [];
   bool _loading = true;
   bool _saving = false;
+  String? _loadError;
   String? _selectedEmployeeId;
   String _period =
       '${DateTime.now().year}-Q${((DateTime.now().month - 1) ~/ 3) + 1}';
@@ -32,9 +34,6 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
   bool _useAsyncAi = true;
   String? _runningTaskId;
   Timer? _taskPoller;
-
-  bool get _ar => Localizations.localeOf(context).languageCode == 'ar';
-  String tr(String ar, String en) => _ar ? ar : en;
 
   @override
   void initState() {
@@ -53,28 +52,40 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
   }
 
   Future<void> _load() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _loadError = null;
+    });
     final employeesRes = await EmployeesRepository.getEmployees();
     final reviewsRes = await PerformanceRepository.instance.getReviews(
       period: _period,
     );
     if (!mounted) return;
 
+    final errors = <String>[];
     if (employeesRes case ApiSuccess(:final data)) {
       _employees = data;
       _selectedEmployeeId ??= _employees.isNotEmpty
           ? _employees.first.id
           : null;
+    } else if (employeesRes case ApiFailure(:final message)) {
+      errors.add(message);
     }
     if (reviewsRes case ApiSuccess(:final data)) {
       _reviews = data;
+    } else if (reviewsRes case ApiFailure(:final message)) {
+      errors.add(message);
     }
 
-    setState(() => _loading = false);
+    setState(() {
+      _loading = false;
+      _loadError = errors.isEmpty ? null : errors.first;
+    });
   }
 
   Future<void> _saveReview() async {
     if (_selectedEmployeeId == null || _saving) return;
+    final l10n = AppLocalizations.of(context)!;
     setState(() => _saving = true);
     final result = await PerformanceRepository.instance.saveReview(
       employeeId: _selectedEmployeeId!,
@@ -92,7 +103,7 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
       case ApiSuccess():
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(tr('تم حفظ التقييم', 'Review saved')),
+            content: Text(l10n.reviewSaved),
             backgroundColor: AppColors.success,
           ),
         );
@@ -110,6 +121,7 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
 
   Future<void> _analyze(String reviewId) async {
     if (_analyzing.contains(reviewId)) return;
+    final l10n = AppLocalizations.of(context)!;
     setState(() => _analyzing.add(reviewId));
     final localeCode = Localizations.localeOf(context).languageCode;
     if (_useAsyncAi) {
@@ -124,12 +136,7 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
           setState(() => _runningTaskId = data);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(
-                tr(
-                  'تمت جدولة التحليل وسيتم التحديث تلقائياً',
-                  'Analysis queued and auto-refresh enabled',
-                ),
-              ),
+              content: Text(l10n.analysisQueued),
               backgroundColor: AppColors.info,
             ),
           );
@@ -153,9 +160,7 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
       case ApiSuccess():
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              tr('تم توليد التحليل الذكي', 'AI analysis generated'),
-            ),
+            content: Text(l10n.aiAnalysisGenerated),
             backgroundColor: AppColors.success,
           ),
         );
@@ -168,6 +173,7 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
   }
 
   void _startTaskPolling(String taskId) {
+    final l10n = AppLocalizations.of(context)!;
     _taskPoller?.cancel();
     _taskPoller = Timer.periodic(const Duration(seconds: 2), (_) async {
       final statusRes = await AiTasksRepository.instance.getTaskStatus(taskId);
@@ -179,9 +185,7 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
             setState(() => _runningTaskId = null);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(
-                  tr('اكتمل التحليل الذكي', 'AI analysis completed'),
-                ),
+                content: Text(l10n.aiAnalysisCompleted),
                 backgroundColor: AppColors.success,
               ),
             );
@@ -191,9 +195,7 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
             setState(() => _runningTaskId = null);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(
-                  data.errorMessage ?? tr('فشلت المهمة', 'Task failed'),
-                ),
+                content: Text(data.errorMessage ?? l10n.taskFailed),
                 backgroundColor: AppColors.error,
               ),
             );
@@ -206,6 +208,7 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -213,18 +216,12 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
           Row(
             children: [
               Expanded(
-                child: Text(
-                  tr('تحليل أداء الموظفين', 'Employee Performance Analysis'),
-                  style: AppTypography.h1,
-                ),
+                child: Text(l10n.performanceTitle, style: AppTypography.h1),
               ),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    tr('وضع Async', 'Async mode'),
-                    style: AppTypography.caption,
-                  ),
+                  Text(l10n.asyncMode, style: AppTypography.caption),
                   Switch(
                     value: _useAsyncAi,
                     onChanged: (v) => setState(() => _useAsyncAi = v),
@@ -233,12 +230,23 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
               ),
               if (_runningTaskId != null)
                 Text(
-                  tr('قيد المعالجة...', 'Processing...'),
+                  l10n.processing,
                   style: AppTypography.caption.copyWith(color: AppColors.info),
                 ),
               IconButton(onPressed: _load, icon: const Icon(Icons.refresh)),
             ],
           ),
+          if (_loadError != null) ...[
+            const SizedBox(height: 12),
+            MaterialBanner(
+              backgroundColor: AppColors.warning.withValues(alpha: 0.12),
+              content: Text(_loadError!, style: AppTypography.bodySmall),
+              leading: const Icon(Icons.warning_amber_rounded, color: AppColors.warning),
+              actions: [
+                TextButton(onPressed: _load, child: Text(l10n.retryAction)),
+              ],
+            ),
+          ],
           const SizedBox(height: 16),
           Card(
             child: Padding(
@@ -246,19 +254,14 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    tr('إدخال تقييم جديد', 'New Review Input'),
-                    style: AppTypography.h4,
-                  ),
+                  Text(l10n.performanceNewReview, style: AppTypography.h4),
                   const SizedBox(height: 10),
                   Row(
                     children: [
                       Expanded(
                         child: DropdownButtonFormField<String>(
                           initialValue: _selectedEmployeeId,
-                          decoration: InputDecoration(
-                            labelText: tr('الموظف', 'Employee'),
-                          ),
+                          decoration: InputDecoration(labelText: l10n.employees),
                           items: _employees
                               .map(
                                 (e) => DropdownMenuItem(
@@ -275,9 +278,7 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
                       Expanded(
                         child: TextFormField(
                           initialValue: _period,
-                          decoration: InputDecoration(
-                            labelText: tr('الفترة', 'Period'),
-                          ),
+                          decoration: InputDecoration(labelText: l10n.periodLabel),
                           onChanged: (v) => _period = v.trim(),
                         ),
                       ),
@@ -285,9 +286,7 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
                       Expanded(
                         child: DropdownButtonFormField<int>(
                           initialValue: _rating,
-                          decoration: InputDecoration(
-                            labelText: tr('التقييم', 'Rating'),
-                          ),
+                          decoration: InputDecoration(labelText: l10n.ratingLabel),
                           items: List.generate(5, (i) => i + 1)
                               .map(
                                 (e) => DropdownMenuItem(
@@ -305,33 +304,25 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
                   TextField(
                     controller: _goalsCtrl,
                     maxLines: 2,
-                    decoration: InputDecoration(
-                      labelText: tr('ملخص الأهداف', 'Goals summary'),
-                    ),
+                    decoration: InputDecoration(labelText: l10n.goalsSummary),
                   ),
                   const SizedBox(height: 8),
                   TextField(
                     controller: _strengthsCtrl,
                     maxLines: 2,
-                    decoration: InputDecoration(
-                      labelText: tr('نقاط القوة', 'Strengths'),
-                    ),
+                    decoration: InputDecoration(labelText: l10n.strengths),
                   ),
                   const SizedBox(height: 8),
                   TextField(
                     controller: _improvementCtrl,
                     maxLines: 2,
-                    decoration: InputDecoration(
-                      labelText: tr('مجالات التحسين', 'Improvement areas'),
-                    ),
+                    decoration: InputDecoration(labelText: l10n.improvementAreas),
                   ),
                   const SizedBox(height: 8),
                   TextField(
                     controller: _managerCtrl,
                     maxLines: 2,
-                    decoration: InputDecoration(
-                      labelText: tr('تعليق المدير', 'Manager comment'),
-                    ),
+                    decoration: InputDecoration(labelText: l10n.managerComment),
                   ),
                   const SizedBox(height: 12),
                   FilledButton.icon(
@@ -346,7 +337,7 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
                             ),
                           )
                         : const Icon(Icons.save_outlined),
-                    label: Text(tr('حفظ التقييم', 'Save review')),
+                    label: Text(l10n.saveReview),
                   ),
                 ],
               ),
@@ -368,11 +359,11 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
                   scrollDirection: Axis.horizontal,
                   child: DataTable(
                     columns: [
-                      DataColumn(label: Text(tr('الموظف', 'Employee'))),
-                      DataColumn(label: Text(tr('الفترة', 'Period'))),
-                      DataColumn(label: Text(tr('التقييم', 'Rating'))),
-                      DataColumn(label: Text(tr('ملخص ذكي', 'AI summary'))),
-                      DataColumn(label: Text(tr('إجراءات', 'Actions'))),
+                      DataColumn(label: Text(l10n.employees)),
+                      DataColumn(label: Text(l10n.periodLabel)),
+                      DataColumn(label: Text(l10n.ratingLabel)),
+                      DataColumn(label: Text(l10n.aiSummaryCol)),
+                      DataColumn(label: Text(l10n.actions)),
                     ],
                     rows: _reviews.map((r) {
                       return DataRow(
@@ -386,10 +377,7 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
                               child: Text(
                                 r.aiSummary?.isNotEmpty == true
                                     ? r.aiSummary!
-                                    : tr(
-                                        'لا يوجد تحليل بعد',
-                                        'No analysis yet',
-                                      ),
+                                    : l10n.noAnalysisYet,
                                 maxLines: 3,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -402,10 +390,10 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
                                   : () => _analyze(r.id),
                               child: Text(
                                 _analyzing.contains(r.id)
-                                    ? tr('جاري...', 'Analyzing...')
+                                    ? l10n.analyzing
                                     : _useAsyncAi
-                                    ? tr('جدولة تحليل AI', 'Queue AI analysis')
-                                    : tr('تحليل AI', 'Analyze AI'),
+                                    ? l10n.queueAiAnalysis
+                                    : l10n.analyzeAi,
                               ),
                             ),
                           ),
