@@ -7,7 +7,7 @@ import '../../../core/repositories/auth_repository.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/text_direction_helper.dart';
 import '../../../core/widgets/hrm_logo.dart';
-import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_strings.dart';
 
 class EmployeeLoginScreen extends StatefulWidget {
   const EmployeeLoginScreen({super.key});
@@ -65,7 +65,7 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen>
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     return Directionality(
       textDirection: textDirectionForContext(context),
       child: Scaffold(

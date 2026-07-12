@@ -1,21 +1,61 @@
 services:
+  mysql:
+    profiles: ["mysql"]
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-hrm}
+      MYSQL_USER: ${MYSQL_USER:-hrm}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-hrm_secret}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_secret}
+    volumes:
+      - hrm-mysql-data:/var/lib/mysql
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-root_secret}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
   api:
     build:
       context: .
       dockerfile: backend/Dockerfile
     environment:
-      APP_ENV: local
-      APP_DEBUG: "true"
-      APP_URL: http://localhost:8080
-      DB_CONNECTION: sqlite
+      APP_ENV: ${APP_ENV:-production}
+      APP_DEBUG: "${APP_DEBUG:-false}"
+      APP_URL: ${APP_URL:-http://localhost:8080}
+      APP_KEY: ${APP_KEY:-}
+      DB_CONNECTION: ${DB_CONNECTION:-sqlite}
+      DB_HOST: ${DB_HOST:-mysql}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_DATABASE: ${DB_DATABASE:-hrm}
+      DB_USERNAME: ${DB_USERNAME:-hrm}
+      DB_PASSWORD: ${DB_PASSWORD:-hrm_secret}
       SESSION_DRIVER: file
       QUEUE_CONNECTION: sync
-      MAIL_MAILER: log
+      MAIL_MAILER: ${MAIL_MAILER:-log}
+      MAIL_HOST: ${MAIL_HOST:-}
+      MAIL_PORT: ${MAIL_PORT:-}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-noreply@nawatech.local}
+      SEED_ON_START: ${SEED_ON_START:-false}
+      AI_DEFAULT_PROVIDER: ${AI_DEFAULT_PROVIDER:-openai}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+    env_file:
+      - path: .env.ai
+        required: false
     volumes:
       - hrm-api-db:/var/www/html/database
       - hrm-api-storage:/var/www/html/storage
     expose:
       - "8000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+        required: false
 
   web:
     image: nginx:1.27-alpine
@@ -30,3 +70,4 @@ services:
 volumes:
   hrm-api-db:
   hrm-api-storage:
+  hrm-mysql-data:

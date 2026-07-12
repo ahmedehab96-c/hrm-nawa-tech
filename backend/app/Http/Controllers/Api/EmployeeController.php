@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Company;
 use App\Models\Employee;
 use App\Models\Role;
 use App\Models\User;
@@ -138,6 +139,16 @@ class EmployeeController extends Controller
         ]);
 
         $user = $request->user();
+        $company = Company::query()->find($user->company_id);
+        if ($company && ! $company->canAddEmployees(1)) {
+            return response()->json([
+                'message' => 'Employee limit reached for your plan. Upgrade to add more staff.',
+                'code' => 'employee_limit_reached',
+                'employee_limit' => $company->employeeLimit(),
+                'employee_count' => $company->employeeCount(),
+                'plan' => $company->plan,
+            ], 403);
+        }
 
         $employee = Employee::query()->create([
             'company_id' => $user->company_id,

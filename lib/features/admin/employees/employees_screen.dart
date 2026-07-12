@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_strings.dart';
 import '../../../core/widgets/status_badge.dart';
 import '../../../core/api/api_result.dart';
 import '../../../core/api/api_config.dart';
@@ -27,7 +27,7 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
   int _total = 0;
 
   Future<void> _deleteEmployee(EmployeeItem e) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -123,7 +123,7 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
   }
 
   void _showDepartmentFilter() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     // نجمع الأقسام من البيانات المحمّلة حالياً
     final depts = _employees.map((e) => e.department).whereType<String>().toSet().toList()..sort();
     showModalBottomSheet<void>(
@@ -165,7 +165,7 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
 
     return SingleChildScrollView(
       child: Column(
@@ -301,7 +301,7 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
   }
 
   DataRow _dataRow(BuildContext context, EmployeeItem e) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     final isSelf = _currentUserEmail != null &&
         _currentUserEmail!.isNotEmpty &&
         e.email.toLowerCase() == _currentUserEmail!.toLowerCase();

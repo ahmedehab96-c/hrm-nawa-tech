@@ -3,8 +3,10 @@ import 'package:go_router/go_router.dart';
 
 import '../api/api_config.dart';
 import '../auth/auth_session.dart';
+import '../auth/user_role.dart';
 import '../../core/utils/platform_helper.dart';
 import '../../features/admin/auth/login_screen.dart';
+import '../../features/admin/auth/register_screen.dart';
 import '../../features/admin/auth/forgot_password_screen.dart';
 import '../../features/admin/notifications/notifications_screen.dart';
 import '../../features/admin/profile/admin_profile_screen.dart';
@@ -26,6 +28,7 @@ import '../../features/admin/payroll/payslip_detail_screen.dart';
 import '../../features/admin/recruitment/recruitment_screen.dart';
 import '../../features/admin/settings/settings_screen.dart';
 import '../../features/admin/settings/role_detail_screen.dart';
+import '../../features/platform/views/platform_console_screen.dart';
 import '../../features/employee/auth/employee_login_screen.dart';
 import '../../features/employee/home/employee_home_screen.dart';
 import '../../features/employee/attendance/employee_attendance_screen.dart';
@@ -35,7 +38,7 @@ import '../../features/employee/payslip/employee_payslip_screen.dart';
 import '../../features/employee/profile/employee_profile_screen.dart';
 import '../../features/employee/notifications/employee_notifications_screen.dart';
 import '../../features/welcome/welcome_screen.dart';
-import '../../l10n/app_localizations.dart';
+import '../../l10n/app_strings.dart';
 
 final _rootKey  = GlobalKey<NavigatorState>();
 final _adminKey = GlobalKey<NavigatorState>();
@@ -54,16 +57,35 @@ CustomTransitionPage<void> _fadeOf(BuildContext ctx, GoRouterState state, Widget
 
 String? _authRedirect(BuildContext context, GoRouterState state) {
   final path = state.uri.path;
-  if (path == '/register') return '/login';
+  final session = AuthSession.instance;
+  final role = session.role;
+
+  if (path == '/register') {
+    if (ApiConfig.useApi && session.hasSession) {
+      return PlatformHelper.isAdminApp
+          ? UserRole.webHomeFor(role)
+          : '/employee';
+    }
+    return null;
+  }
   if (path == '/forgot-password') return null;
   if (path == '/login') {
-    if (ApiConfig.useApi && AuthSession.instance.hasSession) {
-      return PlatformHelper.isAdminApp ? '/admin' : '/employee';
+    if (ApiConfig.useApi && session.hasSession) {
+      return PlatformHelper.isAdminApp
+          ? UserRole.webHomeFor(role)
+          : '/employee';
     }
     return null;
   }
   if (!ApiConfig.useApi) return null;
-  if (!AuthSession.instance.hasSession) return '/login';
+  if (!session.hasSession) return '/login';
+
+  if (PlatformHelper.isAdminApp && UserRole.isSuperAdmin(role)) {
+    if (path.startsWith('/admin')) return '/platform';
+  } else if (path.startsWith('/platform')) {
+    return PlatformHelper.isAdminApp ? '/admin' : '/employee';
+  }
+
   return null;
 }
 
@@ -79,7 +101,9 @@ GoRouter createAppRouter() => GoRouter(
         ),
         GoRoute(path: '/welcome',         pageBuilder: _fade(const WelcomeScreen())),
         GoRoute(path: '/login',           pageBuilder: _fade(PlatformHelper.isAdminApp ? const LoginScreen() : const EmployeeLoginScreen())),
+        GoRoute(path: '/register',        pageBuilder: _fade(const RegisterScreen())),
         GoRoute(path: '/forgot-password', pageBuilder: _fade(const ForgotPasswordScreen())),
+        GoRoute(path: '/platform',        pageBuilder: _fade(const PlatformConsoleScreen())),
 
         ShellRoute(
           navigatorKey: _adminKey,
@@ -183,7 +207,7 @@ class EmployeeShell extends StatelessWidget {
   Widget build(BuildContext context) {
     if (!PlatformHelper.isEmployeeApp) return child;
 
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
 
     return Scaffold(
       body: child,

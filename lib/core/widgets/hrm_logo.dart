@@ -2,7 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
-import '../../l10n/app_localizations.dart';
+import '../../l10n/app_strings.dart';
 
 class HrmLogo extends StatelessWidget {
   const HrmLogo({
@@ -56,7 +56,7 @@ class HrmLogo extends StatelessWidget {
             ),
             if (showTagline)
               Text(
-                AppLocalizations.of(context)?.appTagline ?? 'راحة الإدارة',
+                AppStrings.of(context).appTagline,
                 style: TextStyle(
                   fontFamily: 'Cairo',
                   fontSize: height * 0.22,

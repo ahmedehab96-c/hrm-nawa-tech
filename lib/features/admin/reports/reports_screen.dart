@@ -6,7 +6,7 @@ import '../../../core/api/api_result.dart';
 import '../../../core/repositories/ai_tasks_repository.dart';
 import '../../../core/repositories/reports_repository.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_strings.dart';
 
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key});
@@ -54,7 +54,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
   }
 
   Future<void> _generate() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     setState(() => _loading = true);
     final localeCode = Localizations.localeOf(context).languageCode;
     if (_useAsyncAi) {
@@ -103,7 +103,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
   }
 
   void _startTaskPolling(String taskId) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     _taskPoller?.cancel();
     _taskPoller = Timer.periodic(const Duration(seconds: 2), (_) async {
       final statusRes = await AiTasksRepository.instance.getTaskStatus(taskId);
@@ -142,7 +142,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     final metrics = _summary?.metrics ?? const <String, dynamic>{};
     return SingleChildScrollView(
       child: Column(

@@ -4,7 +4,7 @@ import '../../../core/api/api_result.dart';
 import '../../../core/repositories/leave_repository.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/text_direction_helper.dart';
-import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_strings.dart';
 
 class LeaveRequestScreen extends StatefulWidget {
   const LeaveRequestScreen({super.key});
@@ -61,7 +61,7 @@ class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
   }
 
   Future<void> _submit() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     if (_from == null || _to == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.fieldRequired), backgroundColor: AppColors.error),
@@ -104,7 +104,7 @@ class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     return Directionality(
       textDirection: textDirectionForContext(context),
       child: Scaffold(

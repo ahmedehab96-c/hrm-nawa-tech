@@ -5,6 +5,8 @@ use App\Http\Middleware\EnsureUserPermission;
 use App\Http\Middleware\EnsureAiEnabled;
 use App\Http\Middleware\EnsureAiQuota;
 use App\Http\Middleware\EnsureAiRollout;
+use App\Http\Middleware\EnsureTrialActive;
+use App\Http\Middleware\EnsureEmailVerified;
 use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -27,6 +29,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'ai.enabled' => EnsureAiEnabled::class,
             'ai.quota' => EnsureAiQuota::class,
             'ai.rollout' => EnsureAiRollout::class,
+            'trial' => EnsureTrialActive::class,
+            'verified.api' => EnsureEmailVerified::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

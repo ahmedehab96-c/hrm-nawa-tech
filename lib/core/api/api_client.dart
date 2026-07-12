@@ -124,6 +124,7 @@ class ApiClient {
       }
 
       var message = ApiLocalized.strings.apiErrorServer;
+      String? code;
       final parsed = parseLaravelErrorMessage(response.body);
       if (parsed != null && parsed.isNotEmpty) {
         message = parsed;
@@ -133,12 +134,22 @@ class ApiClient {
           if (map != null) {
             if (map['message'] != null) message = map['message'].toString();
             if (map['error'] != null) message = map['error'].toString();
+            if (map['code'] != null) code = map['code'].toString();
           }
         } catch (_) {
           if (response.body.isNotEmpty) message = response.body;
         }
       }
-      return ApiFailure(message, statusCode: response.statusCode);
+      if (code == 'trial_expired') {
+        message = ApiLocalized.strings.trialExpiredBanner;
+      }
+      if (code == 'email_unverified') {
+        message = ApiLocalized.strings.emailUnverifiedBanner;
+      }
+      if (code == 'employee_limit_reached') {
+        message = ApiLocalized.strings.employeeLimitReached;
+      }
+      return ApiFailure(message, statusCode: response.statusCode, code: code);
     } catch (e) {
       return ApiFailure(
         ApiLocalized.strings.apiErrorConnection(e.toString()),

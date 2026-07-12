@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\DemoCompanySeeder;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -29,6 +30,10 @@ class AuthController extends Controller
         $company = Company::query()->create([
             'name' => $companyName,
             'status' => 'active',
+            'plan' => 'trial',
+            'trial_ends_at' => now()->addDays(14),
+            'ai_plan' => 'starter',
+            'ai_enabled' => true,
         ]);
 
         $user = User::create([
@@ -40,6 +45,14 @@ class AuthController extends Controller
         ]);
         $this->syncUserRole($user);
 
+        $demoEmployees = DemoCompanySeeder::seedTrialEmployees($company);
+
+        try {
+            $user->sendEmailVerificationNotification();
+        } catch (\Throwable) {
+            // Mail may be log/unavailable in local — registration still succeeds.
+        }
+
         $token = $user->createToken('hrm-flutter')->plainTextToken;
 
         return response()->json([
@@ -49,8 +62,45 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'role' => $user->role,
+                'company_id' => $user->company_id,
+                'email_verified' => $user->hasVerifiedEmail(),
             ],
+            'company' => [
+                'id' => $company->id,
+                'name' => $company->name,
+                'plan' => $company->plan,
+                'trial_ends_at' => $company->trial_ends_at?->toIso8601String(),
+                'employee_limit' => $company->employeeLimit(),
+            ],
+            'demo_employees' => $demoEmployees,
         ], 201);
+    }
+
+    public function verifyEmail(Request $request, string $id, string $hash)
+    {
+        $user = User::query()->findOrFail($id);
+
+        if (! hash_equals(sha1($user->getEmailForVerification()), $hash)) {
+            return response()->json(['message' => 'Invalid verification link.', 'code' => 'invalid_hash'], 403);
+        }
+
+        if (! $user->hasVerifiedEmail()) {
+            $user->markEmailAsVerified();
+        }
+
+        return response()->json(['message' => 'Email verified successfully.', 'email_verified' => true]);
+    }
+
+    public function resendVerification(Request $request)
+    {
+        $user = $request->user();
+        if ($user->hasVerifiedEmail()) {
+            return response()->json(['message' => 'Email already verified.']);
+        }
+
+        $user->sendEmailVerificationNotification();
+
+        return response()->json(['message' => 'Verification link sent.']);
     }
 
     public function forgotPassword(Request $request)
@@ -118,6 +168,10 @@ class AuthController extends Controller
         $user->tokens()->delete();
         $token = $user->createToken('hrm-flutter')->plainTextToken;
 
+        $company = $user->company_id
+            ? Company::query()->find($user->company_id)
+            : null;
+
         return response()->json([
             'token' => $token,
             'user' => [
@@ -125,7 +179,17 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'role' => $user->role,
+                'company_id' => $user->company_id,
+                'email_verified' => $user->hasVerifiedEmail(),
             ],
+            'company' => $company ? [
+                'id' => $company->id,
+                'name' => $company->name,
+                'plan' => $company->plan,
+                'trial_ends_at' => $company->trial_ends_at?->toIso8601String(),
+                'employee_limit' => $company->employeeLimit(),
+                'employee_count' => $company->employeeCount(),
+            ] : null,
         ]);
     }
 

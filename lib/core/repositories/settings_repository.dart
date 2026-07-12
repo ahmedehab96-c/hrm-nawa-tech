@@ -36,6 +36,8 @@ class CompanySettings {
     this.aiRunbookLinks = const {},
     this.aiDigestEnabled,
     this.aiDigestWindowMinutes,
+    this.plan,
+    this.trialEndsAt,
   });
 
   final String id;
@@ -45,6 +47,8 @@ class CompanySettings {
   final String? address;
   final String? wifiSsid;
   final String? status;
+  final String? plan;
+  final DateTime? trialEndsAt;
   final String? aiPlan;
   final bool? aiEnabled;
   final String? aiProvider;
@@ -78,6 +82,10 @@ class CompanySettings {
         address: json['address']?.toString(),
         wifiSsid: json['wifi_ssid']?.toString(),
         status: json['status']?.toString(),
+        plan: json['plan']?.toString(),
+        trialEndsAt: json['trial_ends_at'] != null
+            ? DateTime.tryParse(json['trial_ends_at'].toString())
+            : null,
         aiPlan: json['ai_plan']?.toString(),
         aiEnabled: json['ai_enabled'] is bool
             ? json['ai_enabled'] as bool
@@ -127,12 +135,14 @@ class CompanySettings {
 
   static CompanySettings get demo => CompanySettings(
     id: '1',
-    name: 'HRM Portfolio Demo',
+    name: 'Nawa Tech',
     email: 'showcase@nawatech.com',
     phone: '+966 11 234 5678',
     address: 'الرياض، المملكة العربية السعودية',
     wifiSsid: '',
     status: 'active',
+    plan: 'active',
+    trialEndsAt: null,
     aiPlan: 'enterprise',
     aiEnabled: true,
     aiProvider: 'openai',

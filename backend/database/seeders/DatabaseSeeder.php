@@ -33,14 +33,16 @@ class DatabaseSeeder extends Seeder
             ->whereIn('name', [
                 'Demo Company',
                 'شركة النخبة — عرض Nawa Tech',
-                'HRM Portfolio Demo',
+                'Nawa Tech',
             ])
             ->first();
 
         if (! $company) {
             $company = Company::create([
-                'name' => 'HRM Portfolio Demo',
+                'name' => 'Nawa Tech',
                 'status' => 'active',
+                'plan' => 'active',
+                'trial_ends_at' => null,
                 'email' => 'showcase@nawatech.com',
                 'phone' => '+966 11 234 5678',
                 'address' => 'الرياض، المملكة العربية السعودية',
@@ -50,8 +52,10 @@ class DatabaseSeeder extends Seeder
             ]);
         } else {
             $company->update([
-                'name' => 'HRM Portfolio Demo',
+                'name' => 'Nawa Tech',
                 'status' => 'active',
+                'plan' => 'active',
+                'trial_ends_at' => null,
                 'email' => 'showcase@nawatech.com',
                 'phone' => '+966 11 234 5678',
                 'address' => 'الرياض، المملكة العربية السعودية',
@@ -71,6 +75,9 @@ class DatabaseSeeder extends Seeder
                 'password' => Hash::make('Admin12345!'),
             ]
         );
+        if (! $admin->hasVerifiedEmail()) {
+            $admin->forceFill(['email_verified_at' => now()])->save();
+        }
 
         $employeePassword = 'Employee12345!';
 
@@ -247,6 +254,9 @@ class DatabaseSeeder extends Seeder
                     'password' => Hash::make($employeePassword),
                 ]
             );
+            if (! $appUser->hasVerifiedEmail()) {
+                $appUser->forceFill(['email_verified_at' => now()])->save();
+            }
 
             $employee = Employee::query()->updateOrCreate(
                 [
@@ -471,6 +481,20 @@ class DatabaseSeeder extends Seeder
                     ]
                 );
             }
+        }
+
+        // Platform operator (no company tenant)
+        $platform = User::query()->updateOrCreate(
+            ['email' => 'platform@nawatech.com'],
+            [
+                'company_id' => null,
+                'name' => 'Platform Admin',
+                'role' => 'super_admin',
+                'password' => Hash::make('Platform12345!'),
+            ]
+        );
+        if (! $platform->hasVerifiedEmail()) {
+            $platform->forceFill(['email_verified_at' => now()])->save();
         }
 
         // Keep RBAC tables synchronized with legacy users.role values.

@@ -20,6 +20,7 @@ dependencies:
   flutter_secure_storage: ^9.2.4
   pdf: ^3.11.3
   printing: ^5.14.2
+  web: ^1.1.1
 
 dev_dependencies:
   flutter_test:
@@ -37,7 +38,7 @@ flutter_launcher_icons:
   min_sdk_android: 21
 
 flutter:
-  generate: true
+  generate: false
   uses-material-design: true
   assets:
     - assets/images/

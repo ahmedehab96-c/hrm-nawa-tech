@@ -5,7 +5,7 @@ import '../../../core/api/api_result.dart';
 import '../../../core/repositories/notifications_repository.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/text_direction_helper.dart';
-import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_strings.dart';
 
 class EmployeeNotificationsScreen extends StatefulWidget {
   const EmployeeNotificationsScreen({super.key});
@@ -63,7 +63,7 @@ class _EmployeeNotificationsScreenState
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     return Directionality(
       textDirection: textDirectionForContext(context),
       child: Scaffold(
@@ -111,7 +111,7 @@ class _EmployeeNotificationsScreenState
   }
 
   Widget _buildBody(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
 
     if (_loading) return const Center(child: CircularProgressIndicator());
 

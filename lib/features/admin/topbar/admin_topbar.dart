@@ -4,7 +4,7 @@ import '../../../core/locale/locale_controller.dart';
 import '../../../core/saas/company_context.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_scope.dart';
-import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_strings.dart';
 import '../../../core/ai/show_ai_assistant.dart';
 import '../../../core/repositories/auth_repository.dart';
 import '../../../core/api/current_user.dart';
@@ -24,7 +24,7 @@ class AdminTopBar extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final themeNotifier = ThemeScope.of(context);
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
 
     return Container(
       height: 64,
@@ -169,8 +169,8 @@ class AdminTopBar extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(AppLocalizations.of(context)!.sampleAdminName, style: AppTypography.bodyMedium),
-                      Text(AppLocalizations.of(context)!.sampleAdminRole, style: AppTypography.caption),
+                      Text(AppStrings.of(context).sampleAdminName, style: AppTypography.bodyMedium),
+                      Text(AppStrings.of(context).sampleAdminRole, style: AppTypography.caption),
                     ],
                   ),
                   const SizedBox(width: 8),
@@ -179,7 +179,7 @@ class AdminTopBar extends StatelessWidget {
               ],
             ),
             itemBuilder: (context) {
-              final l10n = AppLocalizations.of(context)!;
+              final l10n = AppStrings.of(context);
               return [
                 PopupMenuItem(value: 'profile', child: Text(l10n.adminProfileMenu)),
                 PopupMenuItem(value: 'settings', child: Text(l10n.settings)),

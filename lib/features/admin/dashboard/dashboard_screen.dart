@@ -13,7 +13,7 @@ import '../../../core/utils/leave_status_util.dart';
 import '../../../core/widgets/animations.dart';
 import '../../../core/widgets/stat_card.dart';
 import '../../../core/widgets/status_badge.dart';
-import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_strings.dart';
 
 // ─── DashboardScreen ──────────────────────────────────────────────────────────
 class DashboardScreen extends StatefulWidget {
@@ -151,7 +151,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
 
     return SingleChildScrollView(
       child: Column(
@@ -311,7 +311,7 @@ class _StatGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n        = AppLocalizations.of(context)!;
+    final l10n        = AppStrings.of(context);
     final attSubtitle = '${l10n.present}: $present • ${l10n.late}: $late • ${l10n.absent}: $absent';
 
     final cards = [
@@ -367,7 +367,7 @@ class _PendingLeavesCardState extends State<_PendingLeavesCard> {
   Future<void> _act(String id, Future<ApiResult<void>> Function(String) action, bool isApprove) async {
     final res = await action(id);
     if (!mounted) return;
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     final ok   = res is ApiSuccess<void>;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content:         Text(ok ? (isApprove ? l10n.leaveApproved : l10n.leaveRejected) : (res as ApiFailure<void>).message),
@@ -378,7 +378,7 @@ class _PendingLeavesCardState extends State<_PendingLeavesCard> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -426,7 +426,7 @@ class _RecentActivityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(20),

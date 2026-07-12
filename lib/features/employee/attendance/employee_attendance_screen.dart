@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/text_direction_helper.dart';
-import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_strings.dart';
 import '../../../core/services/wifi_attendance_service.dart';
 import '../../../core/repositories/attendance_repository.dart';
 import '../../../core/api/api_result.dart';
@@ -98,7 +98,7 @@ class _EmployeeAttendanceScreenState extends State<EmployeeAttendanceScreen> {
   }
 
   Future<void> _handleCheckIn() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     if (await requireCompanyWifiForAttendance()) {
       final result = await WifiAttendanceService.canRecordAttendance();
       if (!result.success) {
@@ -133,7 +133,7 @@ class _EmployeeAttendanceScreenState extends State<EmployeeAttendanceScreen> {
   }
 
   Future<void> _handleCheckOut() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     if (await requireCompanyWifiForAttendance()) {
       final result = await WifiAttendanceService.canRecordAttendance();
       if (!result.success) {
@@ -169,7 +169,7 @@ class _EmployeeAttendanceScreenState extends State<EmployeeAttendanceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     return Directionality(
       textDirection: textDirectionForContext(context),
       child: Scaffold(

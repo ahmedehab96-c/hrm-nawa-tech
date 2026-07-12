@@ -24,6 +24,24 @@ class CompanyContext extends ChangeNotifier {
   String get phone => _settings?.phone ?? '';
   String get address => _settings?.address ?? '';
 
+  String get plan => _settings?.plan ?? 'trial';
+  DateTime? get trialEndsAt => _settings?.trialEndsAt;
+
+  bool get isTrialPlan => plan == 'trial';
+
+  bool get isTrialExpired {
+    final ends = trialEndsAt;
+    if (!isTrialPlan || ends == null) return false;
+    return ends.isBefore(DateTime.now());
+  }
+
+  int? get trialDaysRemaining {
+    final ends = trialEndsAt;
+    if (!isTrialPlan || ends == null) return null;
+    final days = ends.difference(DateTime.now()).inDays;
+    return days < 0 ? 0 : days;
+  }
+
   Future<void> load({bool force = false}) async {
     if (_loaded && !force) return;
     final result = await SettingsRepository.instance.getSettings();

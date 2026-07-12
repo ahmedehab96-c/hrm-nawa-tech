@@ -5,7 +5,7 @@ import '../../../core/repositories/recruitment_repository.dart';
 import '../../../core/repositories/ai_content_repository.dart';
 import '../../../core/api/api_result.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_strings.dart';
 
 class AddJobScreen extends StatefulWidget {
   const AddJobScreen({super.key, this.editJob});
@@ -52,7 +52,7 @@ class _AddJobScreenState extends State<AddJobScreen> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     setState(() => _saving = true);
 
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
 
     ApiResult result;
     if (_isEditing) {
@@ -96,7 +96,7 @@ class _AddJobScreenState extends State<AddJobScreen> {
     final title = _titleCtrl.text.trim();
     if (title.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.fieldRequired)),
+        SnackBar(content: Text(AppStrings.of(context).fieldRequired)),
       );
       return;
     }
@@ -115,7 +115,7 @@ class _AddJobScreenState extends State<AddJobScreen> {
         _descCtrl.text = data.content;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.aiJobGenerated),
+            content: Text(AppStrings.of(context).aiJobGenerated),
             backgroundColor: AppColors.success,
           ),
         );
@@ -128,7 +128,7 @@ class _AddJobScreenState extends State<AddJobScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/text_direction_helper.dart';
-import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_strings.dart';
 import '../../../core/widgets/hrm_logo.dart';
-import '../../../core/repositories/auth_repository.dart';
-import '../../../core/api/api_result.dart';
-import '../../../core/auth/user_role.dart';
+import 'viewmodels/login_view_model.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,6 +15,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen>
     with SingleTickerProviderStateMixin {
+  late final LoginViewModel _vm;
   late final AnimationController _controller;
   late final Animation<double> _fade;
   late final Animation<double> _logoScale;
@@ -26,14 +25,13 @@ class _LoginScreenState extends State<LoginScreen>
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _obscurePassword = true;
-  bool _isLoading = false;
   bool _hoverLogin = false;
   bool _pressLogin = false;
 
   @override
   void initState() {
     super.initState();
+    _vm = LoginViewModel();
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
@@ -71,15 +69,36 @@ class _LoginScreenState extends State<LoginScreen>
 
   @override
   void dispose() {
+    _vm.dispose();
     _controller.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
+  Future<void> _submit() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    final result = await _vm.submit(
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+    );
+    if (!mounted) return;
+    if (result.isSuccess) {
+      context.go(result.homeRoute!);
+      return;
+    }
+    if (result.errorMessage == null || result.errorMessage!.isEmpty) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(result.errorMessage!),
+        backgroundColor: AppColors.error,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     final size = MediaQuery.sizeOf(context);
     final isWide = size.width >= 960 && size.height >= 620;
     final outerPad = isWide ? 24.0 : 12.0;
@@ -155,7 +174,7 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
-  Widget _buildBrandingPanel(AppLocalizations l10n, {required bool compact, required double margin}) {
+  Widget _buildBrandingPanel(AppStrings l10n, {required bool compact, required double margin}) {
     final panel = SlideTransition(
       position: _leftSlide,
       child: Container(
@@ -224,7 +243,8 @@ class _LoginScreenState extends State<LoginScreen>
     return panel;
   }
 
-  Widget _buildLoginForm(AppLocalizations l10n, {required double maxWidth}) {
+  Widget _buildLoginForm(AppStrings l10n, {required double maxWidth}) {
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     return SlideTransition(
       position: _rightSlide,
       child: Align(
@@ -282,18 +302,24 @@ class _LoginScreenState extends State<LoginScreen>
                   const SizedBox(height: 16),
                   _StaggeredReveal(
                     delayMs: 170,
-                    child: TextFormField(
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      decoration: InputDecoration(
-                        labelText: l10n.password,
-                        prefixIcon: const Icon(Icons.lock_outline),
-                        suffixIcon: IconButton(
-                          icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
-                          onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                    child: ListenableBuilder(
+                      listenable: _vm,
+                      builder: (context, _) => TextFormField(
+                        controller: _passwordController,
+                        obscureText: _vm.obscurePassword,
+                        decoration: InputDecoration(
+                          labelText: l10n.password,
+                          prefixIcon: const Icon(Icons.lock_outline),
+                          suffixIcon: IconButton(
+                            icon: Icon(_vm.obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility),
+                            onPressed: _vm.toggleObscurePassword,
+                          ),
                         ),
+                        validator: (v) =>
+                            v?.isEmpty ?? true ? l10n.enterPassword : null,
                       ),
-                      validator: (v) => v?.isEmpty ?? true ? l10n.enterPassword : null,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -324,47 +350,43 @@ class _LoginScreenState extends State<LoginScreen>
                           scale: _pressLogin
                               ? 0.975
                               : (_hoverLogin ? 1.018 : 1.0),
-                          child: FilledButton(
-                            onPressed: _isLoading
-                                ? null
-                                : () async {
-                                    if (_formKey.currentState?.validate() ?? false) {
-                                      setState(() => _isLoading = true);
-                                      final result = await AuthRepository.login(
-                                        _emailController.text.trim(),
-                                        _passwordController.text,
-                                        surface: LoginSurface.webAdmin,
-                                      );
-                                      if (!mounted) return;
-                                      setState(() => _isLoading = false);
-                                      if (!mounted) return;
-                                      if (result is ApiSuccess) {
-                                        // ignore: use_build_context_synchronously
-                                        context.go('/admin');
-                                      } else {
-                                        // ignore: use_build_context_synchronously
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(
-                                            content: Text((result as ApiFailure).message),
-                                            backgroundColor: AppColors.error,
-                                          ),
-                                        );
-                                      }
-                                    }
-                                  },
-                            child: _isLoading
-                                ? const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                                  )
-                                : Text(l10n.login),
+                          child: ListenableBuilder(
+                            listenable: _vm,
+                            builder: (context, _) => FilledButton(
+                              onPressed: _vm.isLoading ? null : _submit,
+                              child: _vm.isLoading
+                                  ? const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : Text(l10n.login),
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 14),
+                  _StaggeredReveal(
+                    delayMs: 320,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          isArabic ? 'شركة جديدة؟' : 'New company?',
+                          style: AppTypography.bodySmall,
+                        ),
+                        TextButton(
+                          onPressed: () => context.go('/register'),
+                          child: Text(l10n.registerCompany),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -397,8 +419,8 @@ class _DemoAccessBanner extends StatelessWidget {
           Expanded(
             child: Text(
               isArabic
-                  ? 'مشروع Portfolio — للعرض فقط\nadmin@demo.com • Admin12345!'
-                  : 'Portfolio demo project\nadmin@demo.com • Admin12345!',
+                  ? 'حساب تجريبي للإدارة\nadmin@demo.com • Admin12345!'
+                  : 'Admin demo account\nadmin@demo.com • Admin12345!',
               style: AppTypography.caption.copyWith(
                 color: AppColors.textSecondary,
                 height: 1.5,

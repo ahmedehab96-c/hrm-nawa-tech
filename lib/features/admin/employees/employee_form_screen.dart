@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/api/api_result.dart';
 import '../../../core/repositories/employees_repository.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_strings.dart';
 
 class EmployeeFormScreen extends StatefulWidget {
   const EmployeeFormScreen({super.key, this.employeeId});
@@ -123,7 +123,7 @@ class _EmployeeFormScreenState extends State<EmployeeFormScreen> {
     return '${d.year}-$mm-$dd';
   }
 
-  bool _validateAppLoginForSave(AppLocalizations l10n) {
+  bool _validateAppLoginForSave(AppStrings l10n) {
     if (!_enableAppLogin) return true;
     final needPassword = widget.employeeId == null || !_appLoginEnabledInitial || _appPassword.text.isNotEmpty;
     if (!needPassword) return true;
@@ -157,7 +157,7 @@ class _EmployeeFormScreenState extends State<EmployeeFormScreen> {
 
   Future<void> _save() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     if (!_validateAppLoginForSave(l10n)) return;
     setState(() => _saving = true);
 
@@ -207,7 +207,7 @@ class _EmployeeFormScreenState extends State<EmployeeFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     if (_loadingEmp) {
       return const Center(child: Padding(padding: EdgeInsets.all(48), child: CircularProgressIndicator()));
     }
@@ -325,7 +325,7 @@ class _EmployeeFormScreenState extends State<EmployeeFormScreen> {
     bool email = false,
     bool numeric = false,
   }) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     return SizedBox(
       width: 250,
       child: TextFormField(
@@ -340,7 +340,7 @@ class _EmployeeFormScreenState extends State<EmployeeFormScreen> {
   }
 
   SizedBox _dateField(TextEditingController c, String label) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     return SizedBox(
       width: 250,
       child: TextFormField(
@@ -398,7 +398,7 @@ class _AppLoginSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

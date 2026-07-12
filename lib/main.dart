@@ -10,7 +10,7 @@ import 'core/api/api_config.dart';
 import 'core/auth/auth_session.dart';
 import 'core/locale/locale_controller.dart';
 import 'core/saas/company_context.dart';
-import 'l10n/app_localizations.dart';
+import 'l10n/app_strings.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -64,9 +64,9 @@ class _HrmSaasAppState extends State<HrmSaasApp> {
         themeMode: _themeNotifier.mode,
         routerConfig: _router,
         locale: LocaleController.instance.locale,
-        supportedLocales: AppLocalizations.supportedLocales,
+        supportedLocales: AppStrings.supportedLocales,
         localizationsDelegates: const [
-          AppLocalizations.delegate,
+          AppStrings.delegate,
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,

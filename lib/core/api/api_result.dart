@@ -9,7 +9,8 @@ class ApiSuccess<T> extends ApiResult<T> {
 }
 
 class ApiFailure<T> extends ApiResult<T> {
-  const ApiFailure(this.message, {this.statusCode});
+  const ApiFailure(this.message, {this.statusCode, this.code});
   final String message;
   final int? statusCode;
+  final String? code;
 }

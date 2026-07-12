@@ -5,8 +5,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/utils/open_external_link.dart';
 import '../../core/utils/platform_helper.dart';
 import '../../core/widgets/hrm_logo.dart';
-import '../../core/ai/show_ai_assistant.dart';
-import '../../l10n/app_localizations.dart';
+import '../../l10n/app_strings.dart';
 
 // ─── Entry Point ─────────────────────────────────────────────────────────────
 
@@ -136,8 +135,11 @@ class _LandingPageState extends State<_LandingPage> {
           const SliverToBoxAdapter(child: _HeroSection()),
           const SliverToBoxAdapter(child: _PortfolioStrip()),
           const SliverToBoxAdapter(child: _FeaturesSection()),
+          const SliverToBoxAdapter(child: _StatsRow()),
           const SliverToBoxAdapter(child: _ScreenshotSection()),
           const SliverToBoxAdapter(child: _TechStackSection()),
+          const SliverToBoxAdapter(child: _TestimonialsSection()),
+          const SliverToBoxAdapter(child: _PricingSection()),
           const SliverToBoxAdapter(child: _CtaSection()),
           const SliverToBoxAdapter(child: _Footer()),
         ],
@@ -178,7 +180,7 @@ class _Navbar extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Portfolio Project',
+                  'Nawa Tech HRM',
                   style: AppTypography.caption.copyWith(
                     color: AppColors.textMuted,
                     fontSize: 10,
@@ -206,6 +208,15 @@ class _Navbar extends StatelessWidget {
             _navLink('المميزات'),
             _navLink('التقنيات'),
             const SizedBox(width: 12),
+            OutlinedButton(
+              onPressed: () => context.go('/register'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.primary,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              ),
+              child: const Text('ابدأ مجاناً'),
+            ),
+            const SizedBox(width: 8),
           ],
           FilledButton(
             onPressed: () => context.go('/login'),
@@ -213,7 +224,7 @@ class _Navbar extends StatelessWidget {
               backgroundColor: AppColors.primary,
               padding: EdgeInsets.symmetric(horizontal: isWide ? 24 : 14, vertical: 12),
             ),
-            child: Text(isWide ? 'جرّب العرض' : 'عرض'),
+            child: Text(isWide ? 'تسجيل الدخول' : 'دخول'),
           ),
         ],
       ),
@@ -282,7 +293,7 @@ class _HeroSection extends StatelessWidget {
             children: [
               const Icon(Icons.verified_rounded, color: AppColors.primary, size: 16),
               const SizedBox(width: 6),
-              Text('مشروع Portfolio — Full-Stack HRM',
+              Text('نظام HRM متكامل — Full-Stack',
                   style: AppTypography.caption
                       .copyWith(color: AppColors.primary, fontWeight: FontWeight.w600)),
             ],
@@ -300,7 +311,7 @@ class _HeroSection extends StatelessWidget {
         ),
         const SizedBox(height: 20),
         Text(
-          'مشروع عملي يعرض مهارات Flutter + Laravel + AI في نظام إدارة موارد بشرية كامل.\nلوحة ويب للإدارة وتطبيق جوال للموظفين — للعرض في Portfolio والبحث عن عمل.',
+          'منصة متكاملة لإدارة الموارد البشرية مبنية بـ Flutter + Laravel + AI.\nلوحة ويب للإدارة وتطبيق جوال للموظفين — حضور، إجازات، رواتب، وتوظيف ذكي.',
           style: AppTypography.bodyLarge.copyWith(
             color: AppColors.textSecondary,
             height: 1.7,
@@ -312,9 +323,9 @@ class _HeroSection extends StatelessWidget {
           runSpacing: 12,
           children: [
             FilledButton.icon(
-              onPressed: () => context.go('/login'),
-              icon: const Icon(Icons.play_circle_outline_rounded, size: 20),
-              label: const Text('جرّب لوحة الإدارة'),
+              onPressed: () => context.go('/register'),
+              icon: const Icon(Icons.rocket_launch_outlined, size: 20),
+              label: const Text('ابدأ تجربتك المجانية'),
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 padding:
@@ -324,9 +335,9 @@ class _HeroSection extends StatelessWidget {
               ),
             ),
             OutlinedButton.icon(
-              onPressed: () => showAiAssistantDialog(context),
-              icon: const Icon(Icons.smart_toy_outlined, size: 20),
-              label: Text(AppLocalizations.of(context)!.tryAiAssistant),
+              onPressed: () => context.go('/login'),
+              icon: const Icon(Icons.login_rounded, size: 20),
+              label: const Text('تسجيل الدخول'),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.primary,
                 side: BorderSide(color: AppColors.primary.withValues(alpha: 0.4)),
@@ -517,44 +528,9 @@ class _HeroSection extends StatelessWidget {
       ),
     );
   }
-
-  Widget _avatarStack() {
-    final colors = [
-      AppColors.primary,
-      AppColors.secondary,
-      AppColors.warning,
-      AppColors.error,
-    ];
-    return SizedBox(
-      width: 80,
-      height: 32,
-      child: Stack(
-        children: List.generate(4, (i) {
-          return Positioned(
-            left: i * 18.0,
-            child: Container(
-              width: 32, height: 32,
-              decoration: BoxDecoration(
-                color: colors[i],
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 2),
-              ),
-              child: Center(
-                child: Text('${i + 1}',
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold)),
-              ),
-            ),
-          );
-        }),
-      ),
-    );
-  }
 }
 
-// ─── Portfolio strip ────────────────────────────────────────────────────────────
+// ─── Product strip ─────────────────────────────────────────────────────────────
 
 class _PortfolioStrip extends StatelessWidget {
   const _PortfolioStrip();
@@ -885,7 +861,7 @@ class _ScreenshotSection extends StatelessWidget {
       color: AppColors.background,
       child: Column(
         children: [
-          _sectionBadge(AppLocalizations.of(context)!.welcomeHowItWorks),
+          _sectionBadge(AppStrings.of(context).welcomeHowItWorks),
           const SizedBox(height: 16),
           Text('واجهة بسيطة وقوية',
               textAlign: TextAlign.center,
@@ -913,7 +889,7 @@ class _ScreenshotSection extends StatelessWidget {
   }
 
   Widget _stepsList(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     final steps = [
       (Icons.play_circle_outline_rounded, l10n.welcomeStep1Title, l10n.welcomeStep1Desc),
       (Icons.phone_iphone_rounded, l10n.welcomeStep2Title, l10n.welcomeStep2Desc),
@@ -1142,7 +1118,7 @@ class _PricingSection extends StatelessWidget {
           employees: '25',
           features: ['إدارة الموظفين', 'الحضور (WiFi)', 'الإجازات', 'الرواتب', 'الإشعارات'],
           isPopular: false,
-          onTap: () => context.go('/login'),
+          onTap: () => context.go('/register'),
         ),
         _PlanCard(
           name: 'Growth',
@@ -1152,7 +1128,7 @@ class _PricingSection extends StatelessWidget {
           employees: '50',
           features: ['كل مميزات Starter', 'التوظيف والمرشحين', 'تقارير متقدمة', 'دعم بالبريد', 'PDF للرواتب'],
           isPopular: true,
-          onTap: () => context.go('/login'),
+          onTap: () => context.go('/register'),
         ),
         _PlanCard(
           name: 'Enterprise',
@@ -1162,7 +1138,7 @@ class _PricingSection extends StatelessWidget {
           employees: '200',
           features: ['كل مميزات Growth', 'AI مساعد ذكي', 'API مفتوح', 'مدير حساب مخصص', 'SLA 99.9%'],
           isPopular: false,
-          onTap: () => context.go('/login'),
+          onTap: () => context.go('/register'),
         ),
       ];
 }
@@ -1423,7 +1399,7 @@ class _CtaSection extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Text('مهتم بالمشروع؟',
+          Text('ابدأ تجربتك المجانية',
               textAlign: TextAlign.center,
               style: AppTypography.h1.copyWith(
                   color: Colors.white,
@@ -1431,7 +1407,7 @@ class _CtaSection extends StatelessWidget {
                   fontWeight: FontWeight.w900)),
           const SizedBox(height: 16),
           Text(
-            'جرّب لوحة الإدارة مباشرة أو تواصل معي عبر Portfolio\nمشروع Full-Stack HRM — للعرض والتوظيف',
+            'سجّل شركتك في دقائق — 14 يوماً مجاناً بدون بطاقة ائتمان\nلوحة ويب للإدارة + تطبيق جوال للموظفين',
             textAlign: TextAlign.center,
             style: AppTypography.bodyLarge
                 .copyWith(color: Colors.white70, height: 1.6),
@@ -1443,7 +1419,7 @@ class _CtaSection extends StatelessWidget {
             alignment: WrapAlignment.center,
             children: [
               FilledButton(
-                onPressed: () => context.go('/login'),
+                onPressed: () => context.go('/register'),
                 style: FilledButton.styleFrom(
                   backgroundColor: Colors.white,
                   foregroundColor: AppColors.primary,
@@ -1451,7 +1427,16 @@ class _CtaSection extends StatelessWidget {
                   textStyle: AppTypography.bodyLarge
                       .copyWith(fontWeight: FontWeight.w700),
                 ),
-                child: const Text('جرّب العرض'),
+                child: const Text('ابدأ مجاناً'),
+              ),
+              OutlinedButton(
+                onPressed: () => context.go('/login'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  side: const BorderSide(color: Colors.white54),
+                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18),
+                ),
+                child: const Text('تسجيل الدخول'),
               ),
               OutlinedButton(
                 onPressed: () => openExternalLink('https://nawatech.com'),
@@ -1460,7 +1445,7 @@ class _CtaSection extends StatelessWidget {
                   side: const BorderSide(color: Colors.white54),
                   padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18),
                 ),
-                child: const Text('Portfolio — nawatech.com'),
+                child: const Text('nawatech.com'),
               ),
             ],
           ),
@@ -1497,7 +1482,7 @@ class _Footer extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('© 2026 Nawa Tech — HRM Portfolio Project.',
+              Text('© 2026 Nawa Tech — جميع الحقوق محفوظة.',
                   style: AppTypography.caption.copyWith(color: Colors.white38)),
               Row(children: [
                 _socialIcon(Icons.telegram),
@@ -1525,7 +1510,7 @@ class _Footer extends StatelessWidget {
                   color: Colors.white, fontWeight: FontWeight.w900)),
         ]),
         const SizedBox(height: 12),
-        Text('مشروع Portfolio — Full-Stack HRM\nFlutter + Laravel + AI',
+        Text('منصة HRM متكاملة\nFlutter + Laravel + AI',
             style: AppTypography.bodySmall.copyWith(
                 color: Colors.white38, height: 1.6)),
         const SizedBox(height: 12),

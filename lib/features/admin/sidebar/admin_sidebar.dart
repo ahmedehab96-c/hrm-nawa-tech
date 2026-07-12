@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/hrm_logo.dart';
-import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_strings.dart';
 
 class AdminSidebar extends StatelessWidget {
   const AdminSidebar({
@@ -17,7 +17,7 @@ class AdminSidebar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
 
     final items = <({IconData icon, String label, String path})>[
       (icon: Icons.dashboard_outlined,   label: l10n.dashboard,   path: '/admin'),

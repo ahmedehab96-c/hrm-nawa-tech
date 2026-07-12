@@ -8,7 +8,7 @@ import '../../../core/repositories/leave_repository.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/leave_status_util.dart';
 import '../../../core/utils/text_direction_helper.dart';
-import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_strings.dart';
 
 class EmployeeLeaveScreen extends StatefulWidget {
   const EmployeeLeaveScreen({super.key});
@@ -88,7 +88,7 @@ class _EmployeeLeaveScreenState extends State<EmployeeLeaveScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     return Directionality(
       textDirection: textDirectionForContext(context),
       child: Scaffold(
@@ -183,7 +183,7 @@ class _EmployeeLeaveScreenState extends State<EmployeeLeaveScreen> {
   }
 }
 
-String _leaveTypeLabel(AppLocalizations l10n, String raw) {
+String _leaveTypeLabel(AppStrings l10n, String raw) {
   final t = raw.trim().toLowerCase();
   if (t == 'annual') return l10n.annualShort;
   if (t == 'sick') return l10n.sickShort;

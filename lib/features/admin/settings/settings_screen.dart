@@ -7,12 +7,13 @@ import '../../../core/api/api_config.dart';
 import '../../../core/api/api_result.dart';
 import '../../../core/auth/auth_session.dart';
 import '../../../core/locale/locale_controller.dart';
+import '../../../core/repositories/billing_repository.dart';
 import '../../../core/repositories/settings_repository.dart';
 import '../../../core/saas/company_context.dart';
 import '../../../core/services/wifi_attendance_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_scope.dart';
-import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_strings.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -75,7 +76,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void initState() {
     super.initState();
-    _companyController = TextEditingController(text: 'HRM Portfolio Demo');
+    _companyController = TextEditingController(text: 'Nawa Tech');
     _emailController = TextEditingController(text: 'info@company.com');
     _phoneController = TextEditingController(text: '+966 50 123 4567');
     _addressController = TextEditingController(
@@ -174,6 +175,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  Future<void> _requestPlanUpgrade(String plan) async {
+    final l10n = AppStrings.of(context);
+    final res = await const BillingRepository().requestCheckout(plan: plan);
+    if (!mounted) return;
+    if (res is ApiSuccess<Map<String, dynamic>>) {
+      final data = res.data;
+      final url = data['checkout_url']?.toString();
+      if (url != null && url.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(url)),
+        );
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(data['message']?.toString() ?? l10n.billingNotConfigured)),
+      );
+      return;
+    }
+    final fail = res as ApiFailure<dynamic>;
+    final msg = fail.code == 'billing_not_configured' || fail.statusCode == 501
+        ? l10n.billingNotConfigured
+        : fail.message;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg), backgroundColor: AppColors.warning),
+    );
+  }
+
   @override
   void dispose() {
     _companyController.dispose();
@@ -202,7 +230,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     super.dispose();
   }
 
-  String? _validateApiUrl(AppLocalizations l10n, String url) {
+  String? _validateApiUrl(AppStrings l10n, String url) {
     if (!_useApi) return null;
     if (url.isEmpty) return l10n.apiUrlRequired;
     final err = ApiConfig.validateBaseUrl(url);
@@ -211,7 +239,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return null;
   }
 
-  Future<void> _applyServerSwitch(AppLocalizations l10n, bool enable) async {
+  Future<void> _applyServerSwitch(AppStrings l10n, bool enable) async {
     final url = _apiBaseUrlController.text.trim();
     if (enable) {
       if (url.isEmpty) {
@@ -259,7 +287,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Future<void> _saveCompanySettings(AppLocalizations l10n) async {
+  Future<void> _saveCompanySettings(AppStrings l10n) async {
     setState(() => _savingCompany = true);
     final result = await SettingsRepository.instance.saveSettings(
       name: _companyController.text.trim(),
@@ -285,7 +313,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  Future<void> _saveWifiSettings(AppLocalizations l10n) async {
+  Future<void> _saveWifiSettings(AppStrings l10n) async {
     final ssid = _wifiSsidController.text.trim();
     setState(() => _savingWifi = true);
     WifiAttendanceService.setCompanyWifiSsid(ssid);
@@ -309,7 +337,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  Future<void> _saveServerSettings(AppLocalizations l10n) async {
+  Future<void> _saveServerSettings(AppStrings l10n) async {
     final url = _apiBaseUrlController.text.trim();
     if (_useApi) {
       final msg = _validateApiUrl(l10n, url);
@@ -504,7 +532,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     final locale = Localizations.localeOf(context);
 
     return SingleChildScrollView(
@@ -548,6 +576,86 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         context,
                       ).setMode(v ? ThemeMode.dark : ThemeMode.light);
                     },
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            _SectionCard(
+              title: l10n.saasPlanSection,
+              icon: Icons.workspace_premium_outlined,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          () {
+                            final plan = CompanyContext.instance.plan;
+                            if (plan == 'trial') {
+                              return locale.languageCode == 'ar'
+                                  ? 'تجربة مجانية'
+                                  : 'Free trial';
+                            }
+                            return plan.toUpperCase();
+                          }(),
+                          style: AppTypography.caption.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          () {
+                            final ends = CompanyContext.instance.trialEndsAt;
+                            if (CompanyContext.instance.isTrialExpired) {
+                              return l10n.trialExpiredBanner;
+                            }
+                            if (ends != null && CompanyContext.instance.isTrialPlan) {
+                              final d = ends.toLocal();
+                              final date =
+                                  '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+                              return l10n.trialEndsOn(date);
+                            }
+                            return 'Enterprise';
+                          }(),
+                          style: AppTypography.bodyMedium.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    l10n.planUpgradeLater,
+                    style: AppTypography.caption.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      FilledButton.tonal(
+                        onPressed: () => _requestPlanUpgrade('starter'),
+                        child: Text(l10n.planUpgradeStarter),
+                      ),
+                      FilledButton.tonal(
+                        onPressed: () => _requestPlanUpgrade('growth'),
+                        child: Text(l10n.planUpgradeGrowth),
+                      ),
+                    ],
                   ),
                 ],
               ),

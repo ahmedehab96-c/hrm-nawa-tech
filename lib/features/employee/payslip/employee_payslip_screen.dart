@@ -7,7 +7,7 @@ import '../../../core/repositories/payroll_repository.dart';
 import '../../../core/services/payslip_pdf_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/text_direction_helper.dart';
-import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_strings.dart';
 
 class EmployeePayslipScreen extends StatefulWidget {
   const EmployeePayslipScreen({super.key});
@@ -73,7 +73,7 @@ class _EmployeePayslipScreenState extends State<EmployeePayslipScreen> {
     }
 
     if (!mounted) return;
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     setState(() {
       _loading = false;
       _slip = slip;
@@ -83,7 +83,7 @@ class _EmployeePayslipScreenState extends State<EmployeePayslipScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     final s = _slip;
 
     return Directionality(

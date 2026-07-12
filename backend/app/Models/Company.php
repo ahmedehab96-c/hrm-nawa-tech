@@ -13,6 +13,8 @@ class Company extends Model
         'address',
         'wifi_ssid',
         'status',
+        'plan',
+        'trial_ends_at',
         'ai_plan',
         'ai_enabled',
         'ai_provider',
@@ -41,6 +43,7 @@ class Company extends Model
     protected function casts(): array
     {
         return [
+            'trial_ends_at' => 'datetime',
             'ai_enabled' => 'boolean',
             'ai_requests_per_minute' => 'integer',
             'ai_monthly_token_limit' => 'integer',
@@ -59,5 +62,34 @@ class Company extends Model
             'ai_digest_enabled' => 'boolean',
             'ai_digest_window_minutes' => 'integer',
         ];
+    }
+
+    /**
+     * Max employees for this plan. null = unlimited.
+     */
+    public function employeeLimit(): ?int
+    {
+        return match ((string) ($this->plan ?? 'trial')) {
+            'trial' => 10,
+            'starter' => 25,
+            'growth' => 100,
+            'pro', 'active', 'enterprise' => null,
+            default => 10,
+        };
+    }
+
+    public function employeeCount(): int
+    {
+        return Employee::query()->where('company_id', $this->id)->count();
+    }
+
+    public function canAddEmployees(int $adding = 1): bool
+    {
+        $limit = $this->employeeLimit();
+        if ($limit === null) {
+            return true;
+        }
+
+        return ($this->employeeCount() + $adding) <= $limit;
     }
 }

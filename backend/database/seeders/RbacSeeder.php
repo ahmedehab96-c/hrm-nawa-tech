@@ -12,6 +12,7 @@ class RbacSeeder extends Seeder
     public function run(): void
     {
         $roles = [
+            'super_admin' => 'Platform Super Admin',
             'company_admin' => 'Company Admin',
             'hr_manager' => 'HR Manager',
             'recruiter' => 'Recruiter',
@@ -19,6 +20,11 @@ class RbacSeeder extends Seeder
         ];
 
         $permissionsByRole = [
+            'super_admin' => [
+                'platform.manage',
+                'ai.chat',
+                'ai.usage.view',
+            ],
             'company_admin' => [
                 'ai.chat',
                 'ai.job_description.generate',

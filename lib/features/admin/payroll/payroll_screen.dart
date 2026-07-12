@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_strings.dart';
 import '../../../core/repositories/payroll_repository.dart';
 import '../../../core/api/api_result.dart';
 
@@ -62,7 +62,7 @@ class _PayrollScreenState extends State<PayrollScreen> {
   }
 
   void _generatePayslips() {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     PayrollRepository.generatePayroll(_month).then((result) {
       if (!mounted) return;
       if (result is ApiSuccess<void>) {
@@ -95,7 +95,7 @@ class _PayrollScreenState extends State<PayrollScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     final months = _availableMonths;
     // Clamp to a valid month in case state has a value not in the list
     final safeMonth = months.contains(_month) ? _month : months.first;
@@ -209,7 +209,7 @@ class _PayrollScreenState extends State<PayrollScreen> {
             padding: const EdgeInsets.all(24),
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final loc = AppLocalizations.of(context)!;
+                final loc = AppStrings.of(context);
                 final isWide = constraints.maxWidth > 600;
                 final items = [
                   _BreakdownItem(loc.breakdownBase, '8,000', AppColors.primary),
@@ -255,7 +255,7 @@ class _PayrollScreenState extends State<PayrollScreen> {
         )),
         DataCell(TextButton(
           onPressed: () => context.push('/admin/payroll/payslip/$employeeId'),
-          child: Text(AppLocalizations.of(context)!.payslip),
+          child: Text(AppStrings.of(context).payslip),
         )),
       ],
     );

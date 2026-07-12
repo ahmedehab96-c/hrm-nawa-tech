@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import '../../../core/api/api_result.dart';
 import '../../../core/repositories/ai_content_repository.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_strings.dart';
 
 class AiCommandCenterScreen extends StatefulWidget {
   const AiCommandCenterScreen({super.key});
@@ -590,7 +590,7 @@ class _AiCommandCenterScreenState extends State<AiCommandCenterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
 
     return SingleChildScrollView(
       child: Column(
@@ -1671,7 +1671,7 @@ class _JobDescriptionCard extends StatelessWidget {
   });
 
   final String Function(String ar, String en) txt;
-  final AppLocalizations l10n;
+  final AppStrings l10n;
   final bool busy;
   final TextEditingController titleCtrl;
   final TextEditingController deptCtrl;
@@ -1818,7 +1818,7 @@ class _CommunicationCard extends StatelessWidget {
   });
 
   final String Function(String ar, String en) txt;
-  final AppLocalizations l10n;
+  final AppStrings l10n;
   final bool busy;
   final TextEditingController purposeCtrl;
   final TextEditingController recipientCtrl;

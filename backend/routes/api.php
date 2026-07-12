@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\PlatformController;
 use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\AiController;
 use App\Http\Controllers\Api\AuthController;
@@ -23,16 +24,25 @@ Route::middleware('throttle:5,1')->group(function () {
     Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 });
 
+// Signed email verification (no auth — opened from email link)
+Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
+    ->middleware(['signed', 'throttle:10,1'])
+    ->name('verification.verify');
+
 // Logout — يُبطل الـ token الحالي
 Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
+Route::middleware(['auth:sanctum', 'throttle:6,1'])->post(
+    '/email/verification-notification',
+    [AuthController::class, 'resendVerification']
+);
 
 // مسار `/employees/me` قبل `{id}` حتى لا يُفسَّر `me` كمعرّف رقمي في مجموعة الأدمن.
-Route::middleware(['auth:sanctum', 'role:employee'])->group(function () {
+Route::middleware(['auth:sanctum', 'verified.api', 'trial', 'role:employee'])->group(function () {
     Route::get('/employees/me', [EmployeeController::class, 'me']);
 });
 
 // مسارات الإدارة (لوحة الويب) — تتطلب user.role = company_admin
-Route::middleware(['auth:sanctum', 'role:company_admin'])->group(function () {
+Route::middleware(['auth:sanctum', 'verified.api', 'trial', 'role:company_admin'])->group(function () {
     Route::get('/employees', [EmployeeController::class, 'index']);
     Route::get('/employees/{id}', [EmployeeController::class, 'show'])->whereNumber('id');
     Route::post('/employees', [EmployeeController::class, 'store']);
@@ -86,10 +96,13 @@ Route::middleware(['auth:sanctum', 'role:company_admin'])->group(function () {
     // Reports and narrative summaries
     Route::middleware(['ai.enabled', 'ai.rollout', 'ai.quota:reports_summary', 'permission:reports.ai.summarize'])->post('/reports/summaries', [ReportController::class, 'summarize']);
     Route::middleware(['ai.enabled', 'ai.rollout', 'ai.quota:reports_summary', 'permission:reports.ai.summarize'])->post('/reports/summaries/queue', [ReportController::class, 'summarizeQueued']);
+
+    // Company self-serve billing scaffold (Stripe/Moyasar later)
+    Route::post('/billing/checkout', [PlatformController::class, 'companyCheckout']);
 });
 
 // مسارات مشتركة (أدمن + موظف) مع فلترة حسب الشركة/المستخدم داخل الكنترولر
-Route::middleware(['auth:sanctum', 'role:company_admin,employee'])->group(function () {
+Route::middleware(['auth:sanctum', 'verified.api', 'trial', 'role:company_admin,employee'])->group(function () {
     Route::get('/attendance', [AttendanceController::class, 'index']);
     Route::post('/attendance/check-in', [AttendanceController::class, 'checkIn']);
     Route::post('/attendance/check-out', [AttendanceController::class, 'checkOut']);
@@ -136,4 +149,13 @@ Route::middleware(['auth:sanctum', 'role:company_admin,employee'])->group(functi
     Route::middleware(['ai.enabled', 'permission:ai.prompt.manage'])->post('/ai/prompts', [AiController::class, 'createPromptVersion']);
     Route::middleware(['ai.enabled', 'permission:ai.prompt.manage'])->post('/ai/prompts/{id}/activate', [AiController::class, 'activatePromptVersion'])->whereNumber('id');
     Route::middleware(['ai.enabled'])->get('/ai/tasks/{id}', [AiController::class, 'taskStatus'])->whereNumber('id');
+});
+
+// Platform console — super_admin only (no company trial gate)
+Route::middleware(['auth:sanctum', 'verified.api', 'role:super_admin'])->prefix('platform')->group(function () {
+    Route::get('/overview', [PlatformController::class, 'overview']);
+    Route::get('/companies', [PlatformController::class, 'companies']);
+    Route::get('/companies/{id}', [PlatformController::class, 'showCompany'])->whereNumber('id');
+    Route::put('/companies/{id}', [PlatformController::class, 'updateCompany'])->whereNumber('id');
+    Route::post('/companies/{id}/checkout', [PlatformController::class, 'createCheckout'])->whereNumber('id');
 });

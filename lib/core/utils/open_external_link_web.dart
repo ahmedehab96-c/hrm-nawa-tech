@@ -1,5 +1,5 @@
-import 'dart:html' as html;
+import 'package:web/web.dart' as web;
 
 Future<void> openExternalLinkImpl(String url) async {
-  html.window.open(url, '_blank');
+  web.window.open(url, '_blank');
 }

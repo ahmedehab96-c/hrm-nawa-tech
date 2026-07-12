@@ -9,7 +9,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/attendance_gate.dart';
 import '../../../core/utils/text_direction_helper.dart';
 import '../../../core/widgets/animations.dart';
-import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_strings.dart';
 
 class EmployeeHomeScreen extends StatefulWidget {
   const EmployeeHomeScreen({super.key});
@@ -40,7 +40,7 @@ class _EmployeeHomeScreenState extends State<EmployeeHomeScreen> {
   }
 
   Future<void> _handleCheckIn() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     if (await requireCompanyWifiForAttendance()) {
       final result = await WifiAttendanceService.canRecordAttendance();
       if (!result.success) {
@@ -62,7 +62,7 @@ class _EmployeeHomeScreenState extends State<EmployeeHomeScreen> {
   }
 
   Future<void> _handleCheckOut() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     if (await requireCompanyWifiForAttendance()) {
       final result = await WifiAttendanceService.canRecordAttendance();
       if (!result.success) {
@@ -85,7 +85,7 @@ class _EmployeeHomeScreenState extends State<EmployeeHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     return Directionality(
       textDirection: textDirectionForContext(context),
       child: Scaffold(
@@ -201,7 +201,7 @@ class _HeaderBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n      = AppLocalizations.of(context)!;
+    final l10n      = AppStrings.of(context);
     final wifiColor = isOnCompanyWifi ? AppColors.success : AppColors.warning;
     final wifiIcon  = isOnCompanyWifi ? Icons.wifi_rounded : Icons.wifi_off_rounded;
     final wifiLabel = isLoading
@@ -288,7 +288,7 @@ class _AttendanceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     return Card(
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),

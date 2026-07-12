@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_strings.dart';
 import '../../../core/widgets/status_badge.dart';
 import '../../../core/repositories/attendance_repository.dart';
 import '../../../core/api/api_result.dart';
@@ -102,7 +102,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   }
 
   Future<void> _openEditDialog(AttendanceRecord record) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     final result = await showDialog<bool>(
       context: context,
       builder: (ctx) => _EditAttendanceDialog(record: record, date: _selectedDate),
@@ -139,7 +139,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n  = AppLocalizations.of(context)!;
+    final l10n  = AppStrings.of(context);
     final dateLabel =
         '${_selectedDate.year}-${_selectedDate.month.toString().padLeft(2, '0')}-${_selectedDate.day.toString().padLeft(2, '0')}';
     final filtered = _filtered;
@@ -374,7 +374,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     );
   }
 
-  DataRow _dataRow(AttendanceRecord r, AppLocalizations l10n) {
+  DataRow _dataRow(AttendanceRecord r, AppStrings l10n) {
     final s = r.status.toLowerCase();
     final isLate    = s == 'late';
     final isPresent = s == 'present';
@@ -405,7 +405,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     );
   }
 
-  void _exportDemo({required bool excel, required AppLocalizations l10n}) {
+  void _exportDemo({required bool excel, required AppStrings l10n}) {
     final label = excel ? l10n.formatExcel : l10n.formatPdf;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(l10n.exportPrepared(label)),
@@ -511,7 +511,7 @@ class _EditAttendanceDialogState extends State<_EditAttendanceDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     return AlertDialog(
       title: Text('${l10n.editAttendance} — ${widget.record.employeeName}'),
       content: SingleChildScrollView(

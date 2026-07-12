@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/repositories/recruitment_repository.dart';
 import '../../../core/api/api_result.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_strings.dart';
 import '../../../core/widgets/status_badge.dart';
 
 class RecruitmentScreen extends StatefulWidget {
@@ -60,7 +60,7 @@ class _RecruitmentScreenState extends State<RecruitmentScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
 
     return RefreshIndicator(
       onRefresh: _load,
@@ -151,7 +151,7 @@ class _JobCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     return Card(
       child: InkWell(
         onTap: onTap,
@@ -215,7 +215,7 @@ class _CandidatePipelineRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
 
     final all = jobs.expand((j) => j.candidates).toList();
     final stages = [

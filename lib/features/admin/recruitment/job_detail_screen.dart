@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/repositories/recruitment_repository.dart';
 import '../../../core/api/api_result.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_strings.dart';
 import '../../../core/widgets/status_badge.dart';
 
 class JobDetailScreen extends StatefulWidget {
@@ -44,7 +44,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
 
   Future<void> _addCandidateDialog() async {
     if (_job == null) return;
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     final nameCtrl = TextEditingController();
     final emailCtrl = TextEditingController();
     final phoneCtrl = TextEditingController();
@@ -128,7 +128,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     switch (result) {
       case ApiSuccess():
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(AppLocalizations.of(context)!.candidateAdded),
+          content: Text(AppStrings.of(context).candidateAdded),
           backgroundColor: AppColors.success,
         ));
         _load();
@@ -159,7 +159,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(AppLocalizations.of(context)!.cancel),
+            child: Text(AppStrings.of(context).cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
@@ -238,7 +238,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     switch (result) {
       case ApiSuccess():
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(AppLocalizations.of(context)!.candidateStageUpdated),
+          content: Text(AppStrings.of(context).candidateStageUpdated),
           backgroundColor: AppColors.success,
         ));
         _load();
@@ -251,7 +251,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
 
   Future<void> _deleteCandidate(CandidateItem candidate) async {
     if (_job == null) return;
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -283,7 +283,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
 
     return RefreshIndicator(
       onRefresh: _load,
@@ -361,7 +361,7 @@ class _JobInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -464,7 +464,7 @@ class _CandidatesSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -550,7 +550,7 @@ class _CandidateCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     final color = _stageColor(candidate.stage);
 
     return Card(

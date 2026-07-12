@@ -1,20 +1,31 @@
-# HRM Platform — Portfolio Project
-# منصة HRM — مشروع Portfolio
+# Nawa Tech HRM — SaaS Platform
+# منصة Nawa Tech HRM — SaaS
 
 > **Full-Stack HR Management with AI** | **نظام إدارة موارد بشرية متكامل مع ذكاء اصطناعي**
 
-A **portfolio demo project** by **Nawa Tech** — built with **Flutter + Laravel** to showcase full-stack, mobile, and AI skills.
+**Status:** Actively developing this HR system into a **commercial multi-tenant SaaS product** (trials, plans, platform console, billing scaffold).  
+**الوضع:** جارٍ تطوير نظام الـ HR ليصبح **منتج SaaS تجاري متعدد المستأجرين** (تجارب، خطط، لوحة منصة، هيكل فوترة).
 
-مشروع **Portfolio** من **Nawa Tech** — مبني بـ **Flutter + Laravel** لعرض مهارات Full-Stack والموبايل والـ AI عند البحث عن عمل.
+**Nawa Tech HRM** is a multi-tenant SaaS platform built with **Flutter + Laravel** — admin web dashboard, employee mobile app, and AI assistant. Start a **14-day free trial** or use the demo account.
 
-📖 **Detailed demo guide:** [DEMO.md](./DEMO.md) | **دليل التجربة التفصيلي:** [DEMO.md](./DEMO.md)  
-🚀 **Live deploy guide:** [DEPLOY.md](./DEPLOY.md) | **دليل النشر:** [DEPLOY.md](./DEPLOY.md)
+**Nawa Tech HRM** منصة SaaS متعددة المستأجرين — لوحة ويب، تطبيق موظفين، ومساعد AI. **تجربة مجانية 14 يوم** أو حساب تجريبي جاهز.
+
+📖 **Demo guide:** [DEMO.md](./DEMO.md) · **SaaS launch:** [SAAS.md](./SAAS.md)  
+🚀 **Deploy:** [DEPLOY.md](./DEPLOY.md)
 
 ---
 
-## 🎮 How to Try the Demo | كيفية تجربة المشروع
+## 🎮 Try the platform | جرّب المنصة
 
 ### English — Step by step
+
+#### Option A — Free trial (SaaS)
+
+1. Start API + Flutter (see below)
+2. Open **`http://localhost:3000/register`**
+3. Create your company — you land in the admin dashboard
+
+#### Option B — Demo account (no signup)
 
 #### Prerequisites
 - Flutter 3.x
@@ -45,12 +56,14 @@ flutter run -d chrome --web-port=3000
 ```
 
 - Open **`http://localhost:3000/welcome`**
-- Click **Try Admin Dashboard**
-- Or go to **`http://localhost:3000/login`**
+- Click **Start free trial** or go to **`/register`**
+- Or login with demo admin at **`/login`**
+- Platform console: `platform@nawatech.com` → **`/platform`**
 
 | Role | Email | Password |
 |------|-------|----------|
 | **Admin** | `admin@demo.com` | `Admin12345!` |
+| **Platform** | `platform@nawatech.com` | `Platform12345!` |
 
 > In web debug mode, the app auto-connects to `http://127.0.0.1:8000/api`.
 
@@ -86,7 +99,8 @@ Or open **Profile** → **Server (Laravel API)**:
 | **Attendance** | Daily records, export |
 | **AI Command Center** | Assistant, SLO, escalations, reports |
 | **Recruitment** | Jobs, candidates, AI matching |
-| **Settings** | AR/EN language, dark/light theme |
+| **Platform** | Super-admin tenants, plans, trials |
+| **Settings** | AR/EN language, dark/light theme, plan upgrade CTAs |
 
 #### 5. App icon
 
@@ -126,12 +140,14 @@ flutter run -d chrome --web-port=3000
 ```
 
 - افتح **`http://localhost:3000/welcome`**
-- اضغط **جرّب لوحة الإدارة**
-- أو مباشرة: **`http://localhost:3000/login`**
+- اضغط **ابدأ التجربة المجانية** أو اذهب إلى **`/register`**
+- أو سجّل دخول الأدمن: **`/login`**
+- لوحة المنصة: `platform@nawatech.com` → **`/platform`**
 
 | الدور | البريد | كلمة المرور |
 |-------|--------|-------------|
 | **أدمن** | `admin@demo.com` | `Admin12345!` |
+| **المنصة** | `platform@nawatech.com` | `Platform12345!` |
 
 > في وضع التطوير على الويب، التطبيق يتصل تلقائياً بـ `http://127.0.0.1:8000/api`.
 
@@ -167,7 +183,8 @@ flutter run -d android    # محاكي Android
 | **الحضور** | سجلات يومية، تصدير |
 | **مركز AI** | مساعد، SLO، تصعيد، تقارير |
 | **التوظيف** | وظائف، مرشحين، مطابقة AI |
-| **الإعدادات** | عربي/إنجليزي، وضع ليلي/نهاري |
+| **المنصة** | مستأجرون، خطط، تجارب (super_admin) |
+| **الإعدادات** | عربي/إنجليزي، وضع ليلي/نهاري، ترقية الخطة |
 
 #### 5. أيقونة التطبيق
 
@@ -176,45 +193,69 @@ flutter run -d android    # محاكي Android
 
 ---
 
-## 🚀 Future: SaaS Multi-Tenant Platform | المستقبل: منصة SaaS متعددة الشركات
+## 🚀 SaaS product roadmap | خارطة منتج SaaS
 
-> **Current status:** Portfolio demo with one demo tenant.  
-> **الوضع الحالي:** عرض Portfolio مع tenant تجريبي واحد.
+> **Current status:** Active SaaS development — multi-tenant trials, plan limits, platform console, and billing scaffold are live in this repo.  
+> **الوضع الحالي:** تطوير SaaS جارٍ — التجارب متعددة المستأجرين، حدود الخطط، لوحة المنصة، وهيكل الفوترة موجودة في المستودع.
 
-This codebase is **architecturally ready** to evolve into a commercial **SaaS HRM platform** where multiple companies subscribe independently.
+This project is **no longer “demo-only.”** It is being built as a commercial **SaaS HRM platform** where companies register, trial, and upgrade independently.
 
-الكود **جاهز معمارياً** للتحويل لاحقاً إلى **منصة SaaS تجارية** تستخدمها عدة شركات بالاشتراك.
+المشروع **لم يعد عرضاً تجريبياً فقط.** يتم بناؤه كـ **منصة HRM SaaS تجارية** تسجّل فيها الشركات وتجرّب وترقّي بشكل مستقل.
 
-### Already built (foundation) | موجود بالفعل
+### Already shipping | ما يعمل الآن
 
 | Capability | Status |
 |------------|--------|
-| Multi-tenant (`company_id` isolation) | ✅ Ready |
-| Admin Web + Employee Mobile | ✅ Ready |
-| RBAC (roles & permissions) | ✅ Ready |
-| AI features (assistant, recruitment, reports) | ✅ Ready |
-| AI governance (quotas, rollout, audit) | ✅ Ready |
-| Arabic + English (RTL/LTR) | ✅ Ready |
+| Multi-tenant (`company_id` isolation) | ✅ |
+| Company self-registration + 14-day trial | ✅ |
+| Email verification gate | ✅ |
+| Plan employee caps (trial / starter / growth / enterprise) | ✅ |
+| Super-admin platform console (`/platform`) | ✅ |
+| Billing checkout scaffold (Stripe/Moyasar → next) | ✅ scaffold |
+| Admin Web + Employee Mobile | ✅ |
+| RBAC (roles & permissions) + `super_admin` | ✅ |
+| AI features + governance | ✅ |
+| Optional MySQL Docker profile | ✅ |
+| Flutter MVVM (platform + login) | ✅ |
+| Arabic + English (RTL/LTR) | ✅ |
 
-### Planned for SaaS launch | مخطط لإطلاق SaaS
+### Still planned | المتبقي
 
 | Phase | Feature |
 |-------|---------|
-| **Phase 1** | Company self-registration & onboarding |
-| **Phase 2** | Subscription plans (Starter / Growth / Enterprise) |
-| **Phase 3** | Payment gateway (Moyasar / Stripe) |
-| **Phase 4** | Plan limits (employees, AI features, recruitment) |
-| **Phase 5** | Super-admin panel for all tenants |
-| **Phase 6** | Production deploy (`hrm.nawatech.com`) |
+| **Next** | Live Stripe / Moyasar checkout + webhooks |
+| **Next** | Custom domains |
+| **Later** | Production deploy (`hrm.nawatech.com`) |
 
 ```
-Portfolio Demo (now)          SaaS Product (later)
-─────────────────────         ────────────────────
-1 demo tenant        →        Many companies
-Login only           →        Register + Subscribe
-Free showcase        →        Monthly billing
-nawatech.com/portfolio →      hrm.nawatech.com
+Earlier portfolio demo          SaaS product (now → launch)
+─────────────────────           ──────────────────────────
+1 showcase tenant      →        Many companies + trials
+Login showcase         →        Register + plan upgrades
+nawatech.com/portfolio →        hrm.nawatech.com (planned)
 ```
+
+### Changelog — July 2026 | سجل التغييرات — يوليو 2026
+
+**English**
+- SaaS trial onboarding (register → 14-day trial + demo employees)
+- Email verification + plan employee limits
+- Platform console for super-admin (overview, suspend/activate, extend trial, manual plans)
+- Billing scaffold (`POST /billing/checkout`) + Settings upgrade CTAs
+- Suspended-company API gate (`company_suspended`)
+- Optional MySQL via `docker compose --profile mysql`
+- AppStrings localization (replaced flutter gen-l10n)
+- MVVM foundation for Platform console and Login
+
+**العربية**
+- تسجيل شركة مع تجربة 14 يوماً + موظفين تجريبيين
+- التحقق من البريد + حدود عدد الموظفين حسب الخطة
+- لوحة المنصة لـ super_admin (نظرة عامة، تعليق/تفعيل، تمديد تجربة، تفعيل خطط يدوياً)
+- هيكل الفوترة + أزرار الترقية في الإعدادات
+- منع الشركات المعلّقة عبر الـ API
+- MySQL اختياري عبر Docker profile
+- ترجمة عبر `AppStrings` بدل gen-l10n
+- أساس MVVM للوحة المنصة وتسجيل الدخول
 
 ---
 
@@ -222,7 +263,7 @@ nawatech.com/portfolio →      hrm.nawatech.com
 
 ### Admin Panel (Web) | لوحة الأدمن
 
-Dashboard · Employees · Attendance · Leave · Payroll · Recruitment · AI Command Center · Performance · Reports · Settings
+Dashboard · Employees · Attendance · Leave · Payroll · Recruitment · AI Command Center · Performance · Reports · Settings · Platform (super_admin)
 
 ### Employee App (Mobile) | تطبيق الموظف
 
@@ -234,9 +275,10 @@ Home · Attendance · Leave · Payslip · Profile · Notifications
 
 ```
 hrm-nawa-tech/
-├── lib/                 # Flutter — Web Admin + Mobile Employee
-│   ├── core/            # API, auth, repositories, AI
-│   └── features/        # admin/ + employee/ + welcome/
+├── lib/
+│   ├── core/            # API, auth, mvvm/, repositories
+│   └── features/        # admin/ + employee/ + platform/ + welcome/
+│       └── platform/    # models · data · viewmodels · views (MVVM)
 ├── backend/             # Laravel REST API + AI services
 ├── assets/images/       # HRM logo + app icon source
 └── test/                # Flutter + PHPUnit tests
@@ -248,10 +290,10 @@ hrm-nawa-tech/
 
 | Layer | Stack |
 |-------|-------|
-| **Frontend** | Flutter 3, GoRouter, ARB i18n (AR/EN) |
+| **Frontend** | Flutter 3, GoRouter, AppStrings i18n (AR/EN), MVVM |
 | **Backend** | Laravel, Sanctum, SQLite/MySQL |
 | **AI** | OpenAI / Gemini gateway, prompt registry |
-| **Patterns** | Clean Architecture, Repository, Multi-tenant |
+| **Patterns** | Multi-tenant, Repository, MVVM (feature folders) |
 
 ---
 
@@ -275,4 +317,4 @@ flutter test
 
 ## 📄 License
 
-Portfolio demonstration project. Contact the author for commercial use or SaaS licensing.
+Portfolio + active SaaS product development. Contact the author for commercial use or SaaS licensing.

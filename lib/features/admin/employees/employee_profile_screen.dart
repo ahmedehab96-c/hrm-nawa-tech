@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/api/api_result.dart';
 import '../../../core/repositories/employees_repository.dart';
-import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_strings.dart';
 
 class EmployeeDetailScreen extends StatefulWidget {
   const EmployeeDetailScreen({super.key, this.employeeId});
@@ -54,7 +54,7 @@ class _EmployeeDetailScreenState extends State<EmployeeDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     final name = _employee?.name ?? '';
     final avatarChar = name.trim().isEmpty ? '—' : name.trim()[0];
     final subtitleParts = <String>[];

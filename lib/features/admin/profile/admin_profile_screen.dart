@@ -5,7 +5,7 @@ import '../../../core/api/api_config.dart';
 import '../../../core/repositories/auth_repository.dart';
 import '../../../core/saas/company_context.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_strings.dart';
 
 class AdminProfileScreen extends StatefulWidget {
   const AdminProfileScreen({super.key});
@@ -38,7 +38,7 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     final name = _user?['name']?.toString() ?? l10n.sampleAdminName;
     final email = _user?['email']?.toString() ?? 'admin@demo.com';
 

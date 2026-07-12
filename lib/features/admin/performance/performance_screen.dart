@@ -7,7 +7,7 @@ import '../../../core/repositories/ai_tasks_repository.dart';
 import '../../../core/repositories/employees_repository.dart';
 import '../../../core/repositories/performance_repository.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_strings.dart';
 
 class PerformanceScreen extends StatefulWidget {
   const PerformanceScreen({super.key});
@@ -85,7 +85,7 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
 
   Future<void> _saveReview() async {
     if (_selectedEmployeeId == null || _saving) return;
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     setState(() => _saving = true);
     final result = await PerformanceRepository.instance.saveReview(
       employeeId: _selectedEmployeeId!,
@@ -121,7 +121,7 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
 
   Future<void> _analyze(String reviewId) async {
     if (_analyzing.contains(reviewId)) return;
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     setState(() => _analyzing.add(reviewId));
     final localeCode = Localizations.localeOf(context).languageCode;
     if (_useAsyncAi) {
@@ -173,7 +173,7 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
   }
 
   void _startTaskPolling(String taskId) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     _taskPoller?.cancel();
     _taskPoller = Timer.periodic(const Duration(seconds: 2), (_) async {
       final statusRes = await AiTasksRepository.instance.getTaskStatus(taskId);
@@ -208,7 +208,7 @@ class _PerformanceScreenState extends State<PerformanceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

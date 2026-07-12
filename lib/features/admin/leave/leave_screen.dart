@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_strings.dart';
 import '../../../core/widgets/status_badge.dart';
 import '../../../core/repositories/leave_repository.dart';
 import '../../../core/api/api_result.dart';
@@ -74,7 +74,7 @@ class _LeaveScreenState extends State<LeaveScreen> {
   }
 
   Future<void> _approve(String id) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     final res = await LeaveRepository.approveLeave(id);
     if (!mounted) return;
     if (res is ApiSuccess) {
@@ -88,7 +88,7 @@ class _LeaveScreenState extends State<LeaveScreen> {
   }
 
   Future<void> _reject(String id) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     final res = await LeaveRepository.rejectLeave(id);
     if (!mounted) return;
     if (res is ApiSuccess) {
@@ -133,8 +133,8 @@ class _LeaveScreenState extends State<LeaveScreen> {
             ),
             actions: [
               TextButton(onPressed: () => Navigator.pop(ctx, 'close'), child: Text(ar ? 'إغلاق' : 'Close')),
-              TextButton(onPressed: () => Navigator.pop(ctx, 'reject'), child: Text(AppLocalizations.of(context)!.reject)),
-              FilledButton(onPressed: () => Navigator.pop(ctx, 'approve'), child: Text(AppLocalizations.of(context)!.approve)),
+              TextButton(onPressed: () => Navigator.pop(ctx, 'reject'), child: Text(AppStrings.of(context).reject)),
+              FilledButton(onPressed: () => Navigator.pop(ctx, 'approve'), child: Text(AppStrings.of(context).approve)),
             ],
           ),
         );
@@ -150,7 +150,7 @@ class _LeaveScreenState extends State<LeaveScreen> {
     }
   }
 
-  String _leaveTypeLabel(AppLocalizations l10n, String raw) {
+  String _leaveTypeLabel(AppStrings l10n, String raw) {
     final t = raw.trim().toLowerCase();
     if (t == 'annual') return l10n.annualShort;
     if (t == 'sick') return l10n.sickShort;
@@ -158,7 +158,7 @@ class _LeaveScreenState extends State<LeaveScreen> {
     return raw;
   }
 
-  String _leaveStatusLabel(AppLocalizations l10n, String status) {
+  String _leaveStatusLabel(AppStrings l10n, String status) {
     if (isPendingLeaveStatus(status)) return l10n.leaveStatusPending;
     if (isApprovedLeaveStatus(status)) return l10n.leaveStatusApproved;
     return l10n.leaveStatusRejected;
@@ -166,7 +166,7 @@ class _LeaveScreenState extends State<LeaveScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -292,7 +292,7 @@ class _LeaveScreenState extends State<LeaveScreen> {
     LeaveRequestItem r,
     String id,
   ) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     final typeLabel = _leaveTypeLabel(l10n, r.type);
     final statusLabel = _leaveStatusLabel(l10n, r.status);
     return DataRow(

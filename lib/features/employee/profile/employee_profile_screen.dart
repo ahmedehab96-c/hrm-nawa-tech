@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/locale/locale_controller.dart';
 import '../../../core/theme/app_theme.dart';
@@ -6,8 +7,9 @@ import '../../../core/theme/theme_scope.dart';
 import '../../../core/utils/text_direction_helper.dart';
 import '../../../core/api/api_result.dart';
 import '../../../core/api/api_config.dart';
+import '../../../core/repositories/auth_repository.dart';
 import '../../../core/repositories/employees_repository.dart';
-import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_strings.dart';
 
 class EmployeeProfileScreen extends StatefulWidget {
   const EmployeeProfileScreen({super.key});
@@ -68,7 +70,7 @@ class _EmployeeProfileScreenState extends State<EmployeeProfileScreen> {
   }
 
   Future<void> _saveApiSettings() async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     final code = ApiConfig.validateBaseUrl(_baseUrlCtrl.text);
     if (_useApi && code != null) {
       if (!mounted) return;
@@ -88,7 +90,7 @@ class _EmployeeProfileScreenState extends State<EmployeeProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     final name = _employee?.name ?? '';
     final trimmed = name.trim();
     final avatarChar = trimmed.isEmpty ? '—' : trimmed[0];
@@ -276,6 +278,24 @@ class _EmployeeProfileScreenState extends State<EmployeeProfileScreen> {
                         ),
                       ),
                     ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: () async {
+                    await AuthRepository.logout();
+                    if (!context.mounted) return;
+                    context.go('/login');
+                  },
+                  icon: const Icon(Icons.logout),
+                  label: Text(l10n.logout),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.error,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                 ),
               ),

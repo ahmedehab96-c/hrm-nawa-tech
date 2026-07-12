@@ -1,6 +1,6 @@
 # Deploy Guide | دليل النشر
 
-> Host the **portfolio demo** live — Flutter Web admin + Laravel API in one stack.
+> Host **Nawa Tech HRM** — Flutter Web + Laravel API (SaaS trial ready).
 
 ---
 
@@ -13,9 +13,11 @@
 ### 1. Build Flutter Web
 
 ```bash
-chmod +x scripts/build_web_portfolio.sh
-./scripts/build_web_portfolio.sh
+chmod +x scripts/build_web.sh
+./scripts/build_web.sh
 ```
+
+(`build_web_portfolio.sh` is an alias — same build.)
 
 This builds with `--dart-define=API_BASE_URL=/api` so the web app talks to the API through nginx on the same host.
 
@@ -25,14 +27,15 @@ This builds with `--dart-define=API_BASE_URL=/api` so the web app talks to the A
 docker compose up --build
 ```
 
-### 3. Open the demo
+### 3. Open the app
 
 | URL | Purpose |
 |-----|---------|
 | http://localhost:8080/welcome | Landing page |
+| http://localhost:8080/register | **New company signup** |
 | http://localhost:8080/login | Admin login |
 
-**Credentials:** `admin@demo.com` / `Admin12345!`
+**Demo credentials:** `admin@demo.com` / `Admin12345!`
 
 The API runs behind nginx at `/api` (auto-seeded on first start).
 
@@ -57,7 +60,7 @@ docker compose up --build
 |-------|----------------|
 | **HTTPS** | Put Caddy/Traefik or cloud load balancer in front |
 | **APP_KEY** | Set fixed `APP_KEY` in compose/env for stable sessions |
-| **Database** | SQLite is fine for demo; use MySQL for multi-tenant SaaS later |
+| **Database** | SQLite by default; optional MySQL: `DB_CONNECTION=mysql docker compose --profile mysql up --build` |
 | **Flutter API URL** | Full URL: `--dart-define=API_BASE_URL=https://hrm.example.com/api` |
 | **CORS** | Set `ALLOWED_ORIGINS` in backend `.env` when web/API are on different domains |
 
@@ -139,3 +142,26 @@ Browser → nginx:80 (web container)
 ```
 
 Mobile employee app: point API URL to your hosted API (or LAN IP in dev).
+
+---
+
+## AI — Real OpenAI | تفعيل الذكاء الاصطناعي الحقيقي
+
+**Never commit API keys to GitHub.**
+
+```bash
+chmod +x scripts/set_openai_key.sh
+./scripts/set_openai_key.sh sk-YOUR-OPENAI-KEY
+cd backend && php artisan serve
+```
+
+Or edit `backend/.env`:
+
+```env
+OPENAI_API_KEY=sk-your-key-here
+AI_DEFAULT_PROVIDER=openai
+```
+
+Docker: copy `.env.ai.example` → `.env.ai`, paste key, then `docker compose up --build`.
+
+Get a key: https://platform.openai.com/api-keys

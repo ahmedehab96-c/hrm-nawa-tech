@@ -5,7 +5,7 @@ import '../../../core/api/api_result.dart';
 import '../../../core/repositories/employees_repository.dart';
 import '../../../core/repositories/payroll_repository.dart';
 import '../../../core/services/payslip_pdf_service.dart';
-import '../../../l10n/app_localizations.dart';
+import '../../../l10n/app_strings.dart';
 
 class PayslipDetailScreen extends StatefulWidget {
   const PayslipDetailScreen({super.key, this.employeeId, this.month});
@@ -93,7 +93,7 @@ class _PayslipDetailScreenState extends State<PayslipDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

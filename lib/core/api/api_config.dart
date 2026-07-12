@@ -53,11 +53,21 @@ class ApiConfig {
   /// Production web builds: `--dart-define=API_BASE_URL=/api` or full HTTPS URL.
   static Future<void> applyReleaseDefaults() async {
     const envUrl = String.fromEnvironment('API_BASE_URL');
-    if (envUrl.isEmpty) return;
     final prefs = await SharedPreferences.getInstance();
-    if (prefs.containsKey(_keyBaseUrl) || prefs.containsKey(_keyUseApi)) return;
-    await setBaseUrl(envUrl);
-    await setUseApi(true);
+    if (envUrl.isNotEmpty && !prefs.containsKey(_keyBaseUrl)) {
+      await setBaseUrl(envUrl);
+    }
+    if (kReleaseMode) {
+      final effectiveUrl = _baseUrl ?? envUrl;
+      if (effectiveUrl.isNotEmpty) {
+        await setUseApi(true);
+      }
+    } else if (envUrl.isNotEmpty &&
+        !prefs.containsKey(_keyBaseUrl) &&
+        !prefs.containsKey(_keyUseApi)) {
+      await setBaseUrl(envUrl);
+      await setUseApi(true);
+    }
   }
 
   /// `null` إذا العنوان صالح أو فارغ؛ وإلا رمز: `needs_https` أو `invalid`.

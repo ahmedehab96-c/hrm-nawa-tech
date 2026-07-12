@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 import '../utils/text_direction_helper.dart';
-import '../../l10n/app_localizations.dart';
+import '../../l10n/app_strings.dart';
 import 'ai_assistant_service.dart';
 
 class AiAssistantPanel extends StatefulWidget {
@@ -27,7 +27,7 @@ class _AiAssistantPanelState extends State<AiAssistantPanel> {
     super.dispose();
   }
 
-  void _seedWelcome(AppLocalizations l10n) {
+  void _seedWelcome(AppStrings l10n) {
     if (_welcome) return;
     _welcome = true;
     _msgs.add(_Msg(l10n.aiAssistantWelcome, false));
@@ -70,7 +70,7 @@ class _AiAssistantPanelState extends State<AiAssistantPanel> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppStrings.of(context);
     final t = Theme.of(context);
     final cs = t.colorScheme;
     _seedWelcome(l10n);
