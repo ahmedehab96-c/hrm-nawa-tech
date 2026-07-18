@@ -19,17 +19,26 @@
 
 ### Live demo | تجربة مباشرة
 
-Public hosted demo on Render:
+Anyone can try without installing. First open after idle may take ~30–60s (Render free).
 
-- **Admin:** [https://hrm-nawa-api.onrender.com/admin](https://hrm-nawa-api.onrender.com/admin)
-- **API health:** [https://hrm-nawa-api.onrender.com/api/health](https://hrm-nawa-api.onrender.com/api/health)
-- **Company admin:** `admin@demo.com` / `Admin12345!`
-- **Recruiter:** `recruiter@demo.com` / `Recruiter12345!`
-- **Employee (mobile):** `emp01@demo.com` / `Employee12345!` — run `./scripts/run_mobile_live.sh`
+| What | English | العربية |
+|------|---------|---------|
+| **Web admin** | Open [Admin login](https://hrm-nawa-api.onrender.com/admin) → `admin@demo.com` / `Admin12345!` | افتح [دخول الأدمن](https://hrm-nawa-api.onrender.com/admin) → نفس الحساب |
+| **Backend API** | Open [Health](https://hrm-nawa-api.onrender.com/api/health) (must return OK) | افتح [صحة الـ API](https://hrm-nawa-api.onrender.com/api/health) |
+| **Phone app** | Clone repo → `./scripts/run_mobile_live.sh` → login `emp01@demo.com` / `Employee12345!` | استنسخ المشروع → نفس الأمر → دخول الموظف |
 
-Keep-alive: GitHub Actions pings the health endpoint every 10 minutes so the free instance
-stays warm for demos. For zero sleep, upgrade to Render **Starter** (~$7/mo) — see
-**[docs/LIVE_DEMO.md](./docs/LIVE_DEMO.md)**. Local fallback:
+**Accounts | الحسابات**
+
+| Role / الدور | Email | Password |
+|--------------|-------|----------|
+| Company admin / أدمن | `admin@demo.com` | `Admin12345!` |
+| Recruiter / توظيف | `recruiter@demo.com` | `Recruiter12345!` |
+| Employee / موظف | `emp01@demo.com` | `Employee12345!` |
+| Platform / المنصة | `platform@nawatech.com` | `Platform12345!` |
+
+Full bilingual walkthrough: **[DEMO.md](./DEMO.md)** · Hosting notes: **[docs/LIVE_DEMO.md](./docs/LIVE_DEMO.md)**
+
+Local fallback | تشغيل محلي:
 
 ```bash
 ./scripts/start_api.sh
@@ -69,7 +78,8 @@ This is not a CRUD-only sample. It demonstrates:
 
 المشروع ليس CRUD فقط؛ بل يعرض فصل الواجهات، تعدد الشركات، الصلاحيات، عمليات HR حقيقية، تطبيق موظفين، اختبارات، CI/CD، Docker، وميزات AI قابلة للتعطيل عند غياب المزود.
 
-> For a focused 5–10 minute reviewer walkthrough, use [DEMO.md](./DEMO.md).
+> For a focused 5–10 minute reviewer walkthrough (web + API + phone, EN/AR), use [DEMO.md](./DEMO.md).
+> لعرض 5–10 دقائق (ويب + API + هاتف، عربي/إنجليزي): [DEMO.md](./DEMO.md).
 
 ---
 
