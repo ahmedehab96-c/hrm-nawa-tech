@@ -112,24 +112,29 @@ class _EmployeeAttendanceScreenState extends State<EmployeeAttendanceScreen> {
           title: Text(l10n.attendance),
         ),
         body: ResponsivePage(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // WiFi status
-              Card(
+          child: Builder(
+            builder: (context) {
+              final r = context.responsive;
+              final wifiCard = Card(
                 color: _isOnCompanyWifi
                     ? AppColors.success.withValues(alpha: 0.1)
                     : AppColors.warning.withValues(alpha: 0.1),
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(r.spacing(16)),
                   child: Row(
                     children: [
                       Icon(
-                        _isLoading ? Icons.hourglass_empty : (_isOnCompanyWifi ? Icons.wifi : Icons.wifi_off),
-                        color: _isLoading ? AppColors.textMuted : (_isOnCompanyWifi ? AppColors.success : AppColors.warning),
-                        size: 32,
+                        _isLoading
+                            ? Icons.hourglass_empty
+                            : (_isOnCompanyWifi ? Icons.wifi : Icons.wifi_off),
+                        color: _isLoading
+                            ? AppColors.textMuted
+                            : (_isOnCompanyWifi
+                                ? AppColors.success
+                                : AppColors.warning),
+                        size: r.iconSize + 8,
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: r.spacing(12)),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -137,14 +142,25 @@ class _EmployeeAttendanceScreenState extends State<EmployeeAttendanceScreen> {
                             Text(
                               _isLoading
                                   ? l10n.wifiChecking
-                                  : (_isOnCompanyWifi ? l10n.wifiOnCompany : l10n.wifiOffCompany),
+                                  : (_isOnCompanyWifi
+                                      ? l10n.wifiOnCompany
+                                      : l10n.wifiOffCompany),
                               style: AppTypography.bodyMedium.copyWith(
                                 fontWeight: FontWeight.w600,
-                                color: _isOnCompanyWifi ? AppColors.success : AppColors.warning,
+                                color: _isOnCompanyWifi
+                                    ? AppColors.success
+                                    : AppColors.warning,
                               ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
                             if (_wifiName != null)
-                              Text(l10n.networkLabel(_wifiName!), style: AppTypography.caption),
+                              Text(
+                                l10n.networkLabel(_wifiName!),
+                                style: AppTypography.caption,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                           ],
                         ),
                       ),
@@ -157,21 +173,36 @@ class _EmployeeAttendanceScreenState extends State<EmployeeAttendanceScreen> {
                     ],
                   ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              // Check-in / Check-out card
-              Card(
+              );
+
+              final actionsCard = Card(
                 child: Padding(
-                  padding: const EdgeInsets.all(24),
+                  padding: EdgeInsets.all(r.spacing(24)),
                   child: Column(
                     children: [
-                      Icon(Icons.access_time, size: 64, color: AppColors.primary),
-                      const SizedBox(height: 16),
-                      Text(l10n.attendanceTodayTitle, style: AppTypography.h4),
-                      const SizedBox(height: 8),
-                      Text(l10n.checkInTimeSample, style: AppTypography.h1.copyWith(color: AppColors.primary)),
+                      Icon(
+                        Icons.access_time,
+                        size: r.heroIconSize,
+                        color: AppColors.primary,
+                      ),
+                      SizedBox(height: r.spacing(16)),
+                      Text(
+                        l10n.attendanceTodayTitle,
+                        style: AppTypography.h4,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(height: r.spacing(8)),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          l10n.checkInTimeSample,
+                          style: AppTypography.h1.copyWith(color: AppColors.primary),
+                        ),
+                      ),
                       Text(l10n.checkInRecorded, style: AppTypography.bodySmall),
-                      const SizedBox(height: 24),
+                      SizedBox(height: r.spacing(24)),
                       SizedBox(
                         width: double.infinity,
                         child: OutlinedButton.icon(
@@ -179,11 +210,12 @@ class _EmployeeAttendanceScreenState extends State<EmployeeAttendanceScreen> {
                           icon: const Icon(Icons.login),
                           label: Text(l10n.checkIn),
                           style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            minimumSize: Size.fromHeight(r.minTouchSize),
+                            padding: EdgeInsets.symmetric(vertical: r.spacing(14)),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: r.spacing(12)),
                       SizedBox(
                         width: double.infinity,
                         child: FilledButton.icon(
@@ -191,37 +223,76 @@ class _EmployeeAttendanceScreenState extends State<EmployeeAttendanceScreen> {
                           icon: const Icon(Icons.logout),
                           label: Text(l10n.checkOut),
                           style: FilledButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            minimumSize: Size.fromHeight(r.minTouchSize),
+                            padding: EdgeInsets.symmetric(vertical: r.spacing(14)),
                           ),
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              Text(l10n.attendanceLogLabel, style: AppTypography.h4),
-              const SizedBox(height: 16),
-              if (_loadingHistory)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 24),
-                  child: Center(child: CircularProgressIndicator()),
-                )
-              else ..._history.map((h) {
-                final statusLabel =
-                    h.statusKey == 'late' ? l10n.late : (h.statusKey == 'present' ? l10n.present : l10n.absent);
-                final statusColor = h.statusKey == 'late'
-                    ? AppColors.warning
-                    : (h.statusKey == 'present' ? AppColors.success : AppColors.error);
-                return _AttendanceHistoryItem(
-                  date: h.date,
-                  checkIn: h.checkIn,
-                  checkOut: h.checkOut,
-                  statusLabel: statusLabel,
-                  statusColor: statusColor,
+              );
+
+              final historySection = Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(l10n.attendanceLogLabel, style: AppTypography.h4),
+                  SizedBox(height: r.spacing(16)),
+                  if (_loadingHistory)
+                    Padding(
+                      padding: EdgeInsets.symmetric(vertical: r.spacing(24)),
+                      child: const Center(child: CircularProgressIndicator()),
+                    )
+                  else
+                    ..._history.map((h) {
+                      final statusLabel = h.statusKey == 'late'
+                          ? l10n.late
+                          : (h.statusKey == 'present' ? l10n.present : l10n.absent);
+                      final statusColor = h.statusKey == 'late'
+                          ? AppColors.warning
+                          : (h.statusKey == 'present'
+                              ? AppColors.success
+                              : AppColors.error);
+                      return _AttendanceHistoryItem(
+                        date: h.date,
+                        checkIn: h.checkIn,
+                        checkOut: h.checkOut,
+                        statusLabel: statusLabel,
+                        statusColor: statusColor,
+                      );
+                    }),
+                ],
+              );
+
+              if (r.useTwoPane) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    wifiCard,
+                    SizedBox(height: r.spacing(24)),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(child: actionsCard),
+                        SizedBox(width: r.spacing(16)),
+                        Expanded(child: historySection),
+                      ],
+                    ),
+                  ],
                 );
-              }),
-            ],
+              }
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  wifiCard,
+                  SizedBox(height: r.spacing(24)),
+                  actionsCard,
+                  SizedBox(height: r.spacing(24)),
+                  historySection,
+                ],
+              );
+            },
           ),
         ),
       ),

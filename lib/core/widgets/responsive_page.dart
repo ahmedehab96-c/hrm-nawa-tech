@@ -152,3 +152,96 @@ double responsiveGridAspectRatio(
 bool isNarrowWidth(BuildContext context, {double breakpoint = Breakpoints.narrow}) {
   return MediaQuery.sizeOf(context).width < breakpoint;
 }
+
+/// Adaptive grid that picks column count from [ResponsiveHelper].
+class ResponsiveGrid extends StatelessWidget {
+  const ResponsiveGrid({
+    super.key,
+    required this.children,
+    this.mobileColumns = 2,
+    this.tabletColumns = 3,
+    this.desktopColumns = 5,
+    this.spacing,
+    this.runSpacing,
+    this.childAspectRatio,
+    this.shrinkWrap = true,
+    this.physics = const NeverScrollableScrollPhysics(),
+  });
+
+  final List<Widget> children;
+  final int mobileColumns;
+  final int tabletColumns;
+  final int desktopColumns;
+  final double? spacing;
+  final double? runSpacing;
+  final double? childAspectRatio;
+  final bool shrinkWrap;
+  final ScrollPhysics? physics;
+
+  @override
+  Widget build(BuildContext context) {
+    final r = ResponsiveHelper.of(context);
+    final gap = spacing ?? r.spacing(AppSpacing.md);
+    final runGap = runSpacing ?? gap;
+    final cols = r.gridColumns(
+      mobile: mobileColumns,
+      tablet: tabletColumns,
+      desktop: desktopColumns,
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Prefer Wrap so short card grids never fight nested scroll views.
+        final itemWidth = (constraints.maxWidth - gap * (cols - 1)) / cols;
+        return Wrap(
+          spacing: gap,
+          runSpacing: runGap,
+          children: [
+            for (final child in children)
+              SizedBox(
+                width: itemWidth,
+                child: childAspectRatio == null
+                    ? child
+                    : AspectRatio(
+                        aspectRatio: childAspectRatio!,
+                        child: child,
+                      ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// Horizontal scroll wrapper for wide tables / dense rows on phones.
+class ResponsiveHorizontalScroll extends StatelessWidget {
+  const ResponsiveHorizontalScroll({
+    super.key,
+    required this.child,
+    this.minWidth = 560,
+  });
+
+  final Widget child;
+  final double minWidth;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final needsScroll = constraints.maxWidth < minWidth;
+        final content = ConstrainedBox(
+          constraints: BoxConstraints(
+            minWidth: needsScroll ? minWidth : constraints.maxWidth,
+          ),
+          child: child,
+        );
+        if (!needsScroll) return content;
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: content,
+        );
+      },
+    );
+  }
+}

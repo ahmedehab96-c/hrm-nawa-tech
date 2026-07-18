@@ -113,70 +113,99 @@ class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
           title: Text(l10n.requestLeave),
         ),
         body: ResponsivePage(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              DropdownButtonFormField<String>(
-                key: ValueKey(_type),
-                isExpanded: true,
-                initialValue: _type,
-                decoration: InputDecoration(
-                  labelText: l10n.leaveType,
-                  prefixIcon: const Icon(Icons.event_note),
+          child: ResponsiveFormFrame(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                DropdownButtonFormField<String>(
+                  key: ValueKey(_type),
+                  isExpanded: true,
+                  initialValue: _type,
+                  decoration: InputDecoration(
+                    labelText: l10n.leaveType,
+                    prefixIcon: const Icon(Icons.event_note),
+                  ),
+                  items: [
+                    DropdownMenuItem(value: 'annual', child: Text(l10n.annualShort)),
+                    DropdownMenuItem(value: 'sick', child: Text(l10n.sickShort)),
+                    DropdownMenuItem(value: 'emergency', child: Text(l10n.emergencyShort)),
+                  ],
+                  onChanged: (v) => setState(() => _type = v ?? 'annual'),
                 ),
-                items: [
-                  DropdownMenuItem(value: 'annual', child: Text(l10n.annualShort)),
-                  DropdownMenuItem(value: 'sick', child: Text(l10n.sickShort)),
-                  DropdownMenuItem(value: 'emergency', child: Text(l10n.emergencyShort)),
-                ],
-                onChanged: (v) => setState(() => _type = v ?? 'annual'),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: l10n.leaveColFrom,
-                  prefixIcon: const Icon(Icons.calendar_today),
+                SizedBox(height: context.responsive.spacing(16)),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final sideBySide = constraints.maxWidth >= 420;
+                    final fromField = TextFormField(
+                      decoration: InputDecoration(
+                        labelText: l10n.leaveColFrom,
+                        prefixIcon: const Icon(Icons.calendar_today),
+                      ),
+                      readOnly: true,
+                      controller: _fromDisplay,
+                      onTap: _pickFrom,
+                    );
+                    final toField = TextFormField(
+                      decoration: InputDecoration(
+                        labelText: l10n.leaveColTo,
+                        prefixIcon: const Icon(Icons.calendar_today),
+                      ),
+                      readOnly: true,
+                      controller: _toDisplay,
+                      onTap: _pickTo,
+                    );
+                    if (!sideBySide) {
+                      return Column(
+                        children: [
+                          fromField,
+                          SizedBox(height: context.responsive.spacing(16)),
+                          toField,
+                        ],
+                      );
+                    }
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(child: fromField),
+                        SizedBox(width: context.responsive.spacing(12)),
+                        Expanded(child: toField),
+                      ],
+                    );
+                  },
                 ),
-                readOnly: true,
-                controller: _fromDisplay,
-                onTap: _pickFrom,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: l10n.leaveColTo,
-                  prefixIcon: const Icon(Icons.calendar_today),
+                SizedBox(height: context.responsive.spacing(16)),
+                TextFormField(
+                  decoration: InputDecoration(
+                    labelText: l10n.leaveNotes,
+                    alignLabelWithHint: true,
+                  ),
+                  maxLines: 3,
+                  controller: _notes,
                 ),
-                readOnly: true,
-                controller: _toDisplay,
-                onTap: _pickTo,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: l10n.leaveNotes,
-                  alignLabelWithHint: true,
+                SizedBox(height: context.responsive.spacing(32)),
+                FilledButton(
+                  onPressed: _submitting ? null : _submit,
+                  style: FilledButton.styleFrom(
+                    minimumSize: Size(double.infinity, context.responsive.minTouchSize),
+                  ),
+                  child: _submitting
+                      ? const SizedBox(
+                          height: 22,
+                          width: 22,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Text(l10n.save),
                 ),
-                maxLines: 3,
-                controller: _notes,
-              ),
-              const SizedBox(height: 32),
-              FilledButton(
-                onPressed: _submitting ? null : _submit,
-                child: _submitting
-                    ? const SizedBox(
-                        height: 22,
-                        width: 22,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Text(l10n.save),
-              ),
-              const SizedBox(height: 12),
-              OutlinedButton(
-                onPressed: _submitting ? null : () => Navigator.of(context).pop(),
-                child: Text(l10n.cancel),
-              ),
-            ],
+                SizedBox(height: context.responsive.spacing(12)),
+                OutlinedButton(
+                  onPressed: _submitting ? null : () => Navigator.of(context).pop(),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: Size(double.infinity, context.responsive.minTouchSize),
+                  ),
+                  child: Text(l10n.cancel),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -132,19 +132,34 @@ class _EmployeeLeaveScreenState extends State<EmployeeLeaveScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(l10n.leaveBalance, style: AppTypography.h4),
-                            const SizedBox(height: 16),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _BalanceItem(l10n.annualShort, _annual, _annualTot),
-                                ),
-                                Expanded(
-                                  child: _BalanceItem(l10n.sickShort, _sick, _sickTot),
-                                ),
-                                Expanded(
-                                  child: _BalanceItem(l10n.emergencyShort, _emergency, _emergencyTot),
-                                ),
-                              ],
+                            SizedBox(height: context.responsive.spacing(16)),
+                            LayoutBuilder(
+                              builder: (context, constraints) {
+                                final r = context.responsive;
+                                final useWrap = r.isTiny || r.textScale > 1.15;
+                                final items = [
+                                  _BalanceItem(l10n.annualShort, _annual, _annualTot),
+                                  _BalanceItem(l10n.sickShort, _sick, _sickTot),
+                                  _BalanceItem(l10n.emergencyShort, _emergency, _emergencyTot),
+                                ];
+                                if (!useWrap) {
+                                  return Row(
+                                    children: [
+                                      for (final item in items) Expanded(child: item),
+                                    ],
+                                  );
+                                }
+                                final gap = r.spacing(AppSpacing.md);
+                                final width = (constraints.maxWidth - gap) / 2;
+                                return Wrap(
+                                  spacing: gap,
+                                  runSpacing: gap,
+                                  children: [
+                                    for (final item in items)
+                                      SizedBox(width: width, child: item),
+                                  ],
+                                );
+                              },
                             ),
                           ],
                         ),

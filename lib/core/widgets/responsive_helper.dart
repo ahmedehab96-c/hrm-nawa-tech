@@ -10,7 +10,22 @@ abstract final class Breakpoints {
   static const double narrow = 400;
   static const double tiny = 360;
   static const double contentPhone = 640;
-  static const double contentWide = 960;
+  static const double contentWide = 1100;
+  static const double railLabelsAll = 800;
+  static const double sideNavWide = 1280;
+  static const double sideNavCompactWidth = 220;
+  static const double sideNavExpandedWidth = 260;
+}
+
+/// Shared spacing scale — prefer these over magic numbers.
+abstract final class AppSpacing {
+  static const double xs = 4;
+  static const double sm = 8;
+  static const double md = 12;
+  static const double lg = 16;
+  static const double xl = 20;
+  static const double xxl = 24;
+  static const double xxxl = 32;
 }
 
 enum ScreenType { mobile, tablet, desktop }
@@ -29,10 +44,13 @@ class ResponsiveHelper {
   Size get size => MediaQuery.sizeOf(context);
   double get width => size.width;
   double get height => size.height;
+  double get screenWidth => width;
+  double get screenHeight => height;
   double get shortestSide => size.shortestSide;
   Orientation get orientation => MediaQuery.orientationOf(context);
   bool get isLandscape => orientation == Orientation.landscape;
   EdgeInsets get viewInsets => MediaQuery.viewInsetsOf(context);
+  EdgeInsets get padding => MediaQuery.paddingOf(context);
   double get textScale => MediaQuery.textScalerOf(context).scale(1);
 
   bool get isMobile => width < Breakpoints.mobile;
@@ -56,9 +74,16 @@ class ResponsiveHelper {
     return NavLayout.bottomBar;
   }
 
+  double get sideNavWidth =>
+      width >= Breakpoints.sideNavWide
+          ? Breakpoints.sideNavExpandedWidth
+          : Breakpoints.sideNavCompactWidth;
+
+  bool get railShowAllLabels => width >= Breakpoints.railLabelsAll;
+
   double get pageMaxWidth {
     if (isDesktop) return Breakpoints.contentWide;
-    if (isTablet) return 720;
+    if (isTablet) return 760;
     return Breakpoints.contentPhone;
   }
 
@@ -86,24 +111,50 @@ class ResponsiveHelper {
         vertical: verticalPadding,
       );
 
+  /// Alias matching the architecture brief.
+  EdgeInsets get adaptivePadding => pagePadding;
+
   double spacing(double base) {
     if (isDesktop) return base * 1.25;
     if (isTiny) return math.max(8, base * 0.85);
     return base;
   }
 
+  double get adaptiveSpacing => spacing(AppSpacing.lg);
+
   double fontSize(double base) {
     if (isDesktop) return base * 1.05;
-    if (isTiny) return base * 0.95;
+    if (isTiny) return base * 0.92;
     return base;
+  }
+
+  double get adaptiveFont => fontSize(14);
+
+  /// Minimum comfortable tap target (Material guideline).
+  double get minTouchSize => 48;
+
+  double get iconSize {
+    if (isDesktop) return 26;
+    if (isTiny) return 20;
+    return 24;
+  }
+
+  double get heroIconSize {
+    if (isDesktop) return 72;
+    if (isTablet) return 64;
+    if (isTiny) return 48;
+    return 56;
   }
 
   /// Grid columns for action / card grids.
   int gridColumns({int mobile = 2, int tablet = 3, int desktop = 5}) {
     if (isDesktop) return desktop;
     if (isTablet) return tablet;
+    if (isTiny) return math.min(2, mobile);
     return mobile;
   }
+
+  int get adaptiveGrid => gridColumns();
 
   /// Preferred max extent for [SliverGridDelegateWithMaxCrossAxisExtent].
   double get gridMaxCrossAxisExtent {
@@ -117,14 +168,24 @@ class ResponsiveHelper {
     return math.max(minRatio, base / textScale - narrowed);
   }
 
+  /// Prefer two-pane layouts on tablet+ (or wide landscape phones).
+  bool get useTwoPane => isTablet || isDesktop || (isLandscape && width >= 700);
+
   /// Dialog width that fits phones and desktops.
   double dialogWidth({double preferred = 480}) {
     return math.min(preferred, width - horizontalPadding * 2);
   }
 
   double dialogMaxHeight({double fraction = 0.9}) {
-    final available = height - viewInsets.bottom;
+    final available = height - viewInsets.bottom - padding.vertical;
     return math.max(280, available * fraction);
+  }
+
+  /// Value picker that scales with breakpoints.
+  T value<T>({required T mobile, required T tablet, required T desktop}) {
+    if (isDesktop) return desktop;
+    if (isTablet) return tablet;
+    return mobile;
   }
 }
 

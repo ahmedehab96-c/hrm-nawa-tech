@@ -119,29 +119,40 @@ class _EmployeeHomeScreenState extends State<EmployeeHomeScreen> {
               ),
               Padding(
                 padding: EdgeInsets.fromLTRB(pad, 12, pad, 28),
-                child: LayoutBuilder(builder: (_, c) {
-                  final r = context.responsive;
-                  final cols = r.gridColumns(mobile: 2, tablet: 4, desktop: 4);
-                  final gap = 12.0;
-                  final cardWidth = (c.maxWidth - gap * (cols - 1)) / cols;
-                  final actions = [
-                    FadeSlideIn(delay: const Duration(milliseconds: 200),
-                      child: _QuickActionCard(icon: Icons.event_note_outlined, label: l10n.requestLeave,       iconColor: AppColors.warning,   onTap: () => context.go('/employee/leave'))),
-                    FadeSlideIn(delay: const Duration(milliseconds: 240),
-                      child: _QuickActionCard(icon: Icons.receipt_long,         label: l10n.payslip,            iconColor: AppColors.success,   onTap: () => context.go('/employee/payslip'))),
-                    FadeSlideIn(delay: const Duration(milliseconds: 280),
-                      child: _QuickActionCard(icon: Icons.access_time,           label: l10n.attendanceLogLabel, iconColor: AppColors.primary,   onTap: () => context.go('/employee/attendance'))),
-                    FadeSlideIn(delay: const Duration(milliseconds: 320),
-                      child: _QuickActionCard(icon: Icons.person_outline,        label: l10n.profileQuickLabel,  iconColor: AppColors.secondary, onTap: () => context.go('/employee/profile'))),
-                  ];
-                  return Wrap(
-                    spacing: gap,
-                    runSpacing: gap,
-                    children: actions
-                        .map((w) => SizedBox(width: cardWidth, child: w))
-                        .toList(),
-                  );
-                }),
+                child: FadeSlideIn(
+                  delay: const Duration(milliseconds: 200),
+                  child: ResponsiveGrid(
+                    mobileColumns: 2,
+                    tabletColumns: 4,
+                    desktopColumns: 4,
+                    children: [
+                      _QuickActionCard(
+                        icon: Icons.event_note_outlined,
+                        label: l10n.requestLeave,
+                        iconColor: AppColors.warning,
+                        onTap: () => context.go('/employee/leave'),
+                      ),
+                      _QuickActionCard(
+                        icon: Icons.receipt_long,
+                        label: l10n.payslip,
+                        iconColor: AppColors.success,
+                        onTap: () => context.go('/employee/payslip'),
+                      ),
+                      _QuickActionCard(
+                        icon: Icons.access_time,
+                        label: l10n.attendanceLogLabel,
+                        iconColor: AppColors.primary,
+                        onTap: () => context.go('/employee/attendance'),
+                      ),
+                      _QuickActionCard(
+                        icon: Icons.person_outline,
+                        label: l10n.profileQuickLabel,
+                        iconColor: AppColors.secondary,
+                        onTap: () => context.go('/employee/profile'),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           );
@@ -333,33 +344,57 @@ class _AttendanceCard extends StatelessWidget {
             ),
           ),
 
-          // Action buttons
+          // Action buttons — stack on tiny / large text
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-            child: Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: isLoading ? null : onCheckIn,
-                    icon: const Icon(Icons.login, size: 18),
-                    label: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(l10n.checkIn),
-                    ),
+            padding: EdgeInsets.fromLTRB(
+              context.responsive.spacing(20),
+              context.responsive.spacing(8),
+              context.responsive.spacing(20),
+              context.responsive.spacing(20),
+            ),
+            child: Builder(
+              builder: (context) {
+                final r = context.responsive;
+                final checkIn = OutlinedButton.icon(
+                  onPressed: isLoading ? null : onCheckIn,
+                  icon: const Icon(Icons.login, size: 18),
+                  label: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(l10n.checkIn),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: isLoading ? null : onCheckOut,
-                    icon: const Icon(Icons.logout, size: 18),
-                    label: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(l10n.checkOut),
-                    ),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: Size.fromHeight(r.minTouchSize),
                   ),
-                ),
-              ],
+                );
+                final checkOut = FilledButton.icon(
+                  onPressed: isLoading ? null : onCheckOut,
+                  icon: const Icon(Icons.logout, size: 18),
+                  label: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(l10n.checkOut),
+                  ),
+                  style: FilledButton.styleFrom(
+                    minimumSize: Size.fromHeight(r.minTouchSize),
+                  ),
+                );
+                if (r.isTiny || r.textScale > 1.2) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      checkIn,
+                      SizedBox(height: r.spacing(12)),
+                      checkOut,
+                    ],
+                  );
+                }
+                return Row(
+                  children: [
+                    Expanded(child: checkIn),
+                    SizedBox(width: r.spacing(12)),
+                    Expanded(child: checkOut),
+                  ],
+                );
+              },
             ),
           ),
         ],

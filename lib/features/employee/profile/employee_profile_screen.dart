@@ -102,232 +102,283 @@ class _EmployeeProfileScreenState extends State<EmployeeProfileScreen> {
           title: Text(l10n.profileQuickLabel),
         ),
         body: ResponsivePage(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
+          child: Builder(
+            builder: (context) {
+              final r = context.responsive;
+              final header = Center(
                 child: Column(
                   children: [
                     CircleAvatar(
-                      radius: 48,
+                      radius: r.value(mobile: 48.0, tablet: 56.0, desktop: 64.0),
                       child: Text(
                         avatarChar,
-                        style: const TextStyle(
-                          fontSize: 36,
+                        style: TextStyle(
+                          fontSize: r.fontSize(36),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: r.spacing(16)),
                     Text(
                       name.isEmpty ? '—' : name,
                       style: AppTypography.h3,
                       textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     Text(
                       _employee?.position ?? '—',
                       style: AppTypography.bodySmall,
                       textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     Text(
                       _employee?.department ?? '—',
                       style: AppTypography.caption,
                       textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 32),
-              Text(l10n.personalInfo, style: AppTypography.h4),
-              const SizedBox(height: 16),
-              Card(
-                child: _loading
-                    ? const Padding(
-                        padding: EdgeInsets.all(24),
-                        child: Center(child: CircularProgressIndicator()),
-                      )
-                    : Column(
-                        children: [
-                          _ProfileItem(
-                            icon: Icons.email,
-                            label: l10n.email,
-                            value: _employee?.email ?? '—',
-                          ),
-                          const Divider(height: 1),
-                          _ProfileItem(
-                            icon: Icons.phone,
-                            label: l10n.phone,
-                            value: _employee?.phone ?? '—',
-                          ),
-                          const Divider(height: 1),
-                          _ProfileItem(
-                            icon: Icons.calendar_today,
-                            label: l10n.hireDate,
-                            value: _employee?.hireDate ?? '—',
-                          ),
-                        ],
-                      ),
-              ),
-              const SizedBox(height: 24),
-              Text(l10n.documentsSection, style: AppTypography.h4),
-              const SizedBox(height: 16),
-              Card(
-                child: Column(
-                  children: [
-                    ListTile(
-                      leading: const Icon(Icons.description),
-                      title: Text(l10n.employmentContract),
-                      trailing: const Icon(Icons.download),
-                      onTap: _loading ? null : () {},
-                    ),
-                    const Divider(height: 1),
-                    ListTile(
-                      leading: const Icon(Icons.description),
-                      title: Text(l10n.payslipJanuaryDoc),
-                      trailing: const Icon(Icons.download),
-                      onTap: _loading ? null : () {},
-                    ),
-                  ],
-                ),
-              ),
-              if (_error != null) ...[
-                const SizedBox(height: 16),
-                Text(_error!, style: AppTypography.bodySmall.copyWith(color: AppColors.error)),
-              ],
-              const SizedBox(height: 32),
+              );
 
-              // ── App settings: language + theme ────────────────────────
-              Text(l10n.appearance, style: AppTypography.h4),
-              const SizedBox(height: 16),
-              Card(
-                child: Column(
-                  children: [
-                    // Dark / light mode toggle
-                    Builder(builder: (ctx) {
-                      final notifier = ThemeScope.of(ctx);
-                      return SwitchListTile(
-                        secondary: Icon(
-                          notifier.isDark ? Icons.dark_mode : Icons.light_mode,
-                          color: AppColors.primary,
+              final personalCard = Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(l10n.personalInfo, style: AppTypography.h4),
+                  SizedBox(height: r.spacing(16)),
+                  Card(
+                    child: _loading
+                        ? Padding(
+                            padding: EdgeInsets.all(r.spacing(24)),
+                            child: const Center(child: CircularProgressIndicator()),
+                          )
+                        : Column(
+                            children: [
+                              _ProfileItem(
+                                icon: Icons.email,
+                                label: l10n.email,
+                                value: _employee?.email ?? '—',
+                              ),
+                              const Divider(height: 1),
+                              _ProfileItem(
+                                icon: Icons.phone,
+                                label: l10n.phone,
+                                value: _employee?.phone ?? '—',
+                              ),
+                              const Divider(height: 1),
+                              _ProfileItem(
+                                icon: Icons.calendar_today,
+                                label: l10n.hireDate,
+                                value: _employee?.hireDate ?? '—',
+                              ),
+                            ],
+                          ),
+                  ),
+                ],
+              );
+
+              final docsCard = Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(l10n.documentsSection, style: AppTypography.h4),
+                  SizedBox(height: r.spacing(16)),
+                  Card(
+                    child: Column(
+                      children: [
+                        ListTile(
+                          leading: const Icon(Icons.description),
+                          title: Text(
+                            l10n.employmentContract,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          trailing: const Icon(Icons.download),
+                          onTap: _loading ? null : () {},
                         ),
-                        title: Text(l10n.darkMode, style: AppTypography.bodyMedium),
-                        subtitle: Text(
-                          notifier.isDark ? l10n.darkModeOn : l10n.darkModeOff,
-                          style: AppTypography.caption,
+                        const Divider(height: 1),
+                        ListTile(
+                          leading: const Icon(Icons.description),
+                          title: Text(
+                            l10n.payslipJanuaryDoc,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          trailing: const Icon(Icons.download),
+                          onTap: _loading ? null : () {},
                         ),
-                        value: notifier.isDark,
-                        onChanged: (v) =>
-                            notifier.setMode(v ? ThemeMode.dark : ThemeMode.light),
-                      );
-                    }),
-                    const Divider(height: 1),
-                    // Language toggle — full-width below title to avoid trailing overflow
-                    Builder(builder: (ctx) {
-                      final locale = Localizations.localeOf(ctx);
-                      final isAr = locale.languageCode == 'ar';
-                      return Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Row(
+                      ],
+                    ),
+                  ),
+                ],
+              );
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  header,
+                  SizedBox(height: r.spacing(32)),
+                  if (r.useTwoPane)
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(child: personalCard),
+                        SizedBox(width: r.spacing(16)),
+                        Expanded(child: docsCard),
+                      ],
+                    )
+                  else ...[
+                    personalCard,
+                    SizedBox(height: r.spacing(24)),
+                    docsCard,
+                  ],
+                  if (_error != null) ...[
+                    SizedBox(height: r.spacing(16)),
+                    Text(
+                      _error!,
+                      style: AppTypography.bodySmall.copyWith(color: AppColors.error),
+                    ),
+                  ],
+                  SizedBox(height: r.spacing(32)),
+                  Text(l10n.appearance, style: AppTypography.h4),
+                  SizedBox(height: r.spacing(16)),
+                  Card(
+                    child: Column(
+                      children: [
+                        Builder(builder: (ctx) {
+                          final notifier = ThemeScope.of(ctx);
+                          return SwitchListTile(
+                            secondary: Icon(
+                              notifier.isDark ? Icons.dark_mode : Icons.light_mode,
+                              color: AppColors.primary,
+                            ),
+                            title: Text(l10n.darkMode, style: AppTypography.bodyMedium),
+                            subtitle: Text(
+                              notifier.isDark ? l10n.darkModeOn : l10n.darkModeOff,
+                              style: AppTypography.caption,
+                            ),
+                            value: notifier.isDark,
+                            onChanged: (v) =>
+                                notifier.setMode(v ? ThemeMode.dark : ThemeMode.light),
+                          );
+                        }),
+                        const Divider(height: 1),
+                        Builder(builder: (ctx) {
+                          final locale = Localizations.localeOf(ctx);
+                          final isAr = locale.languageCode == 'ar';
+                          return Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                const Icon(Icons.language, color: AppColors.primary),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(l10n.language, style: AppTypography.bodyMedium),
-                                      Text(
-                                        isAr ? l10n.arabic : l10n.english,
-                                        style: AppTypography.caption,
+                                Row(
+                                  children: [
+                                    const Icon(Icons.language, color: AppColors.primary),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(l10n.language, style: AppTypography.bodyMedium),
+                                          Text(
+                                            isAr ? l10n.arabic : l10n.english,
+                                            style: AppTypography.caption,
+                                          ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                SegmentedButton<String>(
+                                  segments: [
+                                    ButtonSegment(value: 'ar', label: Text(l10n.arabic)),
+                                    ButtonSegment(value: 'en', label: Text(l10n.english)),
+                                  ],
+                                  selected: {isAr ? 'ar' : 'en'},
+                                  onSelectionChanged: (s) => LocaleController.instance
+                                      .setLocale(Locale(s.first)),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 10),
-                            SegmentedButton<String>(
-                              segments: [
-                                ButtonSegment(value: 'ar', label: Text(l10n.arabic)),
-                                ButtonSegment(value: 'en', label: Text(l10n.english)),
-                              ],
-                              selected: {isAr ? 'ar' : 'en'},
-                              onSelectionChanged: (s) =>
-                                  LocaleController.instance.setLocale(Locale(s.first)),
+                          );
+                        }),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: r.spacing(24)),
+                  Text(l10n.serverBindingTitle, style: AppTypography.h4),
+                  SizedBox(height: r.spacing(8)),
+                  Text(
+                    l10n.serverBindingDescription,
+                    style: AppTypography.caption.copyWith(color: AppColors.textSecondary),
+                  ),
+                  SizedBox(height: r.spacing(16)),
+                  ResponsiveFormFrame(
+                    child: Card(
+                      child: Padding(
+                        padding: EdgeInsets.all(r.spacing(16)),
+                        child: Column(
+                          children: [
+                            SwitchListTile(
+                              contentPadding: EdgeInsets.zero,
+                              title: Text(l10n.useServer),
+                              subtitle: Text(
+                                _useApi ? l10n.serverEnabled : l10n.serverDisabled,
+                                style: AppTypography.caption,
+                              ),
+                              value: _useApi,
+                              onChanged: (v) => setState(() => _useApi = v),
+                            ),
+                            TextField(
+                              controller: _baseUrlCtrl,
+                              enabled: _useApi,
+                              decoration: InputDecoration(
+                                labelText: l10n.baseUrlLabel,
+                                hintText: l10n.baseUrlHint,
+                              ),
+                            ),
+                            SizedBox(height: r.spacing(12)),
+                            SizedBox(
+                              width: double.infinity,
+                              child: FilledButton(
+                                onPressed: _saveApiSettings,
+                                style: FilledButton.styleFrom(
+                                  minimumSize: Size.fromHeight(r.minTouchSize),
+                                ),
+                                child: Text(l10n.save),
+                              ),
                             ),
                           ],
                         ),
-                      );
-                    }),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-              Text(l10n.serverBindingTitle, style: AppTypography.h4),
-              const SizedBox(height: 8),
-              Text(
-                l10n.serverBindingDescription,
-                style: AppTypography.caption.copyWith(color: AppColors.textSecondary),
-              ),
-              const SizedBox(height: 16),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      SwitchListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(l10n.useServer),
-                        subtitle: Text(
-                          _useApi ? l10n.serverEnabled : l10n.serverDisabled,
-                          style: AppTypography.caption,
-                        ),
-                        value: _useApi,
-                        onChanged: (v) => setState(() => _useApi = v),
                       ),
-                      TextField(
-                        controller: _baseUrlCtrl,
-                        enabled: _useApi,
-                        decoration: InputDecoration(
-                          labelText: l10n.baseUrlLabel,
-                          hintText: l10n.baseUrlHint,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        width: double.infinity,
-                        child: FilledButton(
-                          onPressed: _saveApiSettings,
-                          child: Text(l10n.save),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  onPressed: () async {
-                    await AuthRepository.logout();
-                    if (!context.mounted) return;
-                    context.go('/login');
-                  },
-                  icon: const Icon(Icons.logout),
-                  label: Text(l10n.logout),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.error,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  SizedBox(height: r.spacing(32)),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: () async {
+                        await AuthRepository.logout();
+                        if (!context.mounted) return;
+                        context.go('/login');
+                      },
+                      icon: const Icon(Icons.logout),
+                      label: Text(l10n.logout),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppColors.error,
+                        foregroundColor: Colors.white,
+                        minimumSize: Size.fromHeight(r.minTouchSize),
+                        padding: EdgeInsets.symmetric(vertical: r.spacing(14)),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 24),
-            ],
+                  SizedBox(height: r.spacing(24)),
+                ],
+              );
+            },
           ),
         ),
       ),
@@ -350,8 +401,18 @@ class _ProfileItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: Icon(icon, color: AppColors.primary),
-      title: Text(label, style: AppTypography.caption),
-      subtitle: Text(value, style: AppTypography.bodyMedium),
+      title: Text(
+        label,
+        style: AppTypography.caption,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      subtitle: Text(
+        value,
+        style: AppTypography.bodyMedium,
+        maxLines: 3,
+        overflow: TextOverflow.ellipsis,
+      ),
     );
   }
 }

@@ -124,7 +124,8 @@ class _EmployeePayslipScreenState extends State<EmployeePayslipScreen> {
         body: _loading
             ? const Center(child: CircularProgressIndicator())
             : ResponsivePage(
-                child: Column(
+                child: ResponsiveFormFrame(
+                  child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     DropdownButtonFormField<String>(
@@ -151,20 +152,21 @@ class _EmployeePayslipScreenState extends State<EmployeePayslipScreen> {
                         }
                       },
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: context.responsive.spacing(24)),
                     if (_error != null)
                       Card(
                         color: AppColors.error.withValues(alpha: 0.08),
                         child: Padding(
-                          padding: const EdgeInsets.all(16),
+                          padding: EdgeInsets.all(context.responsive.spacing(16)),
                           child: Row(
                             children: [
                               const Icon(Icons.error_outline, color: AppColors.error),
-                              const SizedBox(width: 12),
+                              SizedBox(width: context.responsive.spacing(12)),
                               Expanded(
                                 child: Text(
                                   _error!,
                                   style: AppTypography.bodySmall.copyWith(color: AppColors.error),
+                                  softWrap: true,
                                 ),
                               ),
                               TextButton(onPressed: _load, child: Text(l10n.retryAction)),
@@ -175,11 +177,12 @@ class _EmployeePayslipScreenState extends State<EmployeePayslipScreen> {
                     else if (s == null)
                       Card(
                         child: Padding(
-                          padding: const EdgeInsets.all(24),
+                          padding: EdgeInsets.all(context.responsive.spacing(24)),
                           child: Center(
                             child: Text(
                               l10n.payslipNotFound,
                               style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+                              textAlign: TextAlign.center,
                             ),
                           ),
                         ),
@@ -187,7 +190,7 @@ class _EmployeePayslipScreenState extends State<EmployeePayslipScreen> {
                     else
                       Card(
                         child: Padding(
-                          padding: const EdgeInsets.all(24),
+                          padding: EdgeInsets.all(context.responsive.spacing(24)),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -237,6 +240,7 @@ class _EmployeePayslipScreenState extends State<EmployeePayslipScreen> {
                         ),
                       ),
                   ],
+                ),
                 ),
               ),
       ),

@@ -141,9 +141,9 @@ class _EmployeeShellState extends State<EmployeeShell> {
                 NavigationRail(
                   selectedIndex: selected,
                   onDestinationSelected: _onSelect,
-                  labelType: r.width < 800
-                      ? NavigationRailLabelType.selected
-                      : NavigationRailLabelType.all,
+                  labelType: r.railShowAllLabels
+                      ? NavigationRailLabelType.all
+                      : NavigationRailLabelType.selected,
                   destinations: [
                     for (final item in items)
                       NavigationRailDestination(
@@ -174,7 +174,7 @@ class _EmployeeShellState extends State<EmployeeShell> {
                   selectedIndex: selected,
                   items: items,
                   onSelect: _onSelect,
-                  width: r.width >= 1280 ? 260 : 220,
+                  width: r.sideNavWidth,
                 ),
                 const VerticalDivider(width: 1),
                 Expanded(child: widget.child),

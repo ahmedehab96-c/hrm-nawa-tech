@@ -82,10 +82,9 @@ class _AiAssistantPanelState extends State<AiAssistantPanel> {
     _seedWelcome(l10n);
 
     final width = math.min(r.dialogWidth(preferred: 480), size.width - 24);
-    final availableHeight = size.height - viewInsets.bottom - 48;
     final height = math.min(
-      r.isLandscape ? availableHeight * 0.95 : 560.0,
-      math.max(260.0, availableHeight * 0.9),
+      r.dialogMaxHeight(fraction: r.isLandscape ? 0.95 : 0.88),
+      math.max(280.0, size.height - viewInsets.bottom - 48),
     );
 
     return Directionality(
@@ -208,7 +207,10 @@ class _Bubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final maxBubble = math.min(280.0, MediaQuery.sizeOf(context).width * 0.72);
+    final maxBubble = math.min(
+      MediaQuery.sizeOf(context).width * 0.78,
+      ResponsiveHelper.of(context).isDesktop ? 420.0 : 320.0,
+    );
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Align(
