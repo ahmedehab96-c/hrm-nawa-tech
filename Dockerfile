@@ -1,6 +1,6 @@
 # Root Dockerfile for Render/Railway when dockerContext is the repository root.
 # Keeps backend/Dockerfile as the canonical build definition.
-FROM php:8.3-cli-bookworm
+FROM php:8.4-cli-bookworm
 
 RUN apt-get update && apt-get install -y \
     git \
