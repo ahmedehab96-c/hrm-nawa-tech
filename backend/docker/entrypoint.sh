@@ -5,9 +5,31 @@ if [ ! -f .env ]; then
   cp .env.example .env
 fi
 
-if ! grep -q '^APP_KEY=base64:' .env; then
-  php artisan key:generate --force --no-interaction
+# Prefer platform-provided public URL (Render injects RENDER_EXTERNAL_URL).
+if [ -z "${APP_URL:-}" ] && [ -n "${RENDER_EXTERNAL_URL:-}" ]; then
+  export APP_URL="${RENDER_EXTERNAL_URL}"
 fi
+
+# Ensure a usable APP_KEY is available to the PHP process.
+if [ -z "${APP_KEY:-}" ] || [ "${APP_KEY}" = "null" ] || [ "${APP_KEY}" = "base64:" ]; then
+  if grep -q '^APP_KEY=base64:' .env; then
+    export APP_KEY="$(grep '^APP_KEY=base64:' .env | head -n1 | cut -d= -f2-)"
+  else
+    export APP_KEY="base64:$(php -r 'echo base64_encode(random_bytes(32));')"
+    if grep -q '^APP_KEY=' .env; then
+      sed -i.bak "s|^APP_KEY=.*|APP_KEY=${APP_KEY}|" .env && rm -f .env.bak
+    else
+      echo "APP_KEY=${APP_KEY}" >> .env
+    fi
+  fi
+fi
+
+# HTTPS demos behind Render / Railway need secure cookies when APP_URL is https.
+case "${APP_URL:-}" in
+  https://*)
+    export SESSION_SECURE_COOKIE="${SESSION_SECURE_COOKIE:-true}"
+    ;;
+esac
 
 # Wait for MySQL when configured
 if [ "${DB_CONNECTION:-sqlite}" = "mysql" ]; then
