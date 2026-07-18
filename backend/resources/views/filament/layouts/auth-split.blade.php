@@ -4,15 +4,13 @@
     <div class="nawa-auth-shell">
         <aside class="nawa-auth-brand" aria-hidden="true">
             <div class="nawa-auth-brand-inner">
-                <img src="{{ asset('images/hrm_logo.png') }}" alt="{{ __('admin.brand.name') }}">
-                <h1>{{ __('admin.auth.title') }}</h1>
-                <p>{{ __('admin.auth.subtitle') }}</p>
+                @include('filament.partials.nawa-full-logo')
             </div>
         </aside>
 
         <div class="nawa-auth-form-wrap">
             <div class="nawa-auth-mobile-logo">
-                <img src="{{ asset('images/hrm_logo.png') }}" alt="{{ __('admin.brand.name') }}">
+                @include('filament.partials.nawa-full-logo', ['compact' => true])
             </div>
 
             <div class="fi-simple-layout w-full">

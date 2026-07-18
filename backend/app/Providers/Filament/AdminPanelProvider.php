@@ -37,8 +37,11 @@ class AdminPanelProvider extends PanelProvider
             ->login(Login::class)
             ->registration(Register::class)
             ->brandName(__('admin.brand.name'))
-            ->brandLogo(asset('images/hrm_logo_mark.png'))
-            ->brandLogoHeight('3rem')
+            ->brandLogo(fn (): HtmlString => new HtmlString(
+                view('filament.partials.nawa-nav-logo')->render()
+            ))
+            ->brandLogoHeight('2.75rem')
+            ->favicon(asset('images/nawa-hex-mark.svg'))
             ->font('Cairo')
             ->colors([
                 'primary' => Color::hex('#2563EB'),
@@ -92,7 +95,7 @@ class AdminPanelProvider extends PanelProvider
         FilamentView::registerRenderHook(
             PanelsRenderHook::HEAD_END,
             fn (): HtmlString => new HtmlString(
-                '<link rel="stylesheet" href="'.asset('css/nawa-admin.css').'?v=6" />'
+                '<link rel="stylesheet" href="'.asset('css/nawa-admin.css').'?v=7" />'
                 .'<link rel="preconnect" href="https://fonts.googleapis.com">'
                 .'<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
                 .'<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">'
