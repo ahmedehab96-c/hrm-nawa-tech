@@ -25,6 +25,7 @@ Public hosted demo on Render:
 - **API health:** [https://hrm-nawa-api.onrender.com/api/health](https://hrm-nawa-api.onrender.com/api/health)
 - **Company admin:** `admin@demo.com` / `Admin12345!`
 - **Recruiter:** `recruiter@demo.com` / `Recruiter12345!`
+- **Employee (mobile):** `emp01@demo.com` / `Employee12345!` — run `./scripts/run_mobile_live.sh`
 
 Keep-alive: GitHub Actions pings the health endpoint every 10 minutes so the free instance
 stays warm for demos. For zero sleep, upgrade to Render **Starter** (~$7/mo) — see
@@ -127,6 +128,17 @@ For mail and AI background jobs locally, run `./scripts/start_queue.sh` in a sec
 
 #### 3. Run Employee App (Mobile)
 
+**Against the live demo API (phone or simulator):**
+
+```bash
+./scripts/run_mobile_live.sh
+# or: ./scripts/run_mobile_live.sh "iPhone 16 Pro"
+```
+
+Login: `emp01@demo.com` / `Employee12345!`
+
+**Against local API:**
+
 ```bash
 flutter pub get
 flutter run -d ios        # iPhone Simulator
@@ -134,11 +146,11 @@ flutter run -d ios        # iPhone Simulator
 flutter run -d android  # Android Emulator
 ```
 
-In **debug mode**, simulators auto-connect to the local API (`127.0.0.1` on iOS, `10.0.2.2` on Android emulator).
+In **debug mode** without `USE_LIVE_DEMO`, simulators auto-connect to the local API (`127.0.0.1` on iOS, `10.0.2.2` on Android emulator).
 
 Or open **Profile** → **Server (Laravel API)**:
 1. Enable **Use server**
-2. Set Base URL: `http://127.0.0.1:8000/api`
+2. Set Base URL: `https://hrm-nawa-api.onrender.com/api` (live) or `http://127.0.0.1:8000/api` (local)
 3. Save
 
 | Role | Email | Password |
@@ -146,8 +158,7 @@ Or open **Profile** → **Server (Laravel API)**:
 | **Employee** | `emp01@demo.com` | `Employee12345!` |
 | Employee 2 | `emp02@demo.com` | `Employee12345!` |
 
-> On a **physical device**, use your computer's LAN IP instead of `127.0.0.1`  
-> Example: `http://192.168.1.10:8000/api`
+> On a **physical device**, prefer the live HTTPS URL above (no LAN IP). For local-only testing, use your computer's LAN IP instead of `127.0.0.1`.
 
 #### 4. What to explore
 
@@ -199,6 +210,16 @@ cd hrm-nawa-tech
 
 #### 3. تشغيل تطبيق الموظف (موبايل)
 
+**على الـ API اللايف (هاتف أو محاكي):**
+
+```bash
+./scripts/run_mobile_live.sh
+```
+
+دخول: `emp01@demo.com` / `Employee12345!`
+
+**على الـ API المحلي:**
+
 ```bash
 flutter pub get
 flutter run -d ios        # محاكي iPhone
@@ -206,17 +227,17 @@ flutter run -d ios        # محاكي iPhone
 flutter run -d android    # محاكي Android
 ```
 
-في **وضع التطوير**، المحاكي يتصل تلقائياً بالـ API المحلي (`127.0.0.1` على iOS، `10.0.2.2` على Android).
+في التطوير بدون `USE_LIVE_DEMO`، المحاكي يتصل تلقائياً بالمحلي.
 
-أو افتح **الملف الشخصي** → **الخادم (Laravel API)**:
-1. فعّل **استخدام الخادم**
-2. ضع العنوان: `http://127.0.0.1:8000/api`
-3. احفظ
+أو **الملف الشخصي** → **الخادم**: فعّل الاستخدام وضع
+`https://hrm-nawa-api.onrender.com/api` (لايف) أو `http://127.0.0.1:8000/api` (محلي).
 
 | الدور | البريد | كلمة المرور |
 |-------|--------|-------------|
 | **موظف** | `emp01@demo.com` | `Employee12345!` |
 | موظف 2 | `emp02@demo.com` | `Employee12345!` |
+
+> على **هاتف حقيقي** استخدم رابط Render HTTPS أعلاه (بدون IP الشبكة).
 
 > على **هاتف حقيقي**، استخدم IP جهازك على الشبكة بدلاً من `127.0.0.1`  
 > مثال: `http://192.168.1.10:8000/api`

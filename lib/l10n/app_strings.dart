@@ -655,7 +655,7 @@ class AppStringsAr extends AppStrings {
   @override
   String get baseUrlLabel => "عنوان الخادم (Base URL)";
   @override
-  String get baseUrlHint => "https://your-laravel.com/api";
+  String get baseUrlHint => "https://hrm-nawa-api.onrender.com/api";
   @override
   String get useServer => "استخدام الخادم";
   @override
@@ -1506,7 +1506,7 @@ class AppStringsEn extends AppStrings {
   @override
   String get baseUrlLabel => "Base URL";
   @override
-  String get baseUrlHint => "https://your-laravel.com/api";
+  String get baseUrlHint => "https://hrm-nawa-api.onrender.com/api";
   @override
   String get useServer => "Use server";
   @override

@@ -60,14 +60,24 @@ After the first successful seed, set `SEED_ON_START=false` so redeploys do not w
 ## Mobile against the live API
 
 ```bash
+# One command (simulator, device, or chrome):
+./scripts/run_mobile_live.sh
+./scripts/run_mobile_live.sh "iPhone 16 Pro"
+
+# Or manually:
 flutter run -d ios \
+  --dart-define=USE_LIVE_DEMO=true \
   --dart-define=API_BASE_URL=https://hrm-nawa-api.onrender.com/api
 
-# or release APK for reviewers:
-flutter build apk --release \
-  --dart-define=API_BASE_URL=https://hrm-nawa-api.onrender.com/api
+# Release APK for reviewers (defaults to live API even without dart-define):
+flutter build apk --release
 ```
 
+**Employee login:** `emp01@demo.com` / `Employee12345!`
+
+On a physical phone: same live URL works over HTTPS (no LAN IP needed).  
+Or in the app: **Profile → Server** → enable Use server → Base URL
+`https://hrm-nawa-api.onrender.com/api` → Save.
 ## Portfolio copy (paste into README / site)
 
 ```markdown

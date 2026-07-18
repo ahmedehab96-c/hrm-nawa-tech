@@ -11,6 +11,9 @@ class ApiConfig {
   static const _keyBaseUrl = 'api_base_url';
   static const _keyUseApi = 'api_use_server';
 
+  /// Public portfolio API (Render). Override with `--dart-define=API_BASE_URL=...`.
+  static const liveDemoBaseUrl = 'https://hrm-nawa-api.onrender.com/api';
+
   static String? _baseUrl;
   static bool _useApi = false;
 
@@ -24,10 +27,23 @@ class ApiConfig {
   }
 
   /// أول تشغيل على الموبايل في وضع التطوير: ربط تلقائي بـ Laravel المحلي.
+  /// With `--dart-define=USE_LIVE_DEMO=true`, force the public Render API (phone + sim).
   static Future<void> applyDebugMobileDefaults() async {
     if (!kDebugMode) return;
+    const useLive = bool.fromEnvironment('USE_LIVE_DEMO', defaultValue: false);
+    const envUrl = String.fromEnvironment('API_BASE_URL');
+    if (useLive) {
+      await setBaseUrl(envUrl.isNotEmpty ? envUrl : liveDemoBaseUrl);
+      await setUseApi(true);
+      return;
+    }
     final prefs = await SharedPreferences.getInstance();
     if (prefs.containsKey(_keyBaseUrl) || prefs.containsKey(_keyUseApi)) return;
+    if (envUrl.isNotEmpty) {
+      await setBaseUrl(envUrl);
+      await setUseApi(true);
+      return;
+    }
     final url = Platform.isAndroid
         ? 'http://10.0.2.2:8000/api'
         : 'http://127.0.0.1:8000/api';
@@ -35,22 +51,26 @@ class ApiConfig {
     await setUseApi(true);
   }
 
-  /// Production builds: `--dart-define=API_BASE_URL=https://api.example.com/api`
+  /// Release defaults to the live demo API so APK/IPA demos work without extra setup.
+  /// Override: `--dart-define=API_BASE_URL=https://your-api.example/api`
   static Future<void> applyReleaseDefaults() async {
     const envUrl = String.fromEnvironment('API_BASE_URL');
     final prefs = await SharedPreferences.getInstance();
-    if (envUrl.isNotEmpty && !prefs.containsKey(_keyBaseUrl)) {
-      await setBaseUrl(envUrl);
+    final resolved = envUrl.isNotEmpty
+        ? envUrl
+        : (kReleaseMode ? liveDemoBaseUrl : '');
+    if (resolved.isNotEmpty && !prefs.containsKey(_keyBaseUrl)) {
+      await setBaseUrl(resolved);
     }
     if (kReleaseMode) {
-      final effectiveUrl = _baseUrl ?? envUrl;
+      final effectiveUrl = _baseUrl ?? resolved;
       if (effectiveUrl.isNotEmpty) {
         await setUseApi(true);
       }
-    } else if (envUrl.isNotEmpty &&
+    } else if (resolved.isNotEmpty &&
         !prefs.containsKey(_keyBaseUrl) &&
         !prefs.containsKey(_keyUseApi)) {
-      await setBaseUrl(envUrl);
+      await setBaseUrl(resolved);
       await setUseApi(true);
     }
   }
