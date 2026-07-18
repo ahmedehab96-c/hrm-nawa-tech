@@ -1,0 +1,42 @@
+# Render Blueprint — portfolio live demo (free web + SQLite seed on boot)
+# Dashboard: https://dashboard.render.com → New → Blueprint → connect this repo
+# Guide: docs/LIVE_DEMO.md
+#
+# Note: free instances may sleep; first request can take ~30–60s.
+# SQLite is re-seeded on boot so the demo stays usable after restarts.
+
+services:
+  - type: web
+    name: hrm-nawa-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_NAME
+        value: Nawa Tech HRM
+      - key: TRUSTED_PROXIES
+        value: "*"
+      - key: DB_CONNECTION
+        value: sqlite
+      - key: SEED_ON_START
+        value: "true"
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: RUN_QUEUE_WORKER
+        value: "true"
+      - key: SESSION_DRIVER
+        value: file
+      - key: CACHE_STORE
+        value: file
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: MAIL_MAILER
+        value: log
+      - key: APP_KEY
+        generateValue: true

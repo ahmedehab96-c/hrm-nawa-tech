@@ -15,6 +15,19 @@
 | **Stack** | Laravel 13 · Filament 5 · Flutter 3 · Sanctum · SQLite/MySQL · GitHub Actions |
 | **Proof** | 120+ backend tests · 80+ Flutter tests · [Architecture](./docs/ARCHITECTURE.md) · [Demo guide](./DEMO.md) · [Portfolio summary](./docs/PORTFOLIO.md) |
 | **Run locally** | `./scripts/start_api.sh` → http://127.0.0.1:8000/admin |
+| **Live demo** | [docs/LIVE_DEMO.md](./docs/LIVE_DEMO.md) — Railway HTTPS URL for recruiters |
+
+### Live demo | تجربة مباشرة
+
+Public hosted demo (after Railway deploy): see **[docs/LIVE_DEMO.md](./docs/LIVE_DEMO.md)**.
+
+Until the public URL is live, run locally:
+
+```bash
+./scripts/start_api.sh
+# Admin → http://127.0.0.1:8000/admin
+# Recruiter → recruiter@demo.com / Recruiter12345!
+```
 
 ### Mobile preview
 
@@ -30,7 +43,7 @@ More portfolio captures are tracked in [`docs/screenshots/`](./docs/screenshots/
 
 **المرحلة الحالية:** عرض Portfolio قابل للتجربة مع أساس قوي للتحول إلى SaaS. الدفع الحقيقي والنشر الإنتاجي والمراقبة والمراجعة الأمنية النهائية ما زالت ضمن خارطة الطريق.
 
-📖 **Architecture:** [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) · **Demo:** [DEMO.md](./DEMO.md) · **SaaS launch:** [SAAS.md](./SAAS.md)  
+📖 **Architecture:** [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) · **Demo:** [DEMO.md](./DEMO.md) · **Live demo:** [docs/LIVE_DEMO.md](./docs/LIVE_DEMO.md) · **SaaS launch:** [SAAS.md](./SAAS.md)  
 🚀 **Deploy:** [DEPLOY.md](./DEPLOY.md)
 
 ---
