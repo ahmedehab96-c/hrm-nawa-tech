@@ -5,10 +5,13 @@ namespace App\Models;
 use App\Notifications\ResetPasswordNotification;
 use App\Notifications\VerifyEmailNotification;
 use Database\Factories\UserFactory;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -17,10 +20,30 @@ use Laravel\Sanctum\HasApiTokens;
 
 #[Fillable(['company_id', 'name', 'email', 'password', 'role'])]
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        if ($panel->getId() === 'admin') {
+            return $this->hasAnyRole([
+                'company_admin',
+                'super_admin',
+                'hr_manager',
+                'hr',
+                'recruiter',
+            ]);
+        }
+
+        return false;
+    }
+
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
+    }
 
     /**
      * Get the attributes that should be cast.
@@ -48,6 +71,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class, 'role_user')->withTimestamps();
+    }
+
+    public function devicePushTokens(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(DevicePushToken::class);
     }
 
     public function hasRole(string $role): bool
@@ -81,6 +109,12 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Authorization source of truth: pivot roles/permissions (role_user +
+     * permission_role). The legacy per-role match below is a temporary
+     * backward-compatibility fallback for users not yet synced to the RBAC
+     * pivot tables; do not rely on it for new logic and do not remove it until
+     * all users are migrated (removing it early would break existing tests).
+     *
      * @param  array<int, string>  $permissions
      */
     public function hasAnyPermission(array $permissions): bool

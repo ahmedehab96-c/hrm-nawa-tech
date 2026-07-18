@@ -15,6 +15,7 @@ class RbacSeeder extends Seeder
             'super_admin' => 'Platform Super Admin',
             'company_admin' => 'Company Admin',
             'hr_manager' => 'HR Manager',
+            'hr' => 'HR Specialist',
             'recruiter' => 'Recruiter',
             'employee' => 'Employee',
         ];
@@ -65,6 +66,16 @@ class RbacSeeder extends Seeder
                 'recruitment.manage',
                 'recruitment.ai.parse',
                 'recruitment.ai.match',
+                'reports.ai.summarize',
+            ],
+            'hr' => [
+                'ai.chat',
+                'ai.job_description.generate',
+                'employees.manage',
+                'attendance.manage',
+                'leave.approve',
+                'leave.ai.recommend',
+                'performance.manage',
                 'reports.ai.summarize',
             ],
             'recruiter' => [

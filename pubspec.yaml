@@ -1,5 +1,5 @@
 name: hrm_saas
-description: "A new Flutter project."
+description: "Employee mobile app for the Nawa Tech HRM full-stack portfolio platform."
 publish_to: 'none'
 version: 0.1.0
 
@@ -18,9 +18,9 @@ dependencies:
   network_info_plus: ^7.0.0
   shared_preferences: ^2.5.4
   flutter_secure_storage: ^9.2.4
+  app_links: ^6.4.0
   pdf: ^3.11.3
   printing: ^5.14.2
-  web: ^1.1.1
 
 dev_dependencies:
   flutter_test:

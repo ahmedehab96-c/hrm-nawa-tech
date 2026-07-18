@@ -74,4 +74,9 @@ else
   php artisan db:seed --force --no-interaction
 fi
 
+if [ "${RUN_QUEUE_WORKER:-false}" = "true" ] && [ "${QUEUE_CONNECTION:-sync}" != "sync" ]; then
+  echo "Starting queue worker in background..."
+  php artisan queue:work --sleep=3 --tries=3 --max-time=0 &
+fi
+
 exec php artisan serve --host=0.0.0.0 --port=8000

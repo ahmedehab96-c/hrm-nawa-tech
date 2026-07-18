@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_result.dart';
-import '../../../core/repositories/notifications_repository.dart';
+import 'package:hrm_saas/features/employee/notifications/data/notifications_repository.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/text_direction_helper.dart';
+import '../../../core/widgets/responsive_page.dart';
 import '../../../l10n/app_strings.dart';
 
 class EmployeeNotificationsScreen extends StatefulWidget {
@@ -72,31 +73,20 @@ class _EmployeeNotificationsScreenState
             icon: const Icon(Icons.arrow_back),
             onPressed: () => context.pop(),
           ),
-          title: Row(
-            children: [
-              Text(l10n.employeeNotificationsTitle),
-              if (_unreadCount > 0) ...[
-                const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: AppColors.error,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    '$_unreadCount',
-                    style: AppTypography.caption.copyWith(color: Colors.white),
-                  ),
-                ),
-              ],
-            ],
+          title: Text(
+            l10n.employeeNotificationsTitle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
           actions: [
             if (_unreadCount > 0)
-              TextButton.icon(
+              IconButton(
                 onPressed: _markAllRead,
-                icon: const Icon(Icons.done_all, size: 18),
-                label: Text(l10n.markAllRead),
+                tooltip: l10n.markAllRead,
+                icon: Badge(
+                  label: Text('$_unreadCount'),
+                  child: const Icon(Icons.done_all),
+                ),
               ),
             IconButton(
               icon: const Icon(Icons.refresh),
@@ -138,77 +128,108 @@ class _EmployeeNotificationsScreenState
     }
 
     if (_items.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.notifications_none, size: 64,
-                color: AppColors.textSecondary.withValues(alpha: 0.5)),
-            const SizedBox(height: 16),
-            Text(l10n.noNotifications, style: AppTypography.h4),
-          ],
+      return ResponsivePage(
+        scrollable: false,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.notifications_none, size: 64,
+                  color: AppColors.textSecondary.withValues(alpha: 0.5)),
+              const SizedBox(height: 16),
+              Text(
+                l10n.noNotifications,
+                style: AppTypography.h4,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: _items.length,
-      itemBuilder: (context, i) {
-        final item = _items[i];
-        final (icon, color) = _styleForCategory(item.category);
-        return Dismissible(
-          key: ValueKey(item.id),
-          direction: DismissDirection.endToStart,
-          background: Container(
-            alignment: Alignment.centerRight,
-            padding: const EdgeInsets.only(right: 20),
-            color: AppColors.error.withValues(alpha: 0.1),
-            child: Icon(Icons.delete_outline, color: AppColors.error),
+    final r = context.responsive;
+    return Align(
+      alignment: Alignment.topCenter,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: r.pageMaxWidth),
+        child: ListView.builder(
+          padding: EdgeInsets.symmetric(
+            horizontal: r.horizontalPadding,
+            vertical: 16,
           ),
-          onDismissed: (_) => _delete(item),
-          child: Card(
-            margin: const EdgeInsets.only(bottom: 12),
-            color: item.isRead ? null : AppColors.primary.withValues(alpha: 0.04),
-            child: ListTile(
-              onTap: () => _markRead(item),
-              leading: CircleAvatar(
-                backgroundColor: color.withValues(alpha: 0.15),
-                child: Icon(icon, color: color, size: 24),
+          itemCount: _items.length,
+          itemBuilder: (context, i) {
+            final item = _items[i];
+            final (icon, color) = _styleForCategory(item.category);
+            return Dismissible(
+              key: ValueKey(item.id),
+              direction: DismissDirection.endToStart,
+              background: Container(
+                alignment: AlignmentDirectional.centerEnd,
+                padding: const EdgeInsetsDirectional.only(end: 20),
+                color: AppColors.error.withValues(alpha: 0.1),
+                child: Icon(Icons.delete_outline, color: AppColors.error),
               ),
-              title: Text(
-                item.title,
-                style: AppTypography.bodyLarge.copyWith(
-                  fontWeight: item.isRead ? FontWeight.normal : FontWeight.w600,
+              onDismissed: (_) => _delete(item),
+              child: Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                color: item.isRead
+                    ? null
+                    : AppColors.primary.withValues(alpha: 0.04),
+                child: ListTile(
+                  onTap: () => _markRead(item),
+                  leading: CircleAvatar(
+                    backgroundColor: color.withValues(alpha: 0.15),
+                    child: Icon(icon, color: color, size: 24),
+                  ),
+                  title: Text(
+                    item.title,
+                    style: AppTypography.bodyLarge.copyWith(
+                      fontWeight:
+                          item.isRead ? FontWeight.normal : FontWeight.w600,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 4),
+                      Text(
+                        item.body,
+                        style: AppTypography.bodySmall,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        item.timeLabel.isEmpty ? '—' : item.timeLabel,
+                        style: AppTypography.caption,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                  isThreeLine: true,
+                  trailing: item.isRead
+                      ? null
+                      : Container(
+                          width: 10,
+                          height: 10,
+                          decoration: const BoxDecoration(
+                            color: AppColors.primary,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
                 ),
               ),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 4),
-                  Text(item.body, style: AppTypography.bodySmall),
-                  const SizedBox(height: 4),
-                  Text(
-                    item.timeLabel.isEmpty ? '—' : item.timeLabel,
-                    style: AppTypography.caption,
-                  ),
-                ],
-              ),
-              isThreeLine: true,
-              trailing: item.isRead
-                  ? null
-                  : Container(
-                      width: 10,
-                      height: 10,
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-            ),
-          ),
-        );
-      },
+            );
+          },
+        ),
+      ),
     );
   }
 

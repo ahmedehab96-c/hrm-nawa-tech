@@ -4,29 +4,26 @@
 
 ---
 
-## Quick start (3 terminals)
+## Quick start (2 terminals)
 
 ```bash
-# 1) Laravel API (:8000) — runs from ~/Developer/hrm-nawa-api
+# 1) Laravel API + Filament admin (:8000)
 chmod +x scripts/*.sh
 ./scripts/start_api.sh
 
-# 2) Web admin (:3000)
-./scripts/start_web_admin.sh
-
-# 3) Employee iOS simulator (from ~/Developer/hrm-nawa-tech)
+# 2) Employee iOS simulator
 ./scripts/start_employee_ios.sh
 ```
 
 | Surface | URL / Device | Login |
 |---------|--------------|--------|
-| Landing | http://localhost:3000/welcome | — |
-| Register | http://localhost:3000/register | new company (14-day trial) |
-| Admin | http://localhost:3000/login | `admin@demo.com` / `Admin12345!` |
-| Platform | http://localhost:3000/platform | `platform@nawatech.com` / `Platform12345!` |
-| Employee | iPhone Simulator | `emp01@demo.com` / `Employee12345!` |
+| Admin (Filament) | http://127.0.0.1:8000/admin | `admin@demo.com` / `Admin12345!` |
+| Register (trial) | http://127.0.0.1:8000/admin/register | new company (14-day trial) |
+| Platform companies | http://127.0.0.1:8000/admin/companies | `platform@nawatech.com` / `Platform12345!` |
+| Employee | iPhone Simulator / Android | `emp01@demo.com` / `Employee12345!` |
+| Register (API) | `POST /api/register` | same trial flow for mobile/API clients |
 
-API: `http://127.0.0.1:8000/api` (auto-wired in debug for web + iOS sim).
+API: `http://127.0.0.1:8000/api` (auto-wired in debug for mobile).
 
 **Physical phone:** Profile → Server → `http://<YOUR-LAN-IP>:8000/api`
 
@@ -36,15 +33,23 @@ API: `http://127.0.0.1:8000/api` (auto-wired in debug for web + iOS sim).
 
 | Feature | Status |
 |---------|--------|
-| Company self-registration (`/register`) | ✅ + 14-day `trial_ends_at` |
+| Company self-registration (`/admin/register` + `POST /api/register`) | ✅ + 14-day `trial_ends_at` |
+| Filament company settings + AI command center | ✅ |
+| Dashboard HR/AI stats widgets | ✅ |
+| Leave approve/reject (row + bulk) | ✅ |
+| Billing / plan upgrade (manual demo) | ✅ |
+| Candidates pipeline actions | ✅ |
+| Performance reviews + AI analyze | ✅ |
+| HR reports overview + saved summaries | ✅ |
+| Job candidates relation manager | ✅ |
 | Email verification | ✅ signed link + `email_unverified` gate |
 | Employee plan limits | ✅ trial=10, starter=25, growth=100, enterprise=unlimited |
 | Demo employees on new signup | ✅ (`demo.emp1.{id}@trial.local`) |
 | Multi-tenant API (Laravel) | ✅ |
-| Admin web + employee mobile | ✅ same API |
+| Filament admin web + Flutter employee mobile | ✅ same API / DB |
 | Trial expiry middleware | ✅ `403` + `code: trial_expired` |
 | Suspended company gate | ✅ `403` + `code: company_suspended` |
-| Super-admin platform console | ✅ `/platform` + `GET/PUT /api/platform/*` |
+| Super-admin companies in Filament | ✅ `/admin/companies` |
 | Billing scaffold | ✅ `POST /api/billing/checkout` (Stripe/Moyasar → 501) |
 | Docker seed-on-empty only | ✅ `SEED_ON_START` flag |
 | Optional MySQL | ✅ `docker compose --profile mysql` |
@@ -66,33 +71,22 @@ API: `http://127.0.0.1:8000/api` (auto-wired in debug for web + iOS sim).
 | growth | 100 |
 | active / pro / enterprise | unlimited |
 
-### Platform console (super_admin)
+### Platform (super_admin)
 
-- Login as `platform@nawatech.com` / `Platform12345!` → redirected to `/platform`
-- List / search companies, suspend / activate, extend trial, manually set Starter / Growth
-- API: `GET /api/platform/overview`, `GET/PUT /api/platform/companies/{id}`, `POST .../checkout`
+- Login as `platform@nawatech.com` / `Platform12345!` → Filament `/admin`
+- Companies resource: list / edit tenants, plans, trials
+- API still available: `GET/PUT /api/platform/*`
 
 ### Billing scaffold
 
-- Company admin: Settings → request Starter / Growth (`POST /api/billing/checkout`)
+- Company admin: Settings via API → `POST /api/billing/checkout`
 - Without Stripe keys → `501` + `code: billing_not_configured`
 - Platform admin can activate plans with `provider=manual`
 
-### Docker + optional MySQL
+### Stack
 
-```bash
-# Default (SQLite)
-docker compose up --build
-
-# MySQL profile
-DB_CONNECTION=mysql docker compose --profile mysql up --build
-```
-
----
-
-## Phase 2 remaining
-
-- Stripe / Moyasar live checkout + webhooks  
-- Custom domains  
-
-See also: [README.md](./README.md) · [DEPLOY.md](./DEPLOY.md)
+| Layer | Tech |
+|-------|------|
+| Admin web | Laravel Filament (`/admin`) |
+| Employee app | Flutter (iOS / Android) |
+| Backend | Laravel API (`/api`) |

@@ -1,17 +1,55 @@
-# Nawa Tech HRM — SaaS Platform
-# منصة Nawa Tech HRM — SaaS
+# Nawa Tech HRM — Full-Stack Portfolio Project
+# Nawa Tech HRM — مشروع Full-Stack للـ Portfolio
+
+[![Backend CI](https://github.com/ahmedehab96-c/hrm-nawa-tech/actions/workflows/backend_ci.yml/badge.svg)](https://github.com/ahmedehab96-c/hrm-nawa-tech/actions/workflows/backend_ci.yml)
+[![Flutter CI](https://github.com/ahmedehab96-c/hrm-nawa-tech/actions/workflows/flutter_ci.yml/badge.svg)](https://github.com/ahmedehab96-c/hrm-nawa-tech/actions/workflows/flutter_ci.yml)
 
 > **Full-Stack HR Management with AI** | **نظام إدارة موارد بشرية متكامل مع ذكاء اصطناعي**
 
-**Status:** Actively developing this HR system into a **commercial multi-tenant SaaS product** (trials, plans, platform console, billing scaffold).  
-**الوضع:** جارٍ تطوير نظام الـ HR ليصبح **منتج SaaS تجاري متعدد المستأجرين** (تجارب، خطط، لوحة منصة، هيكل فوترة).
+## At a glance | نظرة سريعة
 
-**Nawa Tech HRM** is a multi-tenant SaaS platform built with **Flutter + Laravel** — admin web dashboard, employee mobile app, and AI assistant. Start a **14-day free trial** or use the demo account.
+| | |
+|---|---|
+| **Purpose** | Portfolio case study — full-stack HR platform with SaaS-ready architecture |
+| **My role** | Solo: Laravel API, Filament admin, Flutter mobile, tests, CI, Docker, i18n |
+| **Stack** | Laravel 13 · Filament 5 · Flutter 3 · Sanctum · SQLite/MySQL · GitHub Actions |
+| **Proof** | 120+ backend tests · 80+ Flutter tests · [Architecture](./docs/ARCHITECTURE.md) · [Demo guide](./DEMO.md) · [Portfolio summary](./docs/PORTFOLIO.md) |
+| **Run locally** | `./scripts/start_api.sh` → http://127.0.0.1:8000/admin |
 
-**Nawa Tech HRM** منصة SaaS متعددة المستأجرين — لوحة ويب، تطبيق موظفين، ومساعد AI. **تجربة مجانية 14 يوم** أو حساب تجريبي جاهز.
+### Mobile preview
 
-📖 **Demo guide:** [DEMO.md](./DEMO.md) · **SaaS launch:** [SAAS.md](./SAAS.md)  
+<img src="./docs/screenshots/07-mobile-login.png" alt="Arabic employee mobile login" width="320">
+
+More portfolio captures are tracked in [`docs/screenshots/`](./docs/screenshots/README.md).
+
+**Portfolio case study:** A production-minded HR platform demonstrating full-stack product development across Laravel, Filament, Flutter, REST APIs, multi-tenancy, RBAC, testing, CI, Docker, and AI-assisted workflows.
+
+**دراسة حالة للـ Portfolio:** منصة موارد بشرية توضح بناء منتج Full-Stack باستخدام Laravel وFilament وFlutter وREST API، مع تعدد الشركات والصلاحيات والاختبارات وCI وDocker وميزات مدعومة بالذكاء الاصطناعي.
+
+**Current stage:** Portfolio-ready demo with SaaS foundations. Live payment processing, production hosting, observability, and final security hardening remain roadmap items—not finished claims.
+
+**المرحلة الحالية:** عرض Portfolio قابل للتجربة مع أساس قوي للتحول إلى SaaS. الدفع الحقيقي والنشر الإنتاجي والمراقبة والمراجعة الأمنية النهائية ما زالت ضمن خارطة الطريق.
+
+📖 **Architecture:** [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) · **Demo:** [DEMO.md](./DEMO.md) · **SaaS launch:** [SAAS.md](./SAAS.md)  
 🚀 **Deploy:** [DEPLOY.md](./DEPLOY.md)
+
+---
+
+## Why this project matters | لماذا هذا المشروع؟
+
+This is not a CRUD-only sample. It demonstrates:
+
+- A clear product split: **Filament web admin**, **Flutter employee app**, and **Laravel API**
+- Tenant isolation through `company_id`, company onboarding, trials, and plan limits
+- Role-based access for platform admins, company admins, HR managers, recruiters, and employees
+- Real HR workflows: attendance, leave decisions, payroll, performance, recruitment, and reports
+- Arabic/English administration with RTL/LTR and dark mode
+- Automated backend and Flutter tests, GitHub Actions, Docker, queues, scheduler, and health checks
+- AI-assisted recruitment, leave recommendations, performance analysis, and report generation with safe fallbacks
+
+المشروع ليس CRUD فقط؛ بل يعرض فصل الواجهات، تعدد الشركات، الصلاحيات، عمليات HR حقيقية، تطبيق موظفين، اختبارات، CI/CD، Docker، وميزات AI قابلة للتعطيل عند غياب المزود.
+
+> For a focused 5–10 minute reviewer walkthrough, use [DEMO.md](./DEMO.md).
 
 ---
 
@@ -21,23 +59,29 @@
 
 #### Option A — Free trial (SaaS)
 
-1. Start API + Flutter (see below)
-2. Open **`http://localhost:3000/register`**
-3. Create your company — you land in the admin dashboard
+1. Start Laravel (see below)
+2. Register via API: `POST http://127.0.0.1:8000/api/register`
+3. Sign in to Filament admin at **`http://127.0.0.1:8000/admin`**
 
 #### Option B — Demo account (no signup)
 
 #### Prerequisites
-- Flutter 3.x
-- PHP 8.3+ & Composer
-- Chrome (for web admin) + iOS Simulator or Android emulator (for employee app)
+- Flutter 3.x (employee mobile)
+- PHP 8.3+ with `intl` & Composer (use `php@8.4` on Homebrew if needed)
+- iOS Simulator or Android emulator
 
-#### 1. Start the API (Laravel)
+#### 1. Start Laravel (API + Admin)
 
 ```bash
 git clone https://github.com/ahmedehab96-c/hrm-nawa-tech.git
-cd hrm-nawa-tech/backend
+cd hrm-nawa-tech
+./scripts/start_api.sh
+```
 
+Or manually:
+
+```bash
+cd backend
 composer install
 cp .env.example .env
 php artisan key:generate
@@ -45,31 +89,27 @@ php artisan migrate:fresh --seed
 php artisan serve
 ```
 
-✅ API available at: **`http://127.0.0.1:8000/api`**
+✅ API: **`http://127.0.0.1:8000/api`**
+✅ Admin (Filament): **`http://127.0.0.1:8000/admin`**
 
-#### 2. Run Admin Dashboard (Web)
+#### 2. Open Admin Dashboard (Web)
 
-```bash
-cd ..   # back to project root
-flutter pub get
-flutter run -d chrome --web-port=3000
-```
-
-- Open **`http://localhost:3000/welcome`**
-- Click **Start free trial** or go to **`/register`**
-- Or login with demo admin at **`/login`**
-- Platform console: `platform@nawatech.com` → **`/platform`**
+- Open **`http://127.0.0.1:8000/admin`**
+- Login with demo admin, or platform account for companies
 
 | Role | Email | Password |
 |------|-------|----------|
 | **Admin** | `admin@demo.com` | `Admin12345!` |
 | **Platform** | `platform@nawatech.com` | `Platform12345!` |
+| **HR manager** | `hr@demo.com` | `HrManager12345!` |
+| **Recruiter** | `recruiter@demo.com` | `Recruiter12345!` |
 
-> In web debug mode, the app auto-connects to `http://127.0.0.1:8000/api`.
+For mail and AI background jobs locally, run `./scripts/start_queue.sh` in a second terminal. Verify the stack with `./scripts/smoke_test.sh`.
 
 #### 3. Run Employee App (Mobile)
 
 ```bash
+flutter pub get
 flutter run -d ios        # iPhone Simulator
 # or
 flutter run -d android  # Android Emulator
@@ -94,13 +134,10 @@ Or open **Profile** → **Server (Laravel API)**:
 
 | Area | Highlights |
 |------|------------|
-| **Dashboard** | Stats, pending leaves, activity |
-| **Employees** | CRUD, profiles, search |
-| **Attendance** | Daily records, export |
-| **AI Command Center** | Assistant, SLO, escalations, reports |
-| **Recruitment** | Jobs, candidates, AI matching |
-| **Platform** | Super-admin tenants, plans, trials |
-| **Settings** | AR/EN language, dark/light theme, plan upgrade CTAs |
+| **Filament Admin** | Employees, attendance, leave, payroll, jobs |
+| **Companies (platform)** | Super-admin tenant management |
+| **Employee mobile** | Attendance, leave, payslip, notifications |
+| **AI / API** | Assistant, recruitment, reports via `/api` |
 
 #### 5. App icon
 
@@ -112,48 +149,39 @@ After icon changes, **uninstall and reinstall** the app on the simulator/device 
 ### العربية — خطوة بخطوة
 
 #### المتطلبات
-- Flutter 3.x
-- PHP 8.3+ و Composer
-- Chrome (لوحة الويب) + محاكي iOS أو Android (تطبيق الموظف)
+- Flutter 3.x (تطبيق الموظف)
+- PHP 8.3+ مع `intl` و Composer
+- محاكي iOS أو Android
 
-#### 1. تشغيل الـ API (Laravel)
+#### 1. تشغيل Laravel (API + لوحة الأدمن)
 
 ```bash
 git clone https://github.com/ahmedehab96-c/hrm-nawa-tech.git
-cd hrm-nawa-tech/backend
-
-composer install
-cp .env.example .env
-php artisan key:generate
-php artisan migrate:fresh --seed
-php artisan serve
+cd hrm-nawa-tech
+./scripts/start_api.sh
 ```
 
-✅ الـ API يعمل على: **`http://127.0.0.1:8000/api`**
+✅ الـ API: **`http://127.0.0.1:8000/api`**
+✅ لوحة الأدمن (Filament): **`http://127.0.0.1:8000/admin`**
 
-#### 2. تشغيل لوحة الإدارة (ويب)
+#### 2. فتح لوحة الإدارة (ويب)
 
-```bash
-cd ..   # العودة لجذر المشروع
-flutter pub get
-flutter run -d chrome --web-port=3000
-```
-
-- افتح **`http://localhost:3000/welcome`**
-- اضغط **ابدأ التجربة المجانية** أو اذهب إلى **`/register`**
-- أو سجّل دخول الأدمن: **`/login`**
-- لوحة المنصة: `platform@nawatech.com` → **`/platform`**
+- افتح **`http://127.0.0.1:8000/admin`**
+- سجّل دخول الأدمن أو حساب المنصة
 
 | الدور | البريد | كلمة المرور |
 |-------|--------|-------------|
 | **أدمن** | `admin@demo.com` | `Admin12345!` |
 | **المنصة** | `platform@nawatech.com` | `Platform12345!` |
+| **مدير HR** | `hr@demo.com` | `HrManager12345!` |
+| **توظيف** | `recruiter@demo.com` | `Recruiter12345!` |
 
-> في وضع التطوير على الويب، التطبيق يتصل تلقائياً بـ `http://127.0.0.1:8000/api`.
+للبريد ومهام AI في الخلفية: `./scripts/start_queue.sh` في طرفية ثانية. للتحقق: `./scripts/smoke_test.sh`.
 
 #### 3. تشغيل تطبيق الموظف (موبايل)
 
 ```bash
+flutter pub get
 flutter run -d ios        # محاكي iPhone
 # أو
 flutter run -d android    # محاكي Android
@@ -178,13 +206,10 @@ flutter run -d android    # محاكي Android
 
 | القسم | أبرز المميزات |
 |-------|----------------|
-| **لوحة التحكم** | إحصائيات، إجازات معلقة، نشاط |
-| **الموظفون** | إضافة/تعديل، ملفات، بحث |
-| **الحضور** | سجلات يومية، تصدير |
-| **مركز AI** | مساعد، SLO، تصعيد، تقارير |
-| **التوظيف** | وظائف، مرشحين، مطابقة AI |
-| **المنصة** | مستأجرون، خطط، تجارب (super_admin) |
-| **الإعدادات** | عربي/إنجليزي، وضع ليلي/نهاري، ترقية الخطة |
+| **لوحة Filament** | موظفون، حضور، إجازات، رواتب، وظائف |
+| **الشركات (المنصة)** | إدارة المستأجرين لـ super_admin |
+| **تطبيق الموظف** | حضور، إجازات، قسيمة راتب، إشعارات |
+| **AI / API** | المساعد والتقارير عبر `/api` |
 
 #### 5. أيقونة التطبيق
 
@@ -193,14 +218,11 @@ flutter run -d android    # محاكي Android
 
 ---
 
-## 🚀 SaaS product roadmap | خارطة منتج SaaS
+## 🚀 SaaS evolution roadmap | خارطة التحول إلى SaaS
 
-> **Current status:** Active SaaS development — multi-tenant trials, plan limits, platform console, and billing scaffold are live in this repo.  
-> **الوضع الحالي:** تطوير SaaS جارٍ — التجارب متعددة المستأجرين، حدود الخطط، لوحة المنصة، وهيكل الفوترة موجودة في المستودع.
+> **Current status:** The repository includes SaaS foundations—multi-tenant trials, plan limits, a platform console, and a billing integration scaffold. It is not presented as a finished commercial service.
 
-This project is **no longer “demo-only.”** It is being built as a commercial **SaaS HRM platform** where companies register, trial, and upgrade independently.
-
-المشروع **لم يعد عرضاً تجريبياً فقط.** يتم بناؤه كـ **منصة HRM SaaS تجارية** تسجّل فيها الشركات وتجرّب وترقّي بشكل مستقل.
+> **الوضع الحالي:** يحتوي المشروع على أساس SaaS مثل تعدد الشركات والتجارب وحدود الخطط ولوحة المنصة وهيكل الفوترة، لكنه لا يُقدّم كخدمة تجارية مكتملة بعد.
 
 ### Already shipping | ما يعمل الآن
 
@@ -210,22 +232,22 @@ This project is **no longer “demo-only.”** It is being built as a commercial
 | Company self-registration + 14-day trial | ✅ |
 | Email verification gate | ✅ |
 | Plan employee caps (trial / starter / growth / enterprise) | ✅ |
-| Super-admin platform console (`/platform`) | ✅ |
-| Billing checkout scaffold (Stripe/Moyasar → next) | ✅ scaffold |
-| Admin Web + Employee Mobile | ✅ |
+| Super-admin companies (Filament) | ✅ |
+| Billing integration scaffold | ✅ scaffold, not live payments |
+| Filament Admin Web + Flutter Employee Mobile | ✅ |
 | RBAC (roles & permissions) + `super_admin` | ✅ |
 | AI features + governance | ✅ |
 | Optional MySQL Docker profile | ✅ |
-| Flutter MVVM (platform + login) | ✅ |
-| Arabic + English (RTL/LTR) | ✅ |
+| Arabic + English (RTL/LTR) on admin and mobile | ✅ |
 
 ### Still planned | المتبقي
 
 | Phase | Feature |
 |-------|---------|
-| **Next** | Live Stripe / Moyasar checkout + webhooks |
-| **Next** | Custom domains |
-| **Later** | Production deploy (`hrm.nawatech.com`) |
+| **Next** | Public demo deployment with seeded, resettable data |
+| **Next** | Live Stripe / Moyasar checkout and production webhook verification |
+| **Next** | Monitoring, backups, rate-limit review, and external security review |
+| **Later** | Custom domains, tenant branding, and production SaaS operations |
 
 ```
 Earlier portfolio demo          SaaS product (now → launch)
@@ -275,13 +297,18 @@ Home · Attendance · Leave · Payslip · Profile · Notifications
 
 ```
 hrm-nawa-tech/
+├── backend/
+│   ├── app/Filament/    # Admin panel, resources, pages, widgets
+│   ├── app/Http/        # REST API controllers and middleware
+│   ├── app/Services/    # HR, billing, onboarding, AI, platform services
+│   └── tests/           # Laravel feature and unit tests
 ├── lib/
-│   ├── core/            # API, auth, mvvm/, repositories
-│   └── features/        # admin/ + employee/ + platform/ + welcome/
-│       └── platform/    # models · data · viewmodels · views (MVVM)
-├── backend/             # Laravel REST API + AI services
-├── assets/images/       # HRM logo + app icon source
-└── test/                # Flutter + PHPUnit tests
+│   ├── core/            # API client, auth, routing, shared services
+│   └── features/        # Employee-facing Flutter feature modules
+├── test/                # Flutter widget/unit tests
+├── docs/                # PORTFOLIO.md + screenshots checklist
+├── scripts/             # Local startup, queue, scheduler, smoke tests
+└── .github/workflows/   # Backend and Flutter CI
 ```
 
 ---
@@ -290,10 +317,11 @@ hrm-nawa-tech/
 
 | Layer | Stack |
 |-------|-------|
-| **Frontend** | Flutter 3, GoRouter, AppStrings i18n (AR/EN), MVVM |
-| **Backend** | Laravel, Sanctum, SQLite/MySQL |
+| **Admin web** | Laravel Filament 5, Cairo UI, AR/EN, RTL/LTR, dark mode |
+| **Employee mobile** | Flutter 3, GoRouter, secure storage, AR/EN |
+| **Backend** | Laravel 13, Sanctum, queues, scheduler, SQLite/MySQL |
 | **AI** | OpenAI / Gemini gateway, prompt registry |
-| **Patterns** | Multi-tenant, Repository, MVVM (feature folders) |
+| **Engineering** | Multi-tenancy, RBAC, service layer, CI, Docker, automated tests |
 
 ---
 
@@ -303,6 +331,13 @@ hrm-nawa-tech/
 cd backend && php artisan test
 flutter test
 ```
+
+Current local verification:
+
+- **Backend:** 121 tests, 415 assertions
+- **Flutter:** 38 tests
+- **Static analysis:** `dart analyze` passes with no issues
+- **CI:** independent GitHub Actions workflows for backend and Flutter
 
 ---
 
@@ -317,4 +352,4 @@ flutter test
 
 ## 📄 License
 
-Portfolio + active SaaS product development. Contact the author for commercial use or SaaS licensing.
+MIT — see [LICENSE](./LICENSE). Portfolio use is encouraged; contact the author for commercial SaaS licensing.

@@ -27,6 +27,10 @@ class EnsureEmailVerified
             return $next($request);
         }
 
+        if ($request->isMethod('GET') && $request->is('api/auth/me')) {
+            return $next($request);
+        }
+
         return response()->json([
             'message' => 'Please verify your email to continue.',
             'code' => 'email_unverified',

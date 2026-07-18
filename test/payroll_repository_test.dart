@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hrm_saas/core/repositories/payroll_repository.dart';
-import 'package:hrm_saas/core/repositories/employees_repository.dart' show PagedResult;
+import 'package:hrm_saas/core/api/paged_result.dart';
+import 'package:hrm_saas/features/employee/payslip/data/payroll_repository.dart';
 
 void main() {
   group('PayslipItem', () {

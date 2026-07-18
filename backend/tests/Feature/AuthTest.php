@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Tests\TestCase;
 
 class AuthTest extends TestCase
@@ -96,5 +97,27 @@ class AuthTest extends TestCase
         $res = $this->postJson('/api/forgot-password', ['email' => 'nobody@test.com']);
         // يُعيد 200 حتى لو البريد غير موجود (لأسباب أمنية)
         $res->assertOk();
+    }
+
+    public function test_reset_password_with_valid_token(): void
+    {
+        $this->setupCompany();
+        $token = Password::createToken($this->admin);
+
+        $res = $this->postJson('/api/reset-password', [
+            'email' => $this->admin->email,
+            'token' => $token,
+            'password' => 'NewPassword123!',
+            'password_confirmation' => 'NewPassword123!',
+        ]);
+
+        $res->assertOk()->assertJsonFragment(['message' => 'Password reset successfully.']);
+
+        $login = $this->postJson('/api/login', [
+            'email' => $this->admin->email,
+            'password' => 'NewPassword123!',
+        ]);
+
+        $login->assertOk()->assertJsonStructure(['token']);
     }
 }

@@ -4,8 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Company;
-use App\Models\Employee;
 use App\Models\User;
+use App\Services\BillingService;
+use App\Services\PlatformOverviewService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
@@ -13,23 +14,7 @@ class PlatformController extends Controller
 {
     public function overview(Request $request)
     {
-        return response()->json([
-            'companies' => Company::query()->count(),
-            'users' => User::query()->count(),
-            'employees' => Employee::query()->count(),
-            'trials_active' => Company::query()
-                ->where('plan', 'trial')
-                ->where(function ($q) {
-                    $q->whereNull('trial_ends_at')
-                        ->orWhere('trial_ends_at', '>', now());
-                })
-                ->count(),
-            'trials_expired' => Company::query()
-                ->where('plan', 'trial')
-                ->whereNotNull('trial_ends_at')
-                ->where('trial_ends_at', '<=', now())
-                ->count(),
-        ]);
+        return response()->json(app(PlatformOverviewService::class)->metrics());
     }
 
     public function companies(Request $request)
@@ -122,25 +107,52 @@ class PlatformController extends Controller
         $validated = $request->validate([
             'plan' => 'required|in:starter,growth,enterprise',
             'provider' => 'sometimes|in:stripe,moyasar,manual',
+            'success_url' => 'sometimes|url',
+            'cancel_url' => 'sometimes|url',
         ]);
 
-        $provider = $validated['provider'] ?? 'stripe';
+        $provider = $validated['provider'] ?? app(BillingService::class)->preferredProvider();
+        $billing = app(BillingService::class);
 
         if ($provider === 'manual') {
-            $company->plan = $validated['plan'];
-            $company->trial_ends_at = null;
-            $company->status = 'active';
-            $company->save();
+            $billing->activatePlan($company, $validated['plan']);
 
             return response()->json([
                 'message' => 'Plan activated manually (billing provider not configured).',
                 'checkout_url' => null,
                 'provider' => 'manual',
-                'data' => $this->formatCompany($company),
+                'data' => $this->formatCompany($company->fresh()),
             ]);
         }
 
-        // Placeholder for future Stripe/Moyasar session creation.
+        $resolved = $billing->resolvePaymentProvider($provider);
+        if ($resolved !== null && in_array($resolved, ['stripe', 'moyasar'], true)) {
+            $user = $request->user();
+            abort_unless($user !== null, 401);
+
+            $base = rtrim((string) config('app.url'), '/');
+            $successUrl = $validated['success_url'] ?? "{$base}/admin/billing-upgrade?checkout=success";
+            $cancelUrl = $validated['cancel_url'] ?? "{$base}/admin/billing-upgrade?checkout=cancelled";
+
+            $session = $billing->createCheckoutSession(
+                $company,
+                $user,
+                $validated['plan'],
+                $successUrl,
+                $cancelUrl,
+                $resolved,
+            );
+
+            return response()->json([
+                'message' => 'Checkout session created',
+                'checkout_url' => $session['checkout_url'],
+                'session_id' => $session['session_id'],
+                'provider' => $session['provider'],
+                'plan' => $validated['plan'],
+                'company_id' => $company->id,
+            ]);
+        }
+
         return response()->json([
             'message' => 'Payment provider scaffold ready. Configure API keys to enable checkout.',
             'checkout_url' => null,

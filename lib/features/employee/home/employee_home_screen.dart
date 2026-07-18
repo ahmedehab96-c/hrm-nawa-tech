@@ -1,14 +1,15 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/ai/show_ai_assistant.dart';
-import '../../../core/api/api_result.dart';
-import '../../../core/repositories/attendance_repository.dart';
+import 'package:hrm_saas/features/employee/assistant/show_ai_assistant.dart';
 import '../../../core/services/wifi_attendance_service.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/attendance_gate.dart';
 import '../../../core/utils/text_direction_helper.dart';
 import '../../../core/widgets/animations.dart';
+import '../../../core/widgets/responsive_page.dart';
+import '../attendance/attendance_actions.dart';
 import '../../../l10n/app_strings.dart';
 
 class EmployeeHomeScreen extends StatefulWidget {
@@ -39,49 +40,9 @@ class _EmployeeHomeScreenState extends State<EmployeeHomeScreen> {
     });
   }
 
-  Future<void> _handleCheckIn() async {
-    final l10n = AppStrings.of(context);
-    if (await requireCompanyWifiForAttendance()) {
-      final result = await WifiAttendanceService.canRecordAttendance();
-      if (!result.success) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(result.message ?? l10n.wifiOffCompany),
-          backgroundColor: AppColors.error,
-        ));
-        return;
-      }
-    }
-    final res = await AttendanceRepository.recordCheckIn();
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(
-          res is ApiSuccess<void> ? l10n.checkInRecorded : (res as ApiFailure<void>).message),
-      backgroundColor: res is ApiSuccess<void> ? AppColors.success : AppColors.error,
-    ));
-  }
+  Future<void> _handleCheckIn() => AttendanceActions.checkIn(context);
 
-  Future<void> _handleCheckOut() async {
-    final l10n = AppStrings.of(context);
-    if (await requireCompanyWifiForAttendance()) {
-      final result = await WifiAttendanceService.canRecordAttendance();
-      if (!result.success) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(result.message ?? l10n.wifiOffCompany),
-          backgroundColor: AppColors.error,
-        ));
-        return;
-      }
-    }
-    final res = await AttendanceRepository.recordCheckOut();
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(
-          res is ApiSuccess<void> ? l10n.formSavedSuccess : (res as ApiFailure<void>).message),
-      backgroundColor: res is ApiSuccess<void> ? AppColors.success : AppColors.error,
-    ));
-  }
+  Future<void> _handleCheckOut() => AttendanceActions.checkOut(context);
 
   @override
   Widget build(BuildContext context) {
@@ -104,77 +65,87 @@ class _EmployeeHomeScreenState extends State<EmployeeHomeScreen> {
             ),
           ],
         ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () => showAiAssistantDialog(context),
-          icon: const Icon(Icons.smart_toy_outlined),
-          label: Text(l10n.openAiAssistant),
-          tooltip: l10n.askAiAboutHr,
-        ),
-        body: SingleChildScrollView(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 720),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // ── Gradient header with greeting + WiFi chip ──────────
-                  _HeaderBanner(
-                    greeting: l10n.greetingWithName('محمد'),
-                    date: l10n.homeDateSample,
-                    isLoading: _isLoading,
-                    isOnCompanyWifi: _isOnCompanyWifi,
-                    wifiName: _wifiName,
-                    onRefresh: _checkWifiStatus,
-                  ),
-
-                  // ── Attendance card ─────────────────────────────────────
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-                    child: FadeSlideIn(
-                      delay: const Duration(milliseconds: 80),
-                      child: _AttendanceCard(
-                        isLoading: _isLoading,
-                        onCheckIn: _handleCheckIn,
-                        onCheckOut: _handleCheckOut,
-                      ),
-                    ),
-                  ),
-
-                  // ── Quick actions ───────────────────────────────────────
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
-                    child: FadeSlideIn(
-                      delay: const Duration(milliseconds: 160),
-                      child: Text(l10n.quickActionsTitle, style: AppTypography.h4),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
-                    child: LayoutBuilder(builder: (_, c) {
-                      final cols = c.maxWidth > 480 ? 4 : 2;
-                      return GridView.count(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        crossAxisCount: cols,
-                        mainAxisSpacing: 12,
-                        crossAxisSpacing: 12,
-                        childAspectRatio: 1.35,
-                        children: [
-                          FadeSlideIn(delay: const Duration(milliseconds: 200),
-                            child: _QuickActionCard(icon: Icons.event_note_outlined, label: l10n.requestLeave,       iconColor: AppColors.warning,   onTap: () => context.go('/employee/leave'))),
-                          FadeSlideIn(delay: const Duration(milliseconds: 240),
-                            child: _QuickActionCard(icon: Icons.receipt_long,         label: l10n.payslip,            iconColor: AppColors.success,   onTap: () => context.go('/employee/payslip'))),
-                          FadeSlideIn(delay: const Duration(milliseconds: 280),
-                            child: _QuickActionCard(icon: Icons.access_time,           label: l10n.attendanceLogLabel, iconColor: AppColors.primary,   onTap: () => context.go('/employee/attendance'))),
-                          FadeSlideIn(delay: const Duration(milliseconds: 320),
-                            child: _QuickActionCard(icon: Icons.person_outline,        label: l10n.profileQuickLabel,  iconColor: AppColors.secondary, onTap: () => context.go('/employee/profile'))),
-                        ],
-                      );
-                    }),
-                  ),
-                ],
+        floatingActionButton: isNarrowWidth(context)
+            ? FloatingActionButton(
+                onPressed: () => showAiAssistantDialog(context),
+                tooltip: l10n.askAiAboutHr,
+                child: const Icon(Icons.smart_toy_outlined),
+              )
+            : FloatingActionButton.extended(
+                onPressed: () => showAiAssistantDialog(context),
+                icon: const Icon(Icons.smart_toy_outlined),
+                label: Text(l10n.openAiAssistant),
+                tooltip: l10n.askAiAboutHr,
               ),
-            ),
+        body: ResponsivePage(
+          maxWidth: context.responsive.pageMaxWidth,
+          padding: EdgeInsets.zero,
+          child: Builder(
+            builder: (context) {
+              final pad = context.responsive.horizontalPadding;
+              return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ── Gradient header with greeting + WiFi chip ──────────
+              _HeaderBanner(
+                greeting: l10n.greetingWithName('محمد'),
+                date: l10n.homeDateSample,
+                isLoading: _isLoading,
+                isOnCompanyWifi: _isOnCompanyWifi,
+                wifiName: _wifiName,
+                onRefresh: _checkWifiStatus,
+              ),
+
+              // ── Attendance card ─────────────────────────────────────
+              Padding(
+                padding: EdgeInsets.fromLTRB(pad, 20, pad, 0),
+                child: FadeSlideIn(
+                  delay: const Duration(milliseconds: 80),
+                  child: _AttendanceCard(
+                    isLoading: _isLoading,
+                    onCheckIn: _handleCheckIn,
+                    onCheckOut: _handleCheckOut,
+                  ),
+                ),
+              ),
+
+              // ── Quick actions ───────────────────────────────────────
+              Padding(
+                padding: EdgeInsets.fromLTRB(pad, 24, pad, 0),
+                child: FadeSlideIn(
+                  delay: const Duration(milliseconds: 160),
+                  child: Text(l10n.quickActionsTitle, style: AppTypography.h4),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(pad, 12, pad, 28),
+                child: LayoutBuilder(builder: (_, c) {
+                  final r = context.responsive;
+                  final cols = r.gridColumns(mobile: 2, tablet: 4, desktop: 4);
+                  final gap = 12.0;
+                  final cardWidth = (c.maxWidth - gap * (cols - 1)) / cols;
+                  final actions = [
+                    FadeSlideIn(delay: const Duration(milliseconds: 200),
+                      child: _QuickActionCard(icon: Icons.event_note_outlined, label: l10n.requestLeave,       iconColor: AppColors.warning,   onTap: () => context.go('/employee/leave'))),
+                    FadeSlideIn(delay: const Duration(milliseconds: 240),
+                      child: _QuickActionCard(icon: Icons.receipt_long,         label: l10n.payslip,            iconColor: AppColors.success,   onTap: () => context.go('/employee/payslip'))),
+                    FadeSlideIn(delay: const Duration(milliseconds: 280),
+                      child: _QuickActionCard(icon: Icons.access_time,           label: l10n.attendanceLogLabel, iconColor: AppColors.primary,   onTap: () => context.go('/employee/attendance'))),
+                    FadeSlideIn(delay: const Duration(milliseconds: 320),
+                      child: _QuickActionCard(icon: Icons.person_outline,        label: l10n.profileQuickLabel,  iconColor: AppColors.secondary, onTap: () => context.go('/employee/profile'))),
+                  ];
+                  return Wrap(
+                    spacing: gap,
+                    runSpacing: gap,
+                    children: actions
+                        .map((w) => SizedBox(width: cardWidth, child: w))
+                        .toList(),
+                  );
+                }),
+              ),
+            ],
+          );
+            },
           ),
         ),
       ),
@@ -202,6 +173,7 @@ class _HeaderBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n      = AppStrings.of(context);
+    final pad       = context.responsive.horizontalPadding;
     final wifiColor = isOnCompanyWifi ? AppColors.success : AppColors.warning;
     final wifiIcon  = isOnCompanyWifi ? Icons.wifi_rounded : Icons.wifi_off_rounded;
     final wifiLabel = isLoading
@@ -212,7 +184,7 @@ class _HeaderBanner extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(20, 22, 20, 28),
+      padding: EdgeInsets.fromLTRB(pad, 22, pad, 28),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -235,7 +207,17 @@ class _HeaderBanner extends StatelessWidget {
               style: AppTypography.caption.copyWith(color: Colors.white60)),
           const SizedBox(height: 16),
           // WiFi chip — tap to refresh
-          GestureDetector(
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: math.max(
+                  160,
+                  context.responsive.pageMaxWidth -
+                      context.responsive.horizontalPadding * 2,
+                ),
+              ),
+              child: GestureDetector(
             onTap: onRefresh,
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 300),
@@ -251,7 +233,6 @@ class _HeaderBanner extends StatelessWidget {
                         : wifiColor.withValues(alpha: 0.5)),
               ),
               child: Row(
-                mainAxisSize: MainAxisSize.min,
                 children: [
                   isLoading
                       ? const SizedBox(
@@ -260,13 +241,21 @@ class _HeaderBanner extends StatelessWidget {
                               strokeWidth: 2, color: Colors.white54))
                       : Icon(wifiIcon, color: wifiColor, size: 14),
                   const SizedBox(width: 6),
-                  Text(wifiLabel,
+                  Expanded(
+                    child: Text(
+                      wifiLabel,
                       style: TextStyle(
                           color: isLoading ? Colors.white54 : wifiColor,
                           fontSize: 12,
-                          fontWeight: FontWeight.w600)),
+                          fontWeight: FontWeight.w600),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ],
               ),
+            ),
+          ),
             ),
           ),
         ],
@@ -302,9 +291,16 @@ class _AttendanceCard extends StatelessWidget {
             ),
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(l10n.attendanceTodayTitle, style: AppTypography.h4),
+                Expanded(
+                  child: Text(
+                    l10n.attendanceTodayTitle,
+                    style: AppTypography.h4,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                   decoration: BoxDecoration(
@@ -346,7 +342,10 @@ class _AttendanceCard extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: isLoading ? null : onCheckIn,
                     icon: const Icon(Icons.login, size: 18),
-                    label: Text(l10n.checkIn),
+                    label: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(l10n.checkIn),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -354,7 +353,10 @@ class _AttendanceCard extends StatelessWidget {
                   child: FilledButton.icon(
                     onPressed: isLoading ? null : onCheckOut,
                     icon: const Icon(Icons.logout, size: 18),
-                    label: Text(l10n.checkOut),
+                    label: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(l10n.checkOut),
+                    ),
                   ),
                 ),
               ],
@@ -420,6 +422,7 @@ class _QuickActionCard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
@@ -435,7 +438,7 @@ class _QuickActionCard extends StatelessWidget {
                   style: AppTypography.bodyMedium
                       .copyWith(fontWeight: FontWeight.w600),
                   textAlign: TextAlign.center,
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis),
             ],
           ),

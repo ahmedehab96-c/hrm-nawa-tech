@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\Role;
 use App\Models\User;
-use App\Services\DemoCompanySeeder;
+use App\Services\CompanyRegistrationService;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -25,27 +25,16 @@ class AuthController extends Controller
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        $companyName = $request->input('company_name') ?: $validated['name'];
+        $result = app(CompanyRegistrationService::class)->register(
+            adminName: $validated['name'],
+            email: $validated['email'],
+            password: $validated['password'],
+            companyName: $request->input('company_name') ?: $validated['name'],
+        );
 
-        $company = Company::query()->create([
-            'name' => $companyName,
-            'status' => 'active',
-            'plan' => 'trial',
-            'trial_ends_at' => now()->addDays(14),
-            'ai_plan' => 'starter',
-            'ai_enabled' => true,
-        ]);
-
-        $user = User::create([
-            'company_id' => $company->id,
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'role' => 'company_admin',
-        ]);
-        $this->syncUserRole($user);
-
-        $demoEmployees = DemoCompanySeeder::seedTrialEmployees($company);
+        $user = $result['user'];
+        $company = $result['company'];
+        $demoEmployees = $result['demo_employees'];
 
         try {
             $user->sendEmailVerificationNotification();
@@ -101,6 +90,22 @@ class AuthController extends Controller
         $user->sendEmailVerificationNotification();
 
         return response()->json(['message' => 'Verification link sent.']);
+    }
+
+    public function me(Request $request)
+    {
+        $user = $request->user();
+
+        return response()->json([
+            'data' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'company_id' => $user->company_id,
+                'email_verified' => $user->hasVerifiedEmail(),
+            ],
+        ]);
     }
 
     public function forgotPassword(Request $request)

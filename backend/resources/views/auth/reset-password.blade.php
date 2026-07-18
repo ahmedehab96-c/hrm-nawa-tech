@@ -56,6 +56,16 @@
             transition: background .2s;
         }
         button:hover { background: #1558b0; }
+        .app-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #1a73e8;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .app-link:hover { text-decoration: underline; }
         .error {
             background: #fff0f0;
             border: 1px solid #ffb3b3;
@@ -96,6 +106,14 @@
 
         <button type="submit">Set new password</button>
     </form>
+
+    @php($mobileScheme = config('app.mobile_deep_link_scheme'))
+    @if ($mobileScheme && $token && $email)
+        <a class="app-link"
+           href="{{ $mobileScheme }}://reset-password?{{ http_build_query(['token' => $token, 'email' => $email]) }}">
+            Open in mobile app
+        </a>
+    @endif
 </div>
 </body>
 </html>

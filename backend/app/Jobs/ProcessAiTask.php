@@ -6,7 +6,6 @@ use App\Models\AiTask;
 use App\Models\AiUsageLog;
 use App\Models\AttendanceRecord;
 use App\Models\Candidate;
-use App\Models\CandidateMatchScore;
 use App\Models\Company;
 use App\Models\Employee;
 use App\Models\JobPosting;
@@ -14,8 +13,11 @@ use App\Models\LeaveRequest;
 use App\Models\PayrollRecord;
 use App\Models\PerformanceReview;
 use App\Models\ReportSummary;
+use App\Models\User;
 use App\Services\AiGatewayService;
+use App\Services\PerformanceReviewAnalysisService;
 use App\Services\RecruitmentAiService;
+use App\Services\RecruitmentMatchService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
@@ -31,6 +33,8 @@ class ProcessAiTask implements ShouldQueue
     public function handle(
         AiGatewayService $aiGatewayService,
         RecruitmentAiService $recruitmentAiService,
+        RecruitmentMatchService $recruitmentMatchService,
+        PerformanceReviewAnalysisService $performanceReviewAnalysisService,
     ): void {
         $task = AiTask::query()->find($this->taskId);
         if (! $task || ! in_array($task->status, ['queued', 'processing'], true)) {
@@ -45,8 +49,8 @@ class ProcessAiTask implements ShouldQueue
         try {
             $result = match ($task->task_type) {
                 'recruitment_parse_cv' => $this->runRecruitmentParseCv($task, $recruitmentAiService),
-                'recruitment_match_candidates' => $this->runRecruitmentMatchCandidates($task, $recruitmentAiService),
-                'performance_analyze' => $this->runPerformanceAnalyze($task, $aiGatewayService),
+                'recruitment_match_candidates' => $this->runRecruitmentMatchCandidates($task, $recruitmentMatchService),
+                'performance_analyze' => $this->runPerformanceAnalyze($task, $performanceReviewAnalysisService),
                 'reports_summarize' => $this->runReportSummarize($task, $aiGatewayService),
                 default => throw new \RuntimeException('Unsupported AI task type: '.$task->task_type),
             };
@@ -109,7 +113,7 @@ class ProcessAiTask implements ShouldQueue
         ];
     }
 
-    private function runRecruitmentMatchCandidates(AiTask $task, RecruitmentAiService $recruitmentAiService): array
+    private function runRecruitmentMatchCandidates(AiTask $task, RecruitmentMatchService $recruitmentMatchService): array
     {
         $payload = $task->payload ?? [];
         $job = JobPosting::query()
@@ -119,45 +123,13 @@ class ProcessAiTask implements ShouldQueue
             throw new \RuntimeException('Job not found');
         }
 
-        $company = Company::query()->find($task->company_id);
-        if (! $company) {
-            throw new \RuntimeException('Company not found');
+        $user = User::query()->find((int) $task->user_id);
+        if (! $user) {
+            throw new \RuntimeException('User not found');
         }
 
-        $candidates = $job->candidates()->orderBy('id')->get();
         $languageCode = (string) ($payload['language_code'] ?? 'en');
-        if ($candidates->isEmpty()) {
-            return ['job_id' => $job->id, 'candidates' => []];
-        }
-
-        $scores = $recruitmentAiService->scoreCandidates(
-            job: $job,
-            candidates: $candidates,
-            languageCode: $languageCode,
-            provider: $company->ai_provider ?: 'openai',
-            model: $company->ai_model,
-        );
-
-        foreach ($scores as $item) {
-            /** @var Candidate|null $candidate */
-            $candidate = $candidates->firstWhere('id', $item['candidate_id']);
-            if (! $candidate) {
-                continue;
-            }
-
-            $candidate->ai_fit_score = $item['score'];
-            $candidate->ai_match_reason = $item['reason'];
-            $candidate->save();
-
-            CandidateMatchScore::query()->create([
-                'company_id' => $task->company_id,
-                'job_posting_id' => $job->id,
-                'candidate_id' => $candidate->id,
-                'created_by' => $task->user_id,
-                'score' => $item['score'],
-                'reason' => $item['reason'],
-            ]);
-        }
+        $recruitmentMatchService->matchCandidates($job, $user, $languageCode);
 
         $top = $job->candidates()
             ->orderByDesc('ai_fit_score')
@@ -179,7 +151,7 @@ class ProcessAiTask implements ShouldQueue
         ];
     }
 
-    private function runPerformanceAnalyze(AiTask $task, AiGatewayService $aiGatewayService): array
+    private function runPerformanceAnalyze(AiTask $task, PerformanceReviewAnalysisService $performanceReviewAnalysisService): array
     {
         $payload = $task->payload ?? [];
         $review = PerformanceReview::query()
@@ -196,64 +168,14 @@ class ProcessAiTask implements ShouldQueue
         }
 
         $languageCode = (string) ($payload['language_code'] ?? 'en');
-        $prompt = $this->buildPerformancePrompt($review, $languageCode);
-
-        $startedAt = microtime(true);
-        $status = 'success';
-        $errorMessage = null;
-        $provider = $company->ai_provider ?: 'openai';
-        $model = $company->ai_model;
-        $promptTokens = null;
-        $completionTokens = null;
-        $totalTokens = null;
-
-        try {
-            $reply = $aiGatewayService->generateChatReply(
-                message: $prompt,
-                languageCode: $languageCode,
-                history: [],
-                providerOverride: $provider,
-                modelOverride: $model,
-            );
-            $summary = $reply['content'];
-            $provider = $reply['provider'];
-            $model = $reply['model'];
-            $promptTokens = $reply['prompt_tokens'];
-            $completionTokens = $reply['completion_tokens'];
-            $totalTokens = $reply['total_tokens'];
-        } catch (\Throwable $e) {
-            $status = 'error';
-            $errorMessage = $e->getMessage();
-            $summary = str_starts_with($languageCode, 'ar')
-                ? 'تحليل الأداء غير متاح مؤقتا. راجع البيانات اليدوية وأعد المحاولة.'
-                : 'Performance analysis is temporarily unavailable. Please review manually and try again.';
-        }
-
-        $latencyMs = (int) round((microtime(true) - $startedAt) * 1000);
-
-        $review->ai_summary = $summary;
-        $review->save();
-
-        $this->logUsage(
-            companyId: $task->company_id,
-            userId: $task->user_id,
-            endpoint: 'performance/reviews/analyze',
-            provider: $provider,
-            model: $model,
-            latencyMs: $latencyMs,
-            promptTokens: $promptTokens,
-            completionTokens: $completionTokens,
-            totalTokens: $totalTokens,
-            status: $status,
-            errorMessage: $errorMessage,
-        );
+        $review = $performanceReviewAnalysisService->analyze($review, $company, $languageCode);
 
         return [
             'review_id' => $review->id,
-            'ai_summary' => $summary,
-            'provider' => $provider,
-            'model' => $model,
-            'status' => $status,
+            'ai_summary' => $review->ai_summary,
+            'provider' => $company->ai_provider ?: 'openai',
+            'model' => $company->ai_model,
+            'status' => 'success',
         ];
     }
 
@@ -375,36 +297,6 @@ class ProcessAiTask implements ShouldQueue
             'model' => $model,
             'status' => $status,
         ];
-    }
-
-    private function buildPerformancePrompt(PerformanceReview $review, string $languageCode): string
-    {
-        $employeeName = (string) ($review->employee?->name ?? 'Employee');
-        $department = (string) ($review->employee?->department ?? 'N/A');
-        $position = (string) ($review->employee?->position ?? 'N/A');
-        $rating = $review->rating !== null ? (string) $review->rating : 'N/A';
-
-        if (str_starts_with($languageCode, 'ar')) {
-            return "حلل أداء الموظف وقدّم ملخصا تنفيذيا باللغة العربية مع توصيات عملية.\n"
-                ."الاسم: {$employeeName}\n"
-                ."القسم: {$department}\n"
-                ."المنصب: {$position}\n"
-                ."التقييم: {$rating}/5\n"
-                ."الأهداف: ".($review->goals_summary ?? '-')."\n"
-                ."نقاط القوة: ".($review->strengths ?? '-')."\n"
-                ."مجالات التحسين: ".($review->improvement_areas ?? '-')."\n"
-                ."تعليق المدير: ".($review->manager_comment ?? '-');
-        }
-
-        return "Analyze employee performance and provide an executive summary with actionable recommendations.\n"
-            ."Name: {$employeeName}\n"
-            ."Department: {$department}\n"
-            ."Position: {$position}\n"
-            ."Rating: {$rating}/5\n"
-            ."Goals summary: ".($review->goals_summary ?? '-')."\n"
-            ."Strengths: ".($review->strengths ?? '-')."\n"
-            ."Improvement areas: ".($review->improvement_areas ?? '-')."\n"
-            ."Manager comment: ".($review->manager_comment ?? '-');
     }
 
     private function buildReportPrompt(array $metrics, string $periodStart, string $periodEnd, string $languageCode): string

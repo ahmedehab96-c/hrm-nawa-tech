@@ -14,11 +14,23 @@ jobs:
         working-directory: backend
     steps:
       - uses: actions/checkout@v4
+
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
+          extensions: intl, zip, sqlite3, pdo_sqlite
           coverage: none
-      - run: composer install --no-interaction --prefer-dist
+
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: backend/vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('backend/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - run: composer install --no-interaction --prefer-dist --no-progress
       - run: cp .env.example .env
-      - run: php artisan key:generate
+      - run: php artisan key:generate --force
+      - run: touch database/database.sqlite
+      - run: php artisan migrate --force --no-interaction
       - run: php artisan test

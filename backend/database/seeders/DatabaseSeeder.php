@@ -46,9 +46,10 @@ class DatabaseSeeder extends Seeder
                 'email' => 'showcase@nawatech.com',
                 'phone' => '+966 11 234 5678',
                 'address' => 'الرياض، المملكة العربية السعودية',
+                'wifi_ssid' => 'NawaTech-Office',
                 'ai_plan' => 'enterprise',
                 'ai_enabled' => true,
-                'ai_provider' => 'openai',
+                'ai_provider' => config('services.ai.default_provider', 'openai'),
             ]);
         } else {
             $company->update([
@@ -59,9 +60,10 @@ class DatabaseSeeder extends Seeder
                 'email' => 'showcase@nawatech.com',
                 'phone' => '+966 11 234 5678',
                 'address' => 'الرياض، المملكة العربية السعودية',
+                'wifi_ssid' => 'NawaTech-Office',
                 'ai_plan' => 'enterprise',
                 'ai_enabled' => true,
-                'ai_provider' => 'openai',
+                'ai_provider' => config('services.ai.default_provider', 'openai'),
             ]);
         }
 
@@ -78,6 +80,28 @@ class DatabaseSeeder extends Seeder
         if (! $admin->hasVerifiedEmail()) {
             $admin->forceFill(['email_verified_at' => now()])->save();
         }
+
+        User::query()->updateOrCreate(
+            ['email' => 'hr@demo.com'],
+            [
+                'company_id' => $company->id,
+                'name' => 'HR Manager Demo',
+                'role' => 'hr_manager',
+                'password' => Hash::make('HrManager12345!'),
+                'email_verified_at' => now(),
+            ]
+        );
+
+        User::query()->updateOrCreate(
+            ['email' => 'recruiter@demo.com'],
+            [
+                'company_id' => $company->id,
+                'name' => 'Recruiter Demo',
+                'role' => 'recruiter',
+                'password' => Hash::make('Recruiter12345!'),
+                'email_verified_at' => now(),
+            ]
+        );
 
         $employeePassword = 'Employee12345!';
 
@@ -309,11 +333,11 @@ class DatabaseSeeder extends Seeder
 
                     AttendanceRecord::query()->updateOrCreate(
                         [
-                            'company_id' => $company->id,
                             'employee_id' => $employee->id,
                             'work_date' => $workDate,
                         ],
                         [
+                            'company_id' => $company->id,
                             'check_in_at' => $checkInAt,
                             'check_out_at' => $checkOutAt,
                             'status' => $status,

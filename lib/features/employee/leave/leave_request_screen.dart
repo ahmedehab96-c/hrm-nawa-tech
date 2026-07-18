@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/api/api_result.dart';
-import '../../../core/repositories/leave_repository.dart';
+import 'package:hrm_saas/features/employee/leave/data/leave_repository.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/text_direction_helper.dart';
+import '../../../core/widgets/responsive_page.dart';
 import '../../../l10n/app_strings.dart';
 
 class LeaveRequestScreen extends StatefulWidget {
@@ -111,17 +112,13 @@ class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
         appBar: AppBar(
           title: Text(l10n.requestLeave),
         ),
-        body: Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 640),
-            child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
+        body: ResponsivePage(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               DropdownButtonFormField<String>(
                 key: ValueKey(_type),
+                isExpanded: true,
                 initialValue: _type,
                 decoration: InputDecoration(
                   labelText: l10n.leaveType,
@@ -180,8 +177,6 @@ class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
                 child: Text(l10n.cancel),
               ),
             ],
-          ),
-        ),
           ),
         ),
       ),

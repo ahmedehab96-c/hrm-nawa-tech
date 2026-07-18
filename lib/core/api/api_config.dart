@@ -1,19 +1,15 @@
 import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// إعدادات ربط التطبيق بخادم Laravel API
+import '../session/token_store.dart';
+
+/// إعدادات ربط التطبيق بخادم Laravel API (URL + demo/API mode فقط).
+/// التوكن وبيانات المستخدم في [TokenStore].
 class ApiConfig {
   static const _keyBaseUrl = 'api_base_url';
   static const _keyUseApi = 'api_use_server';
-  static const _keyToken = 'auth_token';
-  static const _keyUser = 'auth_user';
-
-  static const FlutterSecureStorage _secure = FlutterSecureStorage(
-    aOptions: AndroidOptions(encryptedSharedPreferences: true),
-  );
 
   static String? _baseUrl;
   static bool _useApi = false;
@@ -27,20 +23,9 @@ class ApiConfig {
     _useApi = prefs.getBool(_keyUseApi) ?? false;
   }
 
-  /// أول تشغيل على الويب في وضع التطوير: تفعيل Laravel المحلي دون لمس إعدادات المستخدم إن وُجدت.
-  static Future<void> applyDebugWebDefaults() async {
-    if (!kDebugMode || !kIsWeb) return;
-    final prefs = await SharedPreferences.getInstance();
-    final userTouchedBase = prefs.containsKey(_keyBaseUrl);
-    final userTouchedUse = prefs.containsKey(_keyUseApi);
-    if (userTouchedBase || userTouchedUse) return;
-    await setBaseUrl('http://127.0.0.1:8000/api');
-    await setUseApi(true);
-  }
-
   /// أول تشغيل على الموبايل في وضع التطوير: ربط تلقائي بـ Laravel المحلي.
   static Future<void> applyDebugMobileDefaults() async {
-    if (!kDebugMode || kIsWeb) return;
+    if (!kDebugMode) return;
     final prefs = await SharedPreferences.getInstance();
     if (prefs.containsKey(_keyBaseUrl) || prefs.containsKey(_keyUseApi)) return;
     final url = Platform.isAndroid
@@ -50,7 +35,7 @@ class ApiConfig {
     await setUseApi(true);
   }
 
-  /// Production web builds: `--dart-define=API_BASE_URL=/api` or full HTTPS URL.
+  /// Production builds: `--dart-define=API_BASE_URL=https://api.example.com/api`
   static Future<void> applyReleaseDefaults() async {
     const envUrl = String.fromEnvironment('API_BASE_URL');
     final prefs = await SharedPreferences.getInstance();
@@ -114,61 +99,11 @@ class ApiConfig {
     await prefs.setBool(_keyUseApi, _useApi);
   }
 
-  static Future<String?> getToken() async {
-    final fromSecure = await _secure.read(key: _keyToken);
-    if (fromSecure != null && fromSecure.isNotEmpty) {
-      return fromSecure;
-    }
-    final prefs = await SharedPreferences.getInstance();
-    final legacy = prefs.getString(_keyToken);
-    if (legacy != null && legacy.isNotEmpty) {
-      await _secure.write(key: _keyToken, value: legacy);
-      await prefs.remove(_keyToken);
-      return legacy;
-    }
-    return null;
-  }
-
-  static Future<void> setToken(String? token) async {
-    final prefs = await SharedPreferences.getInstance();
-    if (token == null || token.isEmpty) {
-      await _secure.delete(key: _keyToken);
-      await prefs.remove(_keyToken);
-      await prefs.remove(_keyUser);
-    } else {
-      await _secure.write(key: _keyToken, value: token);
-      await prefs.remove(_keyToken);
-    }
-  }
-
-  static Future<void> setUser(Map<String, dynamic>? user) async {
-    final prefs = await SharedPreferences.getInstance();
-    if (user == null) {
-      await prefs.remove(_keyUser);
-    } else {
-      await prefs.setString(_keyUser, _encodeUser(user));
-    }
-  }
-
-  static String _encodeUser(Map<String, dynamic> user) {
-    try {
-      return user.entries.map((e) => '${e.key}:${e.value}').join('|');
-    } catch (_) {
-      return '';
-    }
-  }
-
-  static Future<Map<String, dynamic>?> getUser() async {
-    final prefs = await SharedPreferences.getInstance();
-    final s = prefs.getString(_keyUser);
-    if (s == null || s.isEmpty) return null;
-    final map = <String, dynamic>{};
-    for (final part in s.split('|')) {
-      final idx = part.indexOf(':');
-      if (idx > 0) map[part.substring(0, idx)] = part.substring(idx + 1);
-    }
-    return map.isEmpty ? null : map;
-  }
+  // Compatibility facades — prefer TokenStore in new code.
+  static Future<String?> getToken() => TokenStore.getToken();
+  static Future<void> setToken(String? token) => TokenStore.setToken(token);
+  static Future<void> setUser(Map<String, dynamic>? user) => TokenStore.setUser(user);
+  static Future<Map<String, dynamic>?> getUser() => TokenStore.getUser();
 
   static String url(String path) {
     var base = _baseUrl ?? '';

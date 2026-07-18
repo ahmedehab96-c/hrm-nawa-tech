@@ -7,14 +7,4 @@ abstract final class UserRole {
   static bool isEmployeeRole(String? role) => role == employee;
   static bool isSuperAdmin(String? role) => role == superAdmin;
   static bool isCompanyAdmin(String? role) => role == companyAdmin;
-
-  /// Home route after web login.
-  static String webHomeFor(String? role) =>
-      isSuperAdmin(role) ? '/platform' : '/admin';
-}
-
-/// سطح تسجيل الدخول: يفرض مطابقة الدور مع الويب أو التطبيق.
-enum LoginSurface {
-  webAdmin,
-  mobileEmployee,
 }

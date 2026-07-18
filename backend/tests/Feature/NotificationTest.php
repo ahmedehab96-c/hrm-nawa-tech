@@ -26,7 +26,7 @@ class NotificationTest extends TestCase
 
         $res = $this->getJson('/api/notifications', $h);
         $res->assertOk();
-        $this->assertCount(2, $res->json());
+        $this->assertCount(2, $res->json('data'));
     }
 
     public function test_notifications_scoped_to_company(): void
@@ -36,7 +36,7 @@ class NotificationTest extends TestCase
 
         $res = $this->getJson('/api/notifications', $h);
         $res->assertOk();
-        $this->assertCount(0, $res->json());
+        $this->assertCount(0, $res->json('data'));
     }
 
     public function test_mark_single_notification_as_read(): void

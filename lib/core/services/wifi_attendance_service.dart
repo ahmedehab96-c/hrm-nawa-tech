@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 
 /// خدمة التحقق من الواي فاي لتسجيل الحضور
@@ -31,7 +30,6 @@ class WifiAttendanceService {
 
   /// الحصول على اسم الشبكة الحالية
   static Future<String?> getCurrentWifiName() async {
-    if (kIsWeb) return null;
     try {
       final name = await _networkInfo.getWifiName();
       return name != null ? _normalizeSsid(name) : null;
@@ -42,7 +40,6 @@ class WifiAttendanceService {
 
   /// التحقق من الاتصال بشبكة الشركة
   static Future<bool> isOnCompanyWifi() async {
-    if (kIsWeb) return true; // على الويب نسمح بالتسجيل (للتطوير)
     try {
       final currentSsid = await getCurrentWifiName();
       if (currentSsid == null || currentSsid.isEmpty) return false;
@@ -55,9 +52,6 @@ class WifiAttendanceService {
   /// التحقق قبل تسجيل الحضور/الخروج
   /// يرجع true إذا كان بالإمكان التسجيل
   static Future<WifiCheckResult> canRecordAttendance() async {
-    if (kIsWeb) {
-      return WifiCheckResult(success: true, wifiName: 'Web');
-    }
     try {
       final currentSsid = await getCurrentWifiName();
       if (currentSsid == null || currentSsid.isEmpty) {

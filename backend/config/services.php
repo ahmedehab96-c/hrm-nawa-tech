@@ -47,9 +47,9 @@ return [
                 ],
             ],
             'gemini' => [
-                'gemini-1.5-flash' => [
-                    'input_per_million' => (float) env('AI_PRICE_GEMINI_15_FLASH_INPUT', 0.075),
-                    'output_per_million' => (float) env('AI_PRICE_GEMINI_15_FLASH_OUTPUT', 0.30),
+                'gemini-3.5-flash' => [
+                    'input_per_million' => (float) env('AI_PRICE_GEMINI_35_FLASH_INPUT', 1.50),
+                    'output_per_million' => (float) env('AI_PRICE_GEMINI_35_FLASH_OUTPUT', 9.00),
                 ],
             ],
         ],
@@ -62,7 +62,32 @@ return [
 
     'gemini' => [
         'key' => env('GEMINI_API_KEY'),
-        'model' => env('GEMINI_MODEL', 'gemini-1.5-flash'),
+        'model' => env('GEMINI_MODEL', 'gemini-3.5-flash'),
+    ],
+
+    'stripe' => [
+        'secret' => env('STRIPE_SECRET_KEY'),
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+        'price_starter' => env('STRIPE_PRICE_STARTER'),
+        'price_growth' => env('STRIPE_PRICE_GROWTH'),
+        'price_enterprise' => env('STRIPE_PRICE_ENTERPRISE'),
+    ],
+
+    'moyasar' => [
+        'secret' => env('MOYASAR_SECRET_KEY'),
+        'webhook_secret' => env('MOYASAR_WEBHOOK_SECRET'),
+        'currency' => env('MOYASAR_CURRENCY', 'SAR'),
+        'amount_starter' => env('MOYASAR_AMOUNT_STARTER'),
+        'amount_growth' => env('MOYASAR_AMOUNT_GROWTH'),
+        'amount_enterprise' => env('MOYASAR_AMOUNT_ENTERPRISE'),
+    ],
+
+    'billing' => [
+        'default_provider' => env('BILLING_DEFAULT_PROVIDER', 'stripe'),
+    ],
+
+    'fcm' => [
+        'server_key' => env('FCM_SERVER_KEY'),
     ],
 
 ];

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Company extends Model
 {
@@ -78,9 +79,14 @@ class Company extends Model
         };
     }
 
+    public function employees(): HasMany
+    {
+        return $this->hasMany(Employee::class);
+    }
+
     public function employeeCount(): int
     {
-        return Employee::query()->where('company_id', $this->id)->count();
+        return $this->employees()->count();
     }
 
     public function canAddEmployees(int $adding = 1): bool

@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:hrm_saas/core/repositories/attendance_repository.dart';
+import 'package:hrm_saas/features/employee/attendance/data/attendance_repository.dart';
 import 'package:hrm_saas/core/api/api_result.dart';
 
 void main() {

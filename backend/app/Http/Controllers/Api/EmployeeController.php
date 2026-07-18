@@ -3,23 +3,19 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\EmployeeResource;
 use App\Models\Company;
 use App\Models\Employee;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\EmployeeAppAccessService;
+use App\Support\Tenant\ResolvesEmployee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class EmployeeController extends Controller
 {
-    private static function appLoginEnabledForEmail(string $email, int $companyId): bool
-    {
-        return User::query()
-            ->where('company_id', $companyId)
-            ->where('email', $email)
-            ->where('role', 'employee')
-            ->exists();
-    }
+    use ResolvesEmployee;
 
     public function index(Request $request)
     {
@@ -51,30 +47,8 @@ class EmployeeController extends Controller
 
         $paginated = $query->paginate($perPage);
 
-        $items = collect($paginated->items())->map(function (Employee $e) use ($user) {
-            return [
-                'id'                      => $e->id,
-                'name'                    => $e->name,
-                'email'                   => $e->email,
-                'department'              => $e->department,
-                'position'                => $e->position,
-                'is_active'               => (bool) $e->is_active,
-                'phone'                   => $e->phone,
-                'birth_date'              => $e->birth_date?->toDateString(),
-                'hire_date'               => $e->hire_date?->toDateString(),
-                'insurance_type'          => $e->insurance_type,
-                'insurance_policy_number' => $e->insurance_policy_number,
-                'coverage_start'          => $e->coverage_start?->toDateString(),
-                'coverage_end'            => $e->coverage_end?->toDateString(),
-                'base_salary'             => $e->base_salary,
-                'allowances'              => $e->allowances,
-                'deductions'              => $e->deductions,
-                'app_login_enabled'       => self::appLoginEnabledForEmail($e->email, (int) $user->company_id),
-            ];
-        });
-
         return response()->json([
-            'data' => $items->all(),
+            'data' => EmployeeResource::collection($paginated->items())->resolve(),
             'meta' => [
                 'current_page' => $paginated->currentPage(),
                 'last_page'    => $paginated->lastPage(),
@@ -95,27 +69,7 @@ class EmployeeController extends Controller
             return response()->json(['message' => 'Not found'], 404);
         }
 
-        $data = [
-            'id' => $e->id,
-            'name' => $e->name,
-            'email' => $e->email,
-            'department' => $e->department,
-            'position' => $e->position,
-            'is_active' => (bool) $e->is_active,
-            'phone' => $e->phone,
-            'birth_date' => $e->birth_date?->toDateString(),
-            'hire_date' => $e->hire_date?->toDateString(),
-            'insurance_type' => $e->insurance_type,
-            'insurance_policy_number' => $e->insurance_policy_number,
-            'coverage_start' => $e->coverage_start?->toDateString(),
-            'coverage_end' => $e->coverage_end?->toDateString(),
-            'base_salary' => $e->base_salary,
-            'allowances' => $e->allowances,
-            'deductions' => $e->deductions,
-            'app_login_enabled' => self::appLoginEnabledForEmail($e->email, (int) $user->company_id),
-        ];
-
-        return response()->json(['data' => $data]);
+        return response()->json(['data' => (new EmployeeResource($e))->resolve()]);
     }
 
     public function store(Request $request)
@@ -288,31 +242,12 @@ class EmployeeController extends Controller
         $email = $emp->email;
 
         if (! $request->boolean('enabled')) {
-            User::query()
-                ->where('company_id', $user->company_id)
-                ->where('email', $email)
-                ->where('role', 'employee')
-                ->delete();
-            $emp->user_id = null;
-            $emp->save();
+            app(EmployeeAppAccessService::class)->disable($emp);
 
             return response()->json(['message' => 'App login disabled']);
         }
 
-        $appUser = User::updateOrCreate(
-            [
-                'company_id' => $user->company_id,
-                'email' => $email,
-            ],
-            [
-                'name' => $emp->name,
-                'password' => Hash::make($request->input('password')),
-                'role' => 'employee',
-            ]
-        );
-        $this->syncEmployeeRole($appUser);
-        $emp->user_id = $appUser->id;
-        $emp->save();
+        app(EmployeeAppAccessService::class)->enable($emp, $request->input('password'));
 
         return response()->json(['message' => 'App login updated']);
     }
@@ -320,41 +255,13 @@ class EmployeeController extends Controller
     /// ملف الموظف الحالي — GET `/employees/me` (لـ user.role = employee)
     public function me(Request $request)
     {
-        $user = $request->user();
-
-        $employee = Employee::query()
-            ->where('company_id', $user->company_id)
-            ->where('user_id', $user->id)
-            ->first();
+        $employee = $this->currentEmployee($request->user());
 
         if (! $employee) {
             return response()->json(['message' => 'Employee not found'], 404);
         }
 
-        $data = [
-            'id' => $employee->id,
-            'name' => $employee->name,
-            'email' => $employee->email,
-            'department' => $employee->department,
-            'position' => $employee->position,
-            'is_active' => (bool) $employee->is_active,
-            'phone' => $employee->phone,
-            'birth_date' => $employee->birth_date?->toDateString(),
-            'hire_date' => $employee->hire_date?->toDateString(),
-            'insurance_type' => $employee->insurance_type,
-            'insurance_policy_number' => $employee->insurance_policy_number,
-            'coverage_start' => $employee->coverage_start?->toDateString(),
-            'coverage_end' => $employee->coverage_end?->toDateString(),
-            'base_salary' => $employee->base_salary,
-            'allowances' => $employee->allowances,
-            'deductions' => $employee->deductions,
-            'app_login_enabled' => self::appLoginEnabledForEmail(
-                $employee->email,
-                (int) $user->company_id,
-            ),
-        ];
-
-        return response()->json(['data' => $data]);
+        return response()->json(['data' => (new EmployeeResource($employee))->resolve()]);
     }
 
     private function syncEmployeeRole(User $user): void

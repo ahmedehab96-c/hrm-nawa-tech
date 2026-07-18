@@ -6,60 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Models\AppNotification;
 use App\Models\Employee;
 use App\Models\LeaveRequest;
-use App\Models\LeaveRecommendation;
-use App\Services\HrInsightsService;
-use Illuminate\Support\Facades\DB;
+use App\Services\LeaveBalanceService;
+use App\Services\LeaveDecisionService;
+use App\Services\LeaveRecommendationService;
+use App\Support\Tenant\ResolvesEmployee;
 use Illuminate\Http\Request;
 
 class LeaveController extends Controller
 {
-    public function __construct(private readonly HrInsightsService $hrInsightsService) {}
+    use ResolvesEmployee;
 
-    private array $entitlements = [
-        'annual' => 21,
-        'sick' => 10,
-        'emergency' => 5,
-    ];
-
-    /**
-     * Returns remaining balances per employee and type.
-     * Output: [employee_id => [annual=>float, sick=>float, emergency=>float]]
-     */
-    private function getBalancesForEmployees(int $companyId, array $employeeIds): array
-    {
-        $employeeIds = array_values(array_unique(array_filter($employeeIds)));
-        if (empty($employeeIds)) return [];
-
-        $approved = LeaveRequest::query()
-            ->where('company_id', $companyId)
-            ->whereIn('employee_id', $employeeIds)
-            ->where('status', 'approved')
-            ->select([
-                'employee_id',
-                DB::raw('LOWER(type) as type_key'),
-                DB::raw('SUM(days) as total_days'),
-            ])
-            ->groupBy(['employee_id', DB::raw('LOWER(type)')])
-            ->get();
-
-        $usedMap = [];
-        foreach ($approved as $row) {
-            $eid = (int) $row->employee_id;
-            $typeKey = (string) $row->type_key;
-            $usedMap[$eid][$typeKey] = (float) $row->total_days;
-        }
-
-        $balances = [];
-        foreach ($employeeIds as $eid) {
-            $balances[(int) $eid] = [
-                'annual' => max(0.0, (float) ($this->entitlements['annual'] ?? 0) - ($usedMap[$eid]['annual'] ?? 0.0)),
-                'sick' => max(0.0, (float) ($this->entitlements['sick'] ?? 0) - ($usedMap[$eid]['sick'] ?? 0.0)),
-                'emergency' => max(0.0, (float) ($this->entitlements['emergency'] ?? 0) - ($usedMap[$eid]['emergency'] ?? 0.0)),
-            ];
-        }
-
-        return $balances;
-    }
+    public function __construct(private readonly LeaveBalanceService $leaveBalanceService) {}
 
     public function store(Request $request)
     {
@@ -72,7 +29,7 @@ class LeaveController extends Controller
         ]);
 
         $user = $request->user();
-        $employee = $this->resolveEmployeeForRequest($request);
+        $employee = $this->resolveEmployeeForUser($request);
         if (! $employee || (int) $employee->company_id !== (int) $user->company_id) {
             return response()->json(['message' => 'Employee not found'], 404);
         }
@@ -112,10 +69,7 @@ class LeaveController extends Controller
             ->with('employee:id,name');
 
         if ($user->role === 'employee') {
-            $employee = Employee::query()
-                ->where('company_id', $user->company_id)
-                ->where('user_id', $user->id)
-                ->first();
+            $employee = $this->currentEmployee($user);
             if (! $employee) {
                 return response()->json(['data' => [], 'meta' => ['current_page' => 1, 'last_page' => 1, 'total' => 0, 'per_page' => $perPage]]);
             }
@@ -128,7 +82,7 @@ class LeaveController extends Controller
 
         $paginated   = $query->orderByDesc('id')->paginate($perPage);
         $employeeIds = collect($paginated->items())->pluck('employee_id')->unique()->all();
-        $balances    = $this->getBalancesForEmployees((int) $user->company_id, $employeeIds);
+        $balances    = $this->leaveBalanceService->balancesForEmployees((int) $user->company_id, $employeeIds);
 
         $items = collect($paginated->items())->map(function (LeaveRequest $r) use ($balances) {
             $typeKey        = strtolower(trim((string) $r->type));
@@ -170,18 +124,18 @@ class LeaveController extends Controller
             ->get();
 
         $employeeIds = $employees->pluck('id')->all();
-        $balances = $this->getBalancesForEmployees((int) $user->company_id, $employeeIds);
+        $balances = $this->leaveBalanceService->balancesForEmployees((int) $user->company_id, $employeeIds);
 
         $data = $employees->map(function (Employee $e) use ($balances) {
             $b = $balances[(int) $e->id] ?? ['annual' => 0.0, 'sick' => 0.0, 'emergency' => 0.0];
             return [
                 'employee_name' => $e->name,
                 'annual' => $b['annual'],
-                'annual_total' => (float) ($this->entitlements['annual'] ?? 0),
+                'annual_total' => $this->leaveBalanceService->entitlementFor('annual'),
                 'sick' => $b['sick'],
-                'sick_total' => (float) ($this->entitlements['sick'] ?? 0),
+                'sick_total' => $this->leaveBalanceService->entitlementFor('sick'),
                 'emergency' => $b['emergency'],
-                'emergency_total' => (float) ($this->entitlements['emergency'] ?? 0),
+                'emergency_total' => $this->leaveBalanceService->entitlementFor('emergency'),
             ];
         });
 
@@ -197,15 +151,7 @@ class LeaveController extends Controller
         if (! $leave) {
             return response()->json(['message' => 'Not found'], 404);
         }
-        $leave->status = 'approved';
-        $leave->save();
-        AppNotification::query()->create([
-            'company_id' => $user->company_id,
-            'employee_id' => $leave->employee_id,
-            'title' => 'Leave approved',
-            'body' => 'Your leave request was approved.',
-            'type' => 'leave',
-        ]);
+        app(LeaveDecisionService::class)->approve($leave);
 
         return response()->json(['message' => 'Approved', 'id' => $id]);
     }
@@ -219,38 +165,9 @@ class LeaveController extends Controller
         if (! $leave) {
             return response()->json(['message' => 'Not found'], 404);
         }
-        $leave->status = 'rejected';
-        $leave->save();
-        AppNotification::query()->create([
-            'company_id' => $user->company_id,
-            'employee_id' => $leave->employee_id,
-            'title' => 'Leave rejected',
-            'body' => 'Your leave request was rejected.',
-            'type' => 'leave',
-        ]);
+        app(LeaveDecisionService::class)->reject($leave);
 
         return response()->json(['message' => 'Rejected', 'id' => $id]);
-    }
-
-    private function resolveEmployeeForRequest(Request $request): ?Employee
-    {
-        $user = $request->user();
-        if ($user->role === 'employee') {
-            return Employee::query()
-                ->where('company_id', $user->company_id)
-                ->where('user_id', $user->id)
-                ->first();
-        }
-
-        $employeeId = $request->input('employee_id');
-        if ($employeeId) {
-            return Employee::query()->find($employeeId);
-        }
-
-        return Employee::query()
-            ->where('company_id', $user->company_id)
-            ->where('email', $user->email)
-            ->first();
     }
 
     public function recommend(Request $request, string $id)
@@ -265,27 +182,9 @@ class LeaveController extends Controller
             return response()->json(['message' => 'Not found'], 404);
         }
 
-        $balances = $this->getBalancesForEmployees(
-            (int) $user->company_id,
-            [(int) $leave->employee_id],
-        );
-        $typeKey = strtolower(trim((string) $leave->type));
-        $remaining = (float) ($balances[(int) $leave->employee_id][$typeKey] ?? 0.0);
-
-        $recommendation = $this->hrInsightsService->buildLeaveRecommendation(
-            leave: $leave,
-            remainingBalanceForType: $remaining,
-        );
-
-        $record = LeaveRecommendation::query()->create([
-            'company_id' => $user->company_id,
-            'leave_request_id' => $leave->id,
-            'generated_by' => $user->id,
-            'recommended_action' => $recommendation['action'],
-            'confidence_score' => $recommendation['confidence'],
-            'reason' => $recommendation['reason'],
-            'engine' => 'rule-engine-v1',
-        ]);
+        $result = app(LeaveRecommendationService::class)->recommend($leave, (int) $user->id);
+        $recommendation = $result['recommendation'];
+        $record = $result['record'];
 
         return response()->json([
             'data' => [
@@ -295,7 +194,7 @@ class LeaveController extends Controller
                 'recommended_action' => $recommendation['action'],
                 'confidence_score' => $recommendation['confidence'],
                 'reason' => $recommendation['reason'],
-                'remaining_balance' => $remaining,
+                'remaining_balance' => $result['remaining_balance'],
                 'leave_type' => $leave->type,
                 'requested_days' => $leave->days,
             ],

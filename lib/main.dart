@@ -10,13 +10,13 @@ import 'core/api/api_config.dart';
 import 'core/auth/auth_session.dart';
 import 'core/locale/locale_controller.dart';
 import 'core/saas/company_context.dart';
+import 'core/services/deep_link_handler.dart';
 import 'l10n/app_strings.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await ApiConfig.load();
   await ApiConfig.applyReleaseDefaults();
-  await ApiConfig.applyDebugWebDefaults();
   await ApiConfig.applyDebugMobileDefaults();
   await AuthSession.instance.syncFromStorage();
   await LocaleController.instance.load();
@@ -36,12 +36,15 @@ class HrmSaasApp extends StatefulWidget {
 class _HrmSaasAppState extends State<HrmSaasApp> {
   final ThemeNotifier _themeNotifier = ThemeNotifier();
   late final GoRouter _router = createAppRouter();
+  DeepLinkHandler? _deepLinkHandler;
 
   @override
   void initState() {
     super.initState();
     _themeNotifier.addListener(() => setState(() {}));
     LocaleController.instance.addListener(_onLocale);
+    _deepLinkHandler = DeepLinkHandler(_router);
+    _deepLinkHandler!.init();
   }
 
   void _onLocale() => setState(() {});
@@ -49,6 +52,7 @@ class _HrmSaasAppState extends State<HrmSaasApp> {
   @override
   void dispose() {
     LocaleController.instance.removeListener(_onLocale);
+    _deepLinkHandler?.dispose();
     super.dispose();
   }
 

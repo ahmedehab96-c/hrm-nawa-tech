@@ -135,7 +135,7 @@ class AiGatewayService
         ?string $systemPromptOverride,
     ): array {
         $apiKey = (string) config('services.gemini.key', '');
-        $model = $modelOverride ?: (string) config('services.gemini.model', 'gemini-1.5-flash');
+        $model = $modelOverride ?: (string) config('services.gemini.model', 'gemini-3.5-flash');
 
         if ($apiKey === '') {
             return $this->fallbackReply($message, $languageCode, 'gemini', $model, 'missing_api_key');

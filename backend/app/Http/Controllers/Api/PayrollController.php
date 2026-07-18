@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Employee;
 use App\Models\PayrollRecord;
+use App\Services\PayrollGenerationService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -58,36 +59,7 @@ class PayrollController extends Controller
             'month' => ['required', 'regex:/^\d{4}-\d{2}$/'],
         ]);
         $month = $validated['month'];
-
-        $employees = Employee::query()
-            ->where('company_id', $user->company_id)
-            ->where('is_active', true)
-            ->orderBy('id')
-            ->get();
-
-        $count = 0;
-        foreach ($employees as $employee) {
-            $base = (float) ($employee->base_salary ?? 0);
-            $allowances = (float) ($employee->allowances ?? 0);
-            $deductions = (float) ($employee->deductions ?? 0);
-            $net = $base + $allowances - $deductions;
-
-            PayrollRecord::query()->updateOrCreate(
-                [
-                    'company_id' => $user->company_id,
-                    'employee_id' => $employee->id,
-                    'month' => $month,
-                ],
-                [
-                    'base_salary' => $base,
-                    'allowances' => $allowances,
-                    'deductions' => $deductions,
-                    'net_salary' => $net,
-                    'status' => 'processed',
-                ]
-            );
-            $count++;
-        }
+        $count = app(PayrollGenerationService::class)->generate((int) $user->company_id, $month);
 
         return response()->json([
             'message' => 'Payroll generated',

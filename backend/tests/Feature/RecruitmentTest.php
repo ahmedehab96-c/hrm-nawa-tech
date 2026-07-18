@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Candidate;
 use App\Models\JobPosting;
+use App\Services\AiGatewayService;
 use Tests\TestCase;
 
 class RecruitmentTest extends TestCase
@@ -141,6 +142,7 @@ class RecruitmentTest extends TestCase
 
     public function test_parse_candidate_cv(): void
     {
+        $this->mockRecruitmentAi();
         $h = $this->adminHeaders();
         $job = $this->makeJob();
         $candidate = Candidate::create([
@@ -163,6 +165,7 @@ class RecruitmentTest extends TestCase
 
     public function test_match_candidates_endpoint(): void
     {
+        $this->mockRecruitmentAi();
         $h = $this->adminHeaders();
         $job = $this->makeJob(['description' => 'Need Flutter and API integration skills.']);
         Candidate::create([
@@ -189,5 +192,42 @@ class RecruitmentTest extends TestCase
         ], $h);
 
         $res->assertOk()->assertJsonStructure(['data']);
+    }
+
+    private function mockRecruitmentAi(): void
+    {
+        $this->mock(AiGatewayService::class, function ($mock): void {
+            $mock->shouldReceive('generateChatReply')
+                ->andReturnUsing(function (string $message): array {
+                    if (str_contains($message, 'CV text') || str_contains($message, 'نص السيرة')) {
+                        $content = json_encode([
+                            'summary' => 'Experienced Flutter developer',
+                            'skills' => ['Flutter', 'Dart', 'REST APIs'],
+                            'years_experience' => 4,
+                        ]);
+                    } else {
+                        preg_match_all('/"candidate_id":(\d+)/', $message, $matches);
+                        $scores = [];
+                        foreach ($matches[1] as $index => $id) {
+                            $scores[] = [
+                                'candidate_id' => (int) $id,
+                                'score' => max(10, 90 - ($index * 40)),
+                                'reason' => 'Test AI match reason',
+                            ];
+                        }
+                        $content = json_encode(['scores' => $scores]);
+                    }
+
+                    return [
+                        'content' => $content,
+                        'provider' => 'openai',
+                        'model' => 'test',
+                        'prompt_tokens' => 10,
+                        'completion_tokens' => 10,
+                        'total_tokens' => 20,
+                        'metadata' => ['source' => 'test'],
+                    ];
+                });
+        });
     }
 }

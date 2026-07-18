@@ -73,7 +73,9 @@ else
   echo "→ skip seed (users already exist; set SEED_ON_START=true to force)"
 fi
 
-echo "→ API on http://127.0.0.1:8000 (LAN: http://0.0.0.0:8000)"
+echo "→ API + Admin on http://127.0.0.1:8000"
+echo "   Admin panel: http://127.0.0.1:8000/admin"
 echo "   Admin: admin@demo.com / Admin12345!"
 echo "   Employee: emp01@demo.com / Employee12345!"
+echo "   Optional queue worker: ./scripts/start_queue.sh"
 exec "$PHP_BIN" artisan serve --host=0.0.0.0 --port=8000

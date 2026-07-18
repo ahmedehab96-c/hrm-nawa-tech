@@ -8,10 +8,13 @@ use App\Models\AttendanceInsight;
 use App\Models\AttendanceRecord;
 use App\Models\Employee;
 use App\Services\HrInsightsService;
+use App\Support\Tenant\ResolvesEmployee;
 use Illuminate\Http\Request;
 
 class AttendanceController extends Controller
 {
+    use ResolvesEmployee;
+
     public function __construct(private readonly HrInsightsService $hrInsightsService) {}
 
     public function index(Request $request)
@@ -26,12 +29,9 @@ class AttendanceController extends Controller
             ->orderBy('id');
 
         if ($user->role === 'employee') {
-            $employee = Employee::query()
-                ->where('company_id', $user->company_id)
-                ->where('user_id', $user->id)
-                ->first();
+            $employee = $this->currentEmployee($user);
             if (! $employee) {
-                return response()->json([]);
+                return response()->json(['data' => []]);
             }
             $query->where('employee_id', $employee->id);
         }
@@ -50,7 +50,7 @@ class AttendanceController extends Controller
             ];
         });
 
-        return response()->json($data->all());
+        return response()->json(['data' => $data->all()]);
     }
 
     public function update(Request $request, string $id)
@@ -187,14 +187,14 @@ class AttendanceController extends Controller
         return response()->json(['message' => 'Checked out', 'at' => $now->toIso8601String()]);
     }
 
+    /**
+     * Check-in/out for admins require an explicit employee_id (no email fallback).
+     */
     private function resolveEmployeeForAction(Request $request): ?Employee
     {
         $user = $request->user();
         if ($user->role === 'employee') {
-            return Employee::query()
-                ->where('company_id', $user->company_id)
-                ->where('user_id', $user->id)
-                ->first();
+            return $this->currentEmployee($user);
         }
 
         $employeeId = $request->input('employee_id');

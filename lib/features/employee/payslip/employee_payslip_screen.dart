@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import '../../../core/api/api_result.dart';
 import '../../../core/api/current_user.dart';
 import '../../../core/api/api_config.dart';
-import '../../../core/repositories/payroll_repository.dart';
+import 'package:hrm_saas/features/employee/payslip/data/payroll_repository.dart';
 import '../../../core/services/payslip_pdf_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/text_direction_helper.dart';
+import '../../../core/widgets/responsive_page.dart';
 import '../../../l10n/app_strings.dart';
 
 class EmployeePayslipScreen extends StatefulWidget {
@@ -53,21 +54,28 @@ class _EmployeePayslipScreenState extends State<EmployeePayslipScreen> {
       _error = null;
     });
     await ApiConfig.load();
-    final name = await currentUserDisplayName();
     final res = await PayrollRepository.getPayroll(_month);
 
     PayslipItem? slip;
     String? error;
     if (res is ApiSuccess<List<PayslipItem>>) {
-      for (final p in res.data) {
-        if (name != null &&
-            (p.employeeName.toLowerCase().contains(name.toLowerCase()) ||
-                name.toLowerCase().contains(p.employeeName.toLowerCase()))) {
-          slip = p;
-          break;
+      // Backend scopes payroll to the authenticated employee's own records,
+      // so the first item is always the current user's payslip.
+      // Fuzzy name matching is only used in demo mode as a fallback.
+      if (ApiConfig.useApi && ApiConfig.baseUrl != null && ApiConfig.baseUrl!.isNotEmpty) {
+        slip = res.data.isNotEmpty ? res.data.first : null;
+      } else {
+        final name = await currentUserDisplayName();
+        for (final p in res.data) {
+          if (name != null &&
+              (p.employeeName.toLowerCase().contains(name.toLowerCase()) ||
+                  name.toLowerCase().contains(p.employeeName.toLowerCase()))) {
+            slip = p;
+            break;
+          }
         }
+        slip ??= res.data.isNotEmpty ? res.data.first : null;
       }
-      slip ??= res.data.isNotEmpty ? res.data.first : null;
     } else if (res is ApiFailure<List<PayslipItem>>) {
       error = res.message;
     }
@@ -115,17 +123,13 @@ class _EmployeePayslipScreenState extends State<EmployeePayslipScreen> {
         ),
         body: _loading
             ? const Center(child: CircularProgressIndicator())
-            : Align(
-                alignment: Alignment.topCenter,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 640),
-                  child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
+            : ResponsivePage(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     DropdownButtonFormField<String>(
                       key: ValueKey(_month),
+                      isExpanded: true,
                       initialValue:
                           _monthChoices.contains(_month) ? _month : _monthChoices.first,
                       decoration: InputDecoration(
@@ -196,21 +200,37 @@ class _EmployeePayslipScreenState extends State<EmployeePayslipScreen> {
                                 ),
                               ),
                               const Divider(height: 32),
-                              _PayslipRow(l10n.breakdownBase, s.baseSalary),
-                              _PayslipRow(l10n.breakdownAllowances, s.allowances),
-                              _PayslipRow(l10n.colNetSalary, s.netSalary),
+                              LabeledValueRow(
+                                label: l10n.breakdownBase,
+                                value: s.baseSalary,
+                                labelStyle: AppTypography.bodyMedium,
+                                valueStyle: AppTypography.bodyMedium,
+                              ),
+                              LabeledValueRow(
+                                label: l10n.breakdownAllowances,
+                                value: s.allowances,
+                                labelStyle: AppTypography.bodyMedium,
+                                valueStyle: AppTypography.bodyMedium,
+                              ),
+                              LabeledValueRow(
+                                label: l10n.colNetSalary,
+                                value: s.netSalary,
+                                labelStyle: AppTypography.bodyMedium,
+                                valueStyle: AppTypography.bodyMedium,
+                              ),
                               const Divider(height: 24),
-                              _PayslipRow(l10n.breakdownDeductions, s.deductions),
+                              LabeledValueRow(
+                                label: l10n.breakdownDeductions,
+                                value: s.deductions,
+                                labelStyle: AppTypography.bodyMedium,
+                                valueStyle: AppTypography.bodyMedium,
+                              ),
                               const Divider(height: 24),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(l10n.breakdownNet, style: AppTypography.h4),
-                                  Text(
-                                    s.netSalary,
-                                    style: AppTypography.h3.copyWith(color: AppColors.success),
-                                  ),
-                                ],
+                              LabeledValueRow(
+                                label: l10n.breakdownNet,
+                                value: s.netSalary,
+                                labelStyle: AppTypography.h4,
+                                valueStyle: AppTypography.h3.copyWith(color: AppColors.success),
                               ),
                             ],
                           ),
@@ -219,29 +239,6 @@ class _EmployeePayslipScreenState extends State<EmployeePayslipScreen> {
                   ],
                 ),
               ),
-                  ),
-                ),
-      ),
-    );
-  }
-}
-
-class _PayslipRow extends StatelessWidget {
-  const _PayslipRow(this.label, this.value);
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: AppTypography.bodyMedium),
-          Text(value, style: AppTypography.bodyMedium),
-        ],
       ),
     );
   }

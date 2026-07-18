@@ -22,9 +22,9 @@ class NotificationController extends Controller
 
         $rows = $query->get();
 
-        return response()->json(
-            $rows->map(fn (AppNotification $n) => $this->format($n))->all()
-        );
+        return response()->json([
+            'data' => $rows->map(fn (AppNotification $n) => $this->format($n))->all(),
+        ]);
     }
 
     public function markRead(Request $request, string $id)

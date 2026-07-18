@@ -15,6 +15,19 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    'version' => env('APP_VERSION', '1.0.0'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Mobile deep link scheme (Flutter employee app)
+    |--------------------------------------------------------------------------
+    |
+    | Used in password-reset emails: nawatechhrm://reset-password?token=...
+    |
+    */
+
+    'mobile_deep_link_scheme' => env('MOBILE_DEEP_LINK_SCHEME', 'nawatechhrm'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment

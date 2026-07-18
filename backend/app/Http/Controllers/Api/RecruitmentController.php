@@ -3,19 +3,21 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Jobs\ProcessAiTask;
-use App\Models\AiTask;
 use App\Models\Candidate;
-use App\Models\CandidateMatchScore;
 use App\Models\JobPosting;
 use App\Models\Company;
+use App\Services\Ai\AiTaskDispatcher;
 use App\Services\RecruitmentAiService;
+use App\Services\RecruitmentMatchService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
 class RecruitmentController extends Controller
 {
-    public function __construct(private readonly RecruitmentAiService $recruitmentAiService) {}
+    public function __construct(
+        private readonly RecruitmentAiService $recruitmentAiService,
+        private readonly AiTaskDispatcher $aiTaskDispatcher,
+    ) {}
 
     // ─── Job Postings ────────────────────────────────────────────────────────
 
@@ -190,21 +192,16 @@ class RecruitmentController extends Controller
             'language_code' => 'nullable|string|max:8',
         ]);
 
-        $task = AiTask::query()->create([
-            'company_id' => $request->user()->company_id,
-            'user_id' => $request->user()->id,
-            'task_type' => 'recruitment_parse_cv',
-            'status' => 'queued',
-            'progress_percent' => 0,
-            'queue_name' => 'ai-heavy',
-            'payload' => [
+        $task = $this->aiTaskDispatcher->dispatch(
+            companyId: (int) $request->user()->company_id,
+            userId: (int) $request->user()->id,
+            taskType: 'recruitment_parse_cv',
+            payload: [
                 'candidate_id' => $candidate->id,
                 'cv_text' => (string) $validated['cv_text'],
                 'language_code' => (string) ($validated['language_code'] ?? 'en'),
             ],
-        ]);
-
-        ProcessAiTask::dispatch($task->id)->onQueue('ai-heavy');
+        );
 
         return response()->json([
             'message' => 'CV parsing task queued',
@@ -239,33 +236,10 @@ class RecruitmentController extends Controller
         }
 
         $languageCode = (string) ($request->input('language_code') ?? 'en');
-        $scores = $this->recruitmentAiService->scoreCandidates(
-            job: $job,
-            candidates: $candidates,
-            languageCode: $languageCode,
-            provider: $company->ai_provider ?: 'openai',
-            model: $company->ai_model,
-        );
+        $updated = app(RecruitmentMatchService::class)->matchCandidates($job, $user, $languageCode);
 
-        foreach ($scores as $item) {
-            /** @var Candidate|null $candidate */
-            $candidate = $candidates->firstWhere('id', $item['candidate_id']);
-            if (! $candidate) {
-                continue;
-            }
-
-            $candidate->ai_fit_score = $item['score'];
-            $candidate->ai_match_reason = $item['reason'];
-            $candidate->save();
-
-            CandidateMatchScore::query()->create([
-                'company_id' => $company->id,
-                'job_posting_id' => $job->id,
-                'candidate_id' => $candidate->id,
-                'created_by' => $user->id,
-                'score' => $item['score'],
-                'reason' => $item['reason'],
-            ]);
+        if ($updated === 0 && $job->candidates()->count() === 0) {
+            return response()->json(['data' => []]);
         }
 
         $refreshed = $job->candidates()
@@ -290,20 +264,15 @@ class RecruitmentController extends Controller
             'language_code' => 'nullable|string|max:8',
         ]);
 
-        $task = AiTask::query()->create([
-            'company_id' => $request->user()->company_id,
-            'user_id' => $request->user()->id,
-            'task_type' => 'recruitment_match_candidates',
-            'status' => 'queued',
-            'progress_percent' => 0,
-            'queue_name' => 'ai-heavy',
-            'payload' => [
+        $task = $this->aiTaskDispatcher->dispatch(
+            companyId: (int) $request->user()->company_id,
+            userId: (int) $request->user()->id,
+            taskType: 'recruitment_match_candidates',
+            payload: [
                 'job_id' => $job->id,
                 'language_code' => (string) ($validated['language_code'] ?? 'en'),
             ],
-        ]);
-
-        ProcessAiTask::dispatch($task->id)->onQueue('ai-heavy');
+        );
 
         return response()->json([
             'message' => 'Candidate matching task queued',

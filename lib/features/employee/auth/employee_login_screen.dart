@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_result.dart';
-import '../../../core/auth/user_role.dart';
-import '../../../core/repositories/auth_repository.dart';
+import 'package:hrm_saas/features/employee/auth/data/auth_repository.dart';
+import '../../../core/services/device_token_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/text_direction_helper.dart';
 import '../../../core/widgets/hrm_logo.dart';
+import '../../../core/widgets/responsive_page.dart';
 import '../../../l10n/app_strings.dart';
 
 class EmployeeLoginScreen extends StatefulWidget {
@@ -106,8 +107,19 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen>
                   ),
                 ),
                 // ── Login form card ───────────────────────────────────────
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: context.responsive.formMaxWidth,
+                    ),
+                    child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    context.responsive.horizontalPadding,
+                    24,
+                    context.responsive.horizontalPadding,
+                    32,
+                  ),
                   child: SlideTransition(
                     position: _formSlide,
                     child: Container(
@@ -187,7 +199,15 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen>
                                 validator: (v) => v?.isEmpty ?? true ? l10n.enterPassword : null,
                               ),
                             ),
-                            const SizedBox(height: 28),
+                            const SizedBox(height: 12),
+                            Align(
+                              alignment: AlignmentDirectional.centerEnd,
+                              child: TextButton(
+                                onPressed: _isLoading ? null : () => context.push('/forgot-password'),
+                                child: Text(l10n.forgotPassword),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
                             _Reveal(
                               delayMs: 300,
                               child: Listener(
@@ -202,17 +222,19 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen>
                                         : () async {
                                             if (!(_formKey.currentState?.validate() ?? false)) return;
                                             setState(() => _isLoading = true);
-                                            final result = await AuthRepository.login(
-                                              _emailController.text.trim(),
-                                              _passwordController.text,
-                                              surface: LoginSurface.mobileEmployee,
-                                            );
+                                              final result = await AuthRepository.login(
+                                                _emailController.text.trim(),
+                                                _passwordController.text,
+                                              );
                                             if (!mounted) return;
                                             setState(() => _isLoading = false);
                                             if (!mounted) return;
                                             if (result is ApiSuccess<Map<String, dynamic>>) {
+                                              await DeviceTokenService.registerIfAvailable();
+                                              if (!mounted) return;
+                                              final verified = result.data['user']?['email_verified'] == true;
                                               // ignore: use_build_context_synchronously
-                                              context.go('/employee');
+                                              context.go(verified ? '/employee' : '/verify-email');
                                             } else if (result is ApiFailure<Map<String, dynamic>>) {
                                               // ignore: use_build_context_synchronously
                                               ScaffoldMessenger.of(context).showSnackBar(
@@ -244,6 +266,8 @@ class _EmployeeLoginScreenState extends State<EmployeeLoginScreen>
                         ),
                       ),
                     ),
+                  ),
+                ),
                   ),
                 ),
               ],

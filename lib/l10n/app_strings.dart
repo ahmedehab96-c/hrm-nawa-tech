@@ -257,6 +257,17 @@ abstract class AppStrings {
   String get backToLogin;
   String get resetLinkSent;
   String get resetLinkSentBody;
+  String get resetPasswordTitle;
+  String resetPasswordBody(String email);
+  String get newPassword;
+  String get confirmNewPassword;
+  String get saveNewPassword;
+  String get passwordResetSuccess;
+  String get passwordResetSuccessBody;
+  String get resetLinkInvalid;
+  String get resetLinkInvalidBody;
+  String get passwordMinLength;
+  String get passwordsDoNotMatch;
   String get addCompanyTitle;
   String get demoCompanyLabel;
   String get companyAddedSuccess;
@@ -340,6 +351,14 @@ abstract class AppStrings {
   String get saasPlanSection;
   String get trialExpiredBanner;
   String get emailUnverifiedBanner;
+  String get verifyEmailTitle;
+  String get verifyEmailBody;
+  String get resendVerificationLink;
+  String get verificationLinkSent;
+  String get verifyContinueButton;
+  String get verifyingEmail;
+  String get verifyEmailSuccess;
+  String get verifyEmailFailed;
   String trialEndsOn(String date);
   String trialDaysLeft(int days);
   String get saasRecruitmentLocked;
@@ -904,7 +923,29 @@ class AppStringsAr extends AppStrings {
   @override
   String get resetLinkSent => "تم إرسال الرابط";
   @override
-  String get resetLinkSentBody => "تحقق من بريدك الإلكتروني واضغط على الرابط لإعادة تعيين كلمة المرور";
+  String get resetLinkSentBody => "تحقق من بريدك الإلكتروني واضغط على الرابط لإعادة تعيين كلمة المرور. على الموبايل يمكن فتح الرابط مباشرة في التطبيق.";
+  @override
+  String get resetPasswordTitle => "تعيين كلمة مرور جديدة";
+  @override
+  String resetPasswordBody(String email) => "أدخل كلمة مرور جديدة لحساب $email";
+  @override
+  String get newPassword => "كلمة المرور الجديدة";
+  @override
+  String get confirmNewPassword => "تأكيد كلمة المرور";
+  @override
+  String get saveNewPassword => "حفظ كلمة المرور";
+  @override
+  String get passwordResetSuccess => "تم تغيير كلمة المرور";
+  @override
+  String get passwordResetSuccessBody => "يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة.";
+  @override
+  String get resetLinkInvalid => "رابط غير صالح";
+  @override
+  String get resetLinkInvalidBody => "الرابط منتهي أو غير مكتمل. اطلب رابطاً جديداً من شاشة نسيت كلمة المرور.";
+  @override
+  String get passwordMinLength => "كلمة المرور 8 أحرف على الأقل";
+  @override
+  String get passwordsDoNotMatch => "كلمتا المرور غير متطابقتين";
   @override
   String get addCompanyTitle => "إضافة شركة";
   @override
@@ -1071,6 +1112,22 @@ class AppStringsAr extends AppStrings {
   String get trialExpiredBanner => "انتهت الفترة التجريبية. رقِّ الخطة للمتابعة.";
   @override
   String get emailUnverifiedBanner => "يرجى تأكيد بريدك الإلكتروني للمتابعة. تحقق من صندوق الوارد أو أعد إرسال الرابط.";
+  @override
+  String get verifyEmailTitle => "تأكيد البريد الإلكتروني";
+  @override
+  String get verifyEmailBody => "أرسلنا رابط تأكيد إلى بريدك. افتح الرابط من هاتفك أو الحاسوب ثم ارجع للتطبيق.";
+  @override
+  String get resendVerificationLink => "إعادة إرسال رابط التأكيد";
+  @override
+  String get verificationLinkSent => "تم إرسال رابط التأكيد. تحقق من بريدك الإلكتروني.";
+  @override
+  String get verifyContinueButton => "تم التأكيد — متابعة";
+  @override
+  String get verifyingEmail => "جارٍ تأكيد البريد...";
+  @override
+  String get verifyEmailSuccess => "تم تأكيد بريدك الإلكتروني بنجاح";
+  @override
+  String get verifyEmailFailed => "تعذر تأكيد البريد. اطلب رابطاً جديداً.";
   @override
   String trialEndsOn(String date) => "تنتهي التجربة في $date";
   @override
@@ -1717,7 +1774,29 @@ class AppStringsEn extends AppStrings {
   @override
   String get resetLinkSent => "Link sent";
   @override
-  String get resetLinkSentBody => "Check your email and follow the link to reset your password.";
+  String get resetLinkSentBody => "Check your email and follow the link to reset your password. On mobile, the link can open the app directly.";
+  @override
+  String get resetPasswordTitle => "Set a new password";
+  @override
+  String resetPasswordBody(String email) => "Choose a new password for $email";
+  @override
+  String get newPassword => "New password";
+  @override
+  String get confirmNewPassword => "Confirm password";
+  @override
+  String get saveNewPassword => "Save password";
+  @override
+  String get passwordResetSuccess => "Password updated";
+  @override
+  String get passwordResetSuccessBody => "You can now sign in with your new password.";
+  @override
+  String get resetLinkInvalid => "Invalid link";
+  @override
+  String get resetLinkInvalidBody => "This reset link is incomplete or expired. Request a new one from Forgot password.";
+  @override
+  String get passwordMinLength => "Password must be at least 8 characters";
+  @override
+  String get passwordsDoNotMatch => "Passwords do not match";
   @override
   String get addCompanyTitle => "Add company";
   @override
@@ -1884,6 +1963,22 @@ class AppStringsEn extends AppStrings {
   String get trialExpiredBanner => "Your free trial has expired. Upgrade to continue.";
   @override
   String get emailUnverifiedBanner => "Please verify your email to continue. Check your inbox or resend the link.";
+  @override
+  String get verifyEmailTitle => "Verify your email";
+  @override
+  String get verifyEmailBody => "We sent a confirmation link to your inbox. Open it on your phone or computer, then return here.";
+  @override
+  String get resendVerificationLink => "Resend verification link";
+  @override
+  String get verificationLinkSent => "Verification link sent. Check your email.";
+  @override
+  String get verifyContinueButton => "I verified — continue";
+  @override
+  String get verifyingEmail => "Verifying email...";
+  @override
+  String get verifyEmailSuccess => "Your email was verified successfully";
+  @override
+  String get verifyEmailFailed => "Could not verify email. Request a new link.";
   @override
   String trialEndsOn(String date) => "Trial ends on $date";
   @override

@@ -11,7 +11,20 @@ class ResetPasswordNotification extends BaseResetPassword
     {
         $appUrl = rtrim(config('app.url'), '/');
 
-        return $appUrl . '/reset-password?' . http_build_query([
+        return $appUrl.'/reset-password?'.http_build_query([
+            'token' => $this->token,
+            'email' => $notifiable->getEmailForPasswordReset(),
+        ]);
+    }
+
+    protected function mobileResetUrl(mixed $notifiable): ?string
+    {
+        $scheme = (string) config('app.mobile_deep_link_scheme', '');
+        if ($scheme === '') {
+            return null;
+        }
+
+        return $scheme.'://reset-password?'.http_build_query([
             'token' => $this->token,
             'email' => $notifiable->getEmailForPasswordReset(),
         ]);
@@ -20,13 +33,21 @@ class ResetPasswordNotification extends BaseResetPassword
     public function toMail(mixed $notifiable): MailMessage
     {
         $url = $this->resetUrl($notifiable);
+        $mobileUrl = $this->mobileResetUrl($notifiable);
 
-        return (new MailMessage)
+        $mail = (new MailMessage)
             ->subject('Reset your HRM password')
             ->greeting('Hello!')
             ->line('You requested a password reset for your HRM account.')
             ->action('Reset password', $url)
-            ->line('This link expires in ' . config('auth.passwords.users.expire', 60) . ' minutes.')
+            ->line('This link expires in '.config('auth.passwords.users.expire', 60).' minutes.');
+
+        if ($mobileUrl !== null) {
+            $mail->line('On mobile, open the employee app with this link:')
+                ->line($mobileUrl);
+        }
+
+        return $mail
             ->line('If you did not request this, no action is needed.')
             ->salutation('HRM Team');
     }

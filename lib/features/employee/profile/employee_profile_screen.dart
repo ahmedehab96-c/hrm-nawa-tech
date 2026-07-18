@@ -7,8 +7,9 @@ import '../../../core/theme/theme_scope.dart';
 import '../../../core/utils/text_direction_helper.dart';
 import '../../../core/api/api_result.dart';
 import '../../../core/api/api_config.dart';
-import '../../../core/repositories/auth_repository.dart';
-import '../../../core/repositories/employees_repository.dart';
+import 'package:hrm_saas/features/employee/auth/data/auth_repository.dart';
+import 'package:hrm_saas/features/employee/profile/data/employees_repository.dart';
+import '../../../core/widgets/responsive_page.dart';
 import '../../../l10n/app_strings.dart';
 
 class EmployeeProfileScreen extends StatefulWidget {
@@ -100,12 +101,7 @@ class _EmployeeProfileScreenState extends State<EmployeeProfileScreen> {
         appBar: AppBar(
           title: Text(l10n.profileQuickLabel),
         ),
-        body: Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 640),
-            child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
+        body: ResponsivePage(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -123,9 +119,21 @@ class _EmployeeProfileScreenState extends State<EmployeeProfileScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Text(name.isEmpty ? '—' : name, style: AppTypography.h3),
-                    Text(_employee?.position ?? '—', style: AppTypography.bodySmall),
-                    Text(_employee?.department ?? '—', style: AppTypography.caption),
+                    Text(
+                      name.isEmpty ? '—' : name,
+                      style: AppTypography.h3,
+                      textAlign: TextAlign.center,
+                    ),
+                    Text(
+                      _employee?.position ?? '—',
+                      style: AppTypography.bodySmall,
+                      textAlign: TextAlign.center,
+                    ),
+                    Text(
+                      _employee?.department ?? '—',
+                      style: AppTypography.caption,
+                      textAlign: TextAlign.center,
+                    ),
                   ],
                 ),
               ),
@@ -213,25 +221,44 @@ class _EmployeeProfileScreenState extends State<EmployeeProfileScreen> {
                       );
                     }),
                     const Divider(height: 1),
-                    // Language toggle
+                    // Language toggle — full-width below title to avoid trailing overflow
                     Builder(builder: (ctx) {
                       final locale = Localizations.localeOf(ctx);
-                      final isAr   = locale.languageCode == 'ar';
-                      return ListTile(
-                        leading: const Icon(Icons.language, color: AppColors.primary),
-                        title: Text(l10n.language, style: AppTypography.bodyMedium),
-                        subtitle: Text(
-                          isAr ? l10n.arabic : l10n.english,
-                          style: AppTypography.caption,
-                        ),
-                        trailing: SegmentedButton<String>(
-                          segments: [
-                            ButtonSegment(value: 'ar', label: Text(l10n.arabic)),
-                            ButtonSegment(value: 'en', label: Text(l10n.english)),
+                      final isAr = locale.languageCode == 'ar';
+                      return Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(Icons.language, color: AppColors.primary),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(l10n.language, style: AppTypography.bodyMedium),
+                                      Text(
+                                        isAr ? l10n.arabic : l10n.english,
+                                        style: AppTypography.caption,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            SegmentedButton<String>(
+                              segments: [
+                                ButtonSegment(value: 'ar', label: Text(l10n.arabic)),
+                                ButtonSegment(value: 'en', label: Text(l10n.english)),
+                              ],
+                              selected: {isAr ? 'ar' : 'en'},
+                              onSelectionChanged: (s) =>
+                                  LocaleController.instance.setLocale(Locale(s.first)),
+                            ),
                           ],
-                          selected: {isAr ? 'ar' : 'en'},
-                          onSelectionChanged: (s) =>
-                              LocaleController.instance.setLocale(Locale(s.first)),
                         ),
                       );
                     }),
@@ -301,8 +328,6 @@ class _EmployeeProfileScreenState extends State<EmployeeProfileScreen> {
               ),
               const SizedBox(height: 24),
             ],
-          ),
-        ),
           ),
         ),
       ),

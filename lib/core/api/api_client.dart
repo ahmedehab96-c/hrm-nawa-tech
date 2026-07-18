@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../auth/auth_session.dart';
+import '../session/token_store.dart';
 import '../utils/jwt_util.dart';
 import 'api_config.dart';
 import 'api_error_parser.dart';
@@ -45,6 +46,53 @@ class ApiClient {
     return _request('DELETE', path, headers: headers);
   }
 
+  /// Unsigned GET for signed email-verification links (no Bearer token).
+  static Future<ApiResult<http.Response>> getPublic(
+    String path, {
+    Map<String, String>? queryParameters,
+  }) async {
+    final base = ApiConfig.url(path);
+    if (base.isEmpty) {
+      return ApiFailure(ApiLocalized.strings.apiBaseUrlMissing, statusCode: 0);
+    }
+
+    final uri = Uri.parse(base).replace(
+      queryParameters: queryParameters?.isNotEmpty == true ? queryParameters : null,
+    );
+
+    try {
+      final response = await http.get(
+        uri,
+        headers: const {
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return ApiSuccess(response);
+      }
+
+      var message = ApiLocalized.strings.apiErrorServer;
+      try {
+        final map = jsonDecode(response.body) as Map<String, dynamic>?;
+        if (map?['message'] != null) {
+          message = map!['message'].toString();
+        }
+      } catch (_) {
+        if (response.body.isNotEmpty) {
+          message = response.body;
+        }
+      }
+
+      return ApiFailure(message, statusCode: response.statusCode);
+    } catch (e) {
+      return ApiFailure(
+        ApiLocalized.strings.apiErrorConnection(e.toString()),
+        statusCode: 0,
+      );
+    }
+  }
+
   static Future<ApiResult<http.Response>> _request(
     String method,
     String path, {
@@ -56,14 +104,13 @@ class ApiClient {
       return ApiFailure(ApiLocalized.strings.apiBaseUrlMissing, statusCode: 0);
     }
 
-    var token = await ApiConfig.getToken();
+    var token = await TokenStore.getToken();
     final authFreePath = path == 'login' || path == 'register';
     if (!authFreePath &&
         token != null &&
         token.isNotEmpty &&
         isJwtExpired(token)) {
-      await ApiConfig.setToken(null);
-      await ApiConfig.setUser(null);
+      await TokenStore.clear();
       await AuthSession.instance.syncFromStorage();
       return ApiFailure(ApiLocalized.strings.sessionExpired, statusCode: 401);
     }
@@ -118,26 +165,24 @@ class ApiClient {
       }
 
       if (response.statusCode == 401) {
-        await ApiConfig.setToken(null);
-        await ApiConfig.setUser(null);
+        await TokenStore.clear();
         await AuthSession.instance.syncFromStorage();
       }
 
-      var message = ApiLocalized.strings.apiErrorServer;
+      var message = parseLaravelErrorMessage(response.body) ??
+          ApiLocalized.strings.apiErrorServer;
       String? code;
-      final parsed = parseLaravelErrorMessage(response.body);
-      if (parsed != null && parsed.isNotEmpty) {
-        message = parsed;
-      } else {
-        try {
-          final map = jsonDecode(response.body) as Map<String, dynamic>?;
-          if (map != null) {
-            if (map['message'] != null) message = map['message'].toString();
-            if (map['error'] != null) message = map['error'].toString();
-            if (map['code'] != null) code = map['code'].toString();
-          }
-        } catch (_) {
-          if (response.body.isNotEmpty) message = response.body;
+      try {
+        final map = jsonDecode(response.body) as Map<String, dynamic>?;
+        code = map?['code']?.toString();
+        if (message == ApiLocalized.strings.apiErrorServer) {
+          if (map?['error'] != null) message = map!['error'].toString();
+          if (response.body.isNotEmpty && map == null) message = response.body;
+        }
+      } catch (_) {
+        if (response.body.isNotEmpty &&
+            message == ApiLocalized.strings.apiErrorServer) {
+          message = response.body;
         }
       }
       if (code == 'trial_expired') {

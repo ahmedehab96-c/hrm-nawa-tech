@@ -1,167 +1,170 @@
-# Deploy Guide | دليل النشر
+# Deploy | النشر
 
-> Host **Nawa Tech HRM** — Flutter Web + Laravel API (SaaS trial ready).
+> Host **Nawa Tech HRM** — Laravel (API + Filament admin) + Flutter employee mobile.
+>
+> Before a public launch, complete [`docs/PRODUCTION_CHECKLIST.md`](./docs/PRODUCTION_CHECKLIST.md).
 
----
-
-## English — Quick start (Docker)
+## Local / VPS (Docker)
 
 ### Prerequisites
-- Docker + Docker Compose
-- Flutter SDK (to build web once)
+- Docker Compose
+- PHP 8.3+ with `intl` (for non-Docker local runs)
 
-### 1. Build Flutter Web
+### 1. Configure env
 
-```bash
-chmod +x scripts/build_web.sh
-./scripts/build_web.sh
+Copy backend `.env` and set `APP_KEY`, `APP_URL`, DB, mail, and AI keys as needed.
+
+For production behind nginx or a load balancer, set:
+
+```env
+TRUSTED_PROXIES=*
+APP_VERSION=1.0.0
 ```
 
-(`build_web_portfolio.sh` is an alias — same build.)
-
-This builds with `--dart-define=API_BASE_URL=/api` so the web app talks to the API through nginx on the same host.
-
-### 2. Start the stack
+### 2. Start stack
 
 ```bash
-docker compose up --build
+docker compose up -d --build
 ```
 
-### 3. Open the app
+- App (nginx → Laravel): **http://localhost:8080**
+- Admin: **http://localhost:8080/admin**
+- API: **http://localhost:8080/api**
+- Health: **http://localhost:8080/api/health**
 
-| URL | Purpose |
-|-----|---------|
-| http://localhost:8080/welcome | Landing page |
-| http://localhost:8080/register | **New company signup** |
-| http://localhost:8080/login | Admin login |
+Demo accounts:
 
-**Demo credentials:** `admin@demo.com` / `Admin12345!`
+| Role | Email | Password |
+|------|-------|----------|
+| Company admin | `admin@demo.com` | `Admin12345!` |
+| Platform | `platform@nawatech.com` | `Platform12345!` |
+| Employee (mobile) | `emp01@demo.com` | `Employee12345!` |
+| HR manager | `hr@demo.com` | `HrManager12345!` |
+| Recruiter | `recruiter@demo.com` | `Recruiter12345!` |
 
-The API runs behind nginx at `/api` (auto-seeded on first start).
+### Queue & scheduler (Docker)
 
-### Stop
+The default stack runs a **queue worker** container (`queue`) for mail, leave notifications, and AI jobs.
+
+For scheduled tasks (AI digests, monitors), enable the production profile:
 
 ```bash
-docker compose down
+docker compose --profile production up -d
 ```
 
-To reset data:
+This adds the `scheduler` service (`php artisan schedule:work`).
+
+Set `QUEUE_CONNECTION=database` (default in Docker) so jobs persist between restarts.
+
+### Optional MySQL
 
 ```bash
-docker compose down -v
-docker compose up --build
+docker compose --profile mysql up -d --build
 ```
 
----
+Set `DB_CONNECTION=mysql` and matching credentials in the `api` service env.
 
-## English — Production tips
+### CORS
 
-| Topic | Recommendation |
-|-------|----------------|
-| **HTTPS** | Put Caddy/Traefik or cloud load balancer in front |
-| **APP_KEY** | Set fixed `APP_KEY` in compose/env for stable sessions |
-| **Database** | SQLite by default; optional MySQL: `DB_CONNECTION=mysql docker compose --profile mysql up --build` |
-| **Flutter API URL** | Full URL: `--dart-define=API_BASE_URL=https://hrm.example.com/api` |
-| **CORS** | Set `ALLOWED_ORIGINS` in backend `.env` when web/API are on different domains |
+Set `ALLOWED_ORIGINS` in backend `.env` when the employee app / other clients call the API from another origin.
 
-### Example: API only (Render / Railway)
-
-1. Deploy `backend/Dockerfile` as a web service (port 8000)
-2. Set env: `APP_KEY`, `APP_URL`, `DB_CONNECTION=sqlite`
-3. Build Flutter web with full API URL pointing to your hosted API
-
-### Example: Static web (Netlify / Vercel) + API elsewhere
+## Local development (without Docker)
 
 ```bash
-flutter build web --release \
-  --dart-define=API_BASE_URL=https://your-api.onrender.com/api
+./scripts/start_api.sh          # API + Filament admin on :8000
+./scripts/start_queue.sh        # queue worker (separate terminal)
+./scripts/start_scheduler.sh    # scheduler (optional, separate terminal)
+./scripts/smoke_test.sh         # verify /api/health and /admin
 ```
 
-Upload `build/web` to static hosting. Enable CORS on the API for your web domain.
+## Health & smoke checks
 
----
+`GET /api/health` returns JSON with `status`, `version`, and checks for `app`, `database`, and `queue`.
 
-## العربية — البدء السريع (Docker)
-
-### المتطلبات
-- Docker + Docker Compose
-- Flutter SDK (لبناء الويب مرة واحدة)
-
-### 1. بناء Flutter Web
+`GET /up` is Laravel's built-in health route (used by uptime monitors).
 
 ```bash
-chmod +x scripts/build_web_portfolio.sh
-./scripts/build_web_portfolio.sh
+SMOKE_BASE_URL=http://127.0.0.1:8000 ./scripts/smoke_test.sh
 ```
 
-### 2. تشغيل المنصة
+## CI
+
+GitHub Actions workflows:
+
+- `.github/workflows/backend_ci.yml` — PHP 8.3, migrate, `php artisan test`
+- `.github/workflows/flutter_ci.yml` — `flutter analyze`, `flutter test`
+
+Tests run without real OpenAI/Gemini keys (`OPENAI_API_KEY` and `GEMINI_API_KEY` are empty in `phpunit.xml`).
+
+## Employee mobile builds
+
+Point the Flutter app at your hosted API:
 
 ```bash
-docker compose up --build
+flutter build ios --release \
+  --dart-define=API_BASE_URL=https://your-domain.com/api
+
+flutter build apk --release \
+  --dart-define=API_BASE_URL=https://your-domain.com/api
 ```
 
-### 3. افتح العرض
+### Password reset deep links (employee app)
 
-| الرابط | الغرض |
-|--------|--------|
-| http://localhost:8080/welcome | صفحة الترحيب |
-| http://localhost:8080/login | دخول الأدمن |
+Reset emails include a mobile link using the custom scheme `nawatechhrm://reset-password?token=...&email=...`.
 
-**الدخول:** `admin@demo.com` / `Admin12345!`
+Email verification uses `nawatechhrm://verify-email?id=...&hash=...&expires=...&signature=...`.
 
-الـ API يعمل خلف nginx على `/api` مع بيانات تجريبية تلقائية.
+Configure on the server:
 
-### إيقاف / إعادة ضبط
-
-```bash
-docker compose down          # إيقاف
-docker compose down -v       # حذف البيانات
-docker compose up --build    # إعادة التشغيل
+```env
+MOBILE_DEEP_LINK_SCHEME=nawatechhrm
+FCM_SERVER_KEY=
 ```
 
----
+The web reset page (`/reset-password`) also shows **Open in mobile app** when the scheme is set.
 
-## العربية — نصائح الإنتاج
+### Push notifications (FCM)
 
-| الموضوع | التوصية |
-|---------|---------|
-| **HTTPS** | ضع Caddy أو موازن تحميل أمام الخدمات |
-| **APP_KEY** | ثبّت مفتاحاً ثابتاً في البيئة |
-| **قاعدة البيانات** | SQLite للعرض؛ MySQL لاحقاً لـ SaaS |
-| **عنوان API** | `--dart-define=API_BASE_URL=https://hrm.example.com/api` |
-| **CORS** | عيّن `ALLOWED_ORIGINS` عند فصل الويب عن الـ API |
+When `FCM_SERVER_KEY` is set, leave approvals/rejections also send push notifications to registered device tokens.
 
----
+Employees register tokens via `POST /api/device-tokens` (the Flutter app supports `PUSH_TOKEN` dart-define until Firebase is wired).
 
 ## Architecture
 
 ```
-Browser → nginx:80 (web container)
-            ├── /        → Flutter build/web (static)
-            └── /api/*   → Laravel api:8000
+Browser / Mobile
+    │
+    ├─ /admin/*     → Filament (session auth)
+    └─ /api/*       → Laravel JSON API (Sanctum)
 ```
 
-Mobile employee app: point API URL to your hosted API (or LAN IP in dev).
+nginx proxies all traffic to the Laravel `api` container (see `deploy/nginx/default.conf`).
 
 ---
 
-## AI — Real OpenAI | تفعيل الذكاء الاصطناعي الحقيقي
+## العربية
 
-**Never commit API keys to GitHub.**
+### التشغيل بـ Docker
 
 ```bash
-chmod +x scripts/set_openai_key.sh
-./scripts/set_openai_key.sh sk-YOUR-OPENAI-KEY
-cd backend && php artisan serve
+docker compose up -d --build
 ```
 
-Or edit `backend/.env`:
+- اللوحة: **http://localhost:8080/admin**
+- الـ API: **http://localhost:8080/api**
+- الصحة: **http://localhost:8080/api/health**
+- الدخول: `admin@demo.com` / `Admin12345!`
 
-```env
-OPENAI_API_KEY=sk-your-key-here
-AI_DEFAULT_PROVIDER=openai
+**Queue:** حاوية `queue` تعالج البريد ومهام AI تلقائياً.
+
+**Scheduler:** `docker compose --profile production up -d` لتفعيل المهام المجدولة.
+
+تطبيق الموظف (Flutter) يتصل بنفس الـ API عبر `API_BASE_URL`.
+
+### التطوير المحلي
+
+```bash
+./scripts/start_api.sh
+./scripts/start_queue.sh
+./scripts/smoke_test.sh
 ```
-
-Docker: copy `.env.ai.example` → `.env.ai`, paste key, then `docker compose up --build`.
-
-Get a key: https://platform.openai.com/api-keys

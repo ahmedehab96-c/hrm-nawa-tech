@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Employee extends Model
 {
@@ -38,5 +39,20 @@ class Employee extends Model
             'deductions' => 'float',
             'is_active' => 'boolean',
         ];
+    }
+
+    public function attendanceRecords(): HasMany
+    {
+        return $this->hasMany(AttendanceRecord::class);
+    }
+
+    public function leaveRequests(): HasMany
+    {
+        return $this->hasMany(LeaveRequest::class);
+    }
+
+    public function payrollRecords(): HasMany
+    {
+        return $this->hasMany(PayrollRecord::class);
     }
 }

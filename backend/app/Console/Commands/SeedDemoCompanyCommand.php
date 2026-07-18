@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Company;
-use App\Services\DemoCompanySeeder;
+use Database\Seeders\DemoCompanySeeder;
 use Illuminate\Console\Command;
 
 class SeedDemoCompanyCommand extends Command

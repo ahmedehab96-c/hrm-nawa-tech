@@ -1,0 +1,639 @@
+/* Nawa Tech HRM — Filament admin theme (employee mobile uses Flutter) */
+
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap');
+
+:root {
+    --nawa-primary: #2563eb;
+    --nawa-primary-dark: #1d4ed8;
+    --nawa-bg: #f4f6fd;
+    --nawa-sidebar-from: #1e293b;
+    --nawa-sidebar-to: #131e30;
+    --nawa-sidebar-active: #3b82f6;
+    --font-family: 'Cairo', ui-sans-serif, system-ui, sans-serif;
+}
+
+html,
+body,
+.fi-body {
+    font-family: var(--font-family) !important;
+}
+
+.fi-body {
+    background: var(--nawa-bg) !important;
+}
+
+.fi-main-ctn {
+    background: var(--nawa-bg) !important;
+}
+
+.fi-main {
+    background: transparent !important;
+}
+
+/* ── Topbar (white, subtle shadow like Flutter AdminTopBar) ── */
+.fi-topbar {
+    background: #ffffff !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.fi-topbar .fi-logo {
+    font-weight: 600;
+}
+
+.fi-topbar .fi-logo img {
+    width: 3rem;
+    height: 3rem !important;
+    padding: 0.2rem;
+    object-fit: contain;
+    border-radius: 0.75rem;
+    background: #ffffff;
+}
+
+/* ── Dark gradient sidebar (Flutter AdminSidebar) ── */
+.fi-sidebar,
+.fi-sidebar.fi-sidebar-open {
+    background: linear-gradient(180deg, var(--nawa-sidebar-from) 0%, var(--nawa-sidebar-to) 100%) !important;
+    box-shadow: 2px 0 16px rgba(15, 23, 42, 0.18) !important;
+    border-inline-end: none !important;
+}
+
+.fi-sidebar-header {
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+.fi-sidebar-nav {
+    padding-top: 1rem !important;
+}
+
+.fi-sidebar-group-label {
+    color: rgba(255, 255, 255, 0.45) !important;
+    font-size: 0.7rem !important;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.fi-sidebar-item-btn {
+    border-radius: 0.75rem !important;
+    min-height: 2.75rem;
+    padding-inline: 0.875rem !important;
+    color: #e2e8f0 !important;
+    transition: background 0.18s ease, color 0.18s ease;
+}
+
+.fi-sidebar-item-label {
+    color: #e2e8f0 !important;
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    opacity: 1 !important;
+}
+
+.fi-sidebar-item-btn:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff !important;
+}
+
+.fi-sidebar-item-btn:hover .fi-sidebar-item-label {
+    color: #ffffff !important;
+}
+
+.fi-sidebar-item.fi-active > .fi-sidebar-item-btn,
+.fi-sidebar-item.fi-sidebar-item-has-active-child-items > .fi-sidebar-item-btn {
+    background: linear-gradient(90deg, rgba(37, 99, 235, 0.78), rgba(59, 130, 246, 0.42)) !important;
+    box-shadow: inset 3px 0 0 #93c5fd, 0 6px 14px rgba(15, 23, 42, 0.18);
+}
+
+.fi-sidebar-item.fi-active .fi-sidebar-item-label,
+.fi-sidebar-item.fi-active .fi-icon,
+.fi-sidebar-item.fi-sidebar-item-has-active-child-items .fi-sidebar-item-label {
+    color: #ffffff !important;
+}
+
+.fi-sidebar-item.fi-active .fi-icon {
+    color: #ffffff !important;
+}
+
+.fi-sidebar-item-btn .fi-icon {
+    color: #cbd5e1 !important;
+    opacity: 1 !important;
+}
+
+.fi-sidebar-group-btn .fi-icon,
+.fi-sidebar-group-label {
+    color: #94a3b8 !important;
+    opacity: 1 !important;
+}
+
+.fi-sidebar .fi-logo,
+.fi-sidebar .fi-logo span {
+    color: #ffffff !important;
+}
+
+/* ── Cards & sections ── */
+.fi-section,
+.fi-ta-ctn,
+.fi-wi-stats-overview-stat,
+.fi-wi-widget {
+    border-radius: 1rem !important;
+}
+
+.fi-section,
+.fi-ta-ctn {
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 5px 18px rgba(15, 23, 42, 0.05) !important;
+}
+
+.fi-section-header-heading {
+    color: #1e293b !important;
+    font-weight: 600 !important;
+}
+
+.fi-header-heading {
+    color: #0f172a !important;
+    font-size: clamp(1.5rem, 2vw, 2rem) !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.025em;
+}
+
+.fi-header-subheading {
+    color: #64748b !important;
+}
+
+.fi-main {
+    width: 100%;
+    max-width: 100rem !important;
+}
+
+/* ── Reports overview ── */
+.nawa-report-period {
+    position: relative;
+    overflow: hidden;
+    border: 0 !important;
+    color: #ffffff;
+    background: linear-gradient(125deg, #1d4ed8 0%, #2563eb 54%, #0f766e 100%) !important;
+    box-shadow: 0 14px 30px rgba(37, 99, 235, 0.2) !important;
+}
+
+.nawa-report-period::after {
+    content: '';
+    position: absolute;
+    width: 13rem;
+    height: 13rem;
+    inset-block-start: -7rem;
+    inset-inline-end: -4rem;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.nawa-report-period .fi-section-header-heading,
+.nawa-report-period .fi-section-header-description,
+.nawa-report-period p {
+    color: #ffffff !important;
+}
+
+.nawa-report-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.nawa-report-card {
+    position: relative;
+    min-height: 8.5rem;
+    padding: 1.25rem;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    border-radius: 1rem;
+    background: #ffffff;
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.nawa-report-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 26px rgba(15, 23, 42, 0.1);
+}
+
+.nawa-report-card::after {
+    content: '';
+    position: absolute;
+    width: 4.5rem;
+    height: 4.5rem;
+    inset-block-end: -2rem;
+    inset-inline-end: -1.5rem;
+    border-radius: 9999px;
+    background: color-mix(in srgb, var(--metric-color, #2563eb) 12%, transparent);
+}
+
+.nawa-report-card-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    margin-bottom: 0.875rem;
+    border-radius: 0.75rem;
+    color: var(--metric-color, #2563eb);
+    background: color-mix(in srgb, var(--metric-color, #2563eb) 12%, white);
+}
+
+.nawa-report-card-icon svg {
+    width: 1.35rem;
+    height: 1.35rem;
+}
+
+.nawa-report-card-label {
+    color: #64748b;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.nawa-report-card-value {
+    margin-top: 0.25rem;
+    color: #0f172a;
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.nawa-report-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.875rem;
+    background: rgba(255, 255, 255, 0.72);
+}
+
+.nawa-report-footer a {
+    font-weight: 600;
+    text-decoration: none;
+}
+
+@media (max-width: 1023px) {
+    .nawa-report-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 639px) {
+    .nawa-report-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .nawa-report-footer {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+/* ── Auth split layout (Flutter login screen) ── */
+.nawa-auth-shell {
+    min-height: 100dvh;
+    display: flex;
+    background: linear-gradient(135deg, #f4f6fd 0%, rgba(37, 99, 235, 0.08) 50%, rgba(5, 150, 105, 0.07) 100%);
+}
+
+.nawa-auth-brand {
+    display: none;
+    flex: 1;
+    padding: 1.5rem;
+}
+
+.nawa-auth-brand-inner {
+    height: 100%;
+    border-radius: 1.625rem;
+    padding: 3rem 2.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: #fff;
+    background: linear-gradient(135deg, #0c1731 0%, #152244 55%, #0b5e54 100%);
+    box-shadow: 0 18px 40px rgba(12, 23, 49, 0.5);
+}
+
+.nawa-auth-brand img {
+    width: 88px;
+    height: 88px;
+    object-fit: contain;
+    margin-bottom: 1.5rem;
+}
+
+.nawa-auth-brand h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 0.75rem;
+}
+
+.nawa-auth-brand p {
+    margin: 0;
+    max-width: 22rem;
+    color: rgba(255, 255, 255, 0.75);
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+
+.nawa-auth-form-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+}
+
+.nawa-auth-form-wrap .fi-simple-layout {
+    width: 100%;
+    max-width: 28rem;
+}
+
+.nawa-auth-form-wrap .fi-simple-main {
+    background: #ffffff;
+    border-radius: 1.375rem;
+    padding: 2rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.nawa-auth-mobile-logo {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.25rem;
+}
+
+.nawa-auth-mobile-logo img {
+    width: 64px;
+    height: 64px;
+}
+
+@media (min-width: 960px) {
+    .nawa-auth-brand {
+        display: flex;
+    }
+
+    .nawa-auth-mobile-logo {
+        display: none;
+    }
+}
+
+[dir='rtl'] .nawa-auth-shell {
+    flex-direction: row-reverse;
+}
+
+/* ── Topbar company chip (Flutter AdminTopBar) ── */
+.nawa-company-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-inline-start: 1rem;
+    padding: 0.45rem 0.875rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    background: #ffffff;
+    color: #1e293b;
+    font-size: 0.875rem;
+    font-weight: 500;
+    max-width: 14rem;
+}
+
+.nawa-company-chip svg {
+    width: 1.15rem;
+    height: 1.15rem;
+    flex-shrink: 0;
+    color: #64748b;
+}
+
+.nawa-company-chip span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.nawa-topbar-ai-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    margin-inline-end: 0.25rem;
+    border-radius: 0.5rem;
+    color: #475569;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.nawa-topbar-ai-btn:hover {
+    background: #f1f5f9;
+    color: var(--nawa-primary);
+}
+
+.nawa-topbar-ai-btn svg {
+    width: 1.35rem;
+    height: 1.35rem;
+}
+
+/* Hide empty navigation group headings */
+.fi-sidebar-group-label:empty {
+    display: none;
+}
+
+/* Divider before Settings — matches Flutter sidebar */
+.fi-sidebar-item:has([href*="company-settings"]) {
+    margin-top: 1.25rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+/* Sidebar logo area — match Flutter header spacing */
+.fi-sidebar-header {
+    min-height: 4.5rem !important;
+    padding-top: 0.75rem !important;
+}
+
+.fi-sidebar .fi-logo img {
+    width: 3.25rem;
+    height: 3.25rem !important;
+    padding: 0.2rem;
+    object-fit: contain;
+    border-radius: 0.8rem;
+    background: #ffffff;
+}
+
+/* ── Topbar locale + theme toggles (Flutter AdminTopBar) ── */
+.nawa-topbar-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-inline-end: 0.5rem;
+}
+
+.nawa-locale-toggle {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background: #ffffff;
+}
+
+.nawa-locale-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.25rem;
+    padding: 0.4rem 0.55rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.nawa-locale-btn:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+}
+
+.nawa-locale-btn.is-active {
+    background: var(--nawa-primary);
+    color: #ffffff;
+}
+
+.nawa-theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    background: #ffffff;
+    color: #475569;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.nawa-theme-toggle:hover {
+    background: #f1f5f9;
+    color: var(--nawa-primary);
+    border-color: #cbd5e1;
+}
+
+.nawa-theme-toggle svg {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+.nawa-auth-locale {
+    position: fixed;
+    top: 1rem;
+    inset-inline-end: 1rem;
+    z-index: 50;
+}
+
+/* Hide duplicate theme switcher inside user menu dropdown */
+.fi-user-menu .fi-theme-switcher {
+    display: none !important;
+}
+
+/* ── Dark mode overrides ── */
+.dark .fi-body,
+.dark .fi-main-ctn {
+    background: #0f172a !important;
+}
+
+.dark .fi-topbar {
+    background: #1e293b !important;
+    border-bottom-color: #334155 !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+.dark .nawa-company-chip,
+.dark .nawa-locale-toggle,
+.dark .nawa-theme-toggle {
+    background: #334155;
+    border-color: #475569;
+    color: #e2e8f0;
+}
+
+.dark .nawa-company-chip {
+    color: #f1f5f9;
+}
+
+.dark .nawa-company-chip svg {
+    color: #94a3b8;
+}
+
+.dark .nawa-locale-btn {
+    color: #94a3b8;
+}
+
+.dark .nawa-locale-btn:hover {
+    background: #475569;
+    color: #f8fafc;
+}
+
+.dark .nawa-locale-btn.is-active {
+    background: var(--nawa-primary);
+    color: #ffffff;
+}
+
+.dark .nawa-topbar-ai-btn {
+    color: #cbd5e1;
+}
+
+.dark .nawa-topbar-ai-btn:hover {
+    background: #334155;
+    color: #93c5fd;
+}
+
+.dark .nawa-theme-toggle {
+    color: #cbd5e1;
+}
+
+.dark .nawa-theme-toggle:hover {
+    background: #475569;
+    color: #93c5fd;
+}
+
+.dark .fi-section-header-heading {
+    color: #f1f5f9 !important;
+}
+
+.dark .fi-header-heading {
+    color: #f8fafc !important;
+}
+
+.dark .fi-section,
+.dark .fi-ta-ctn,
+.dark .nawa-report-card {
+    border-color: #334155 !important;
+    background: #1e293b !important;
+    box-shadow: 0 7px 20px rgba(0, 0, 0, 0.2) !important;
+}
+
+.dark .nawa-report-card-label {
+    color: #94a3b8;
+}
+
+.dark .nawa-report-card-value {
+    color: #f8fafc;
+}
+
+.dark .nawa-report-footer {
+    border-color: #334155;
+    background: rgba(30, 41, 59, 0.82);
+}
+
+.dark .nawa-auth-shell {
+    background: linear-gradient(135deg, #0f172a 0%, rgba(37, 99, 235, 0.12) 50%, rgba(5, 150, 105, 0.08) 100%);
+}
+
+.dark .nawa-auth-form-wrap .fi-simple-main {
+    background: #1e293b;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+

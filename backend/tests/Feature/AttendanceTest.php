@@ -40,7 +40,7 @@ class AttendanceTest extends TestCase
         // نستخدم whereDate في الـ controller — يعمل بصرف النظر عن تنسيق التخزين في SQLite
         $res = $this->getJson("/api/attendance?date={$today}", $h);
         $res->assertOk();
-        $data = $res->json();
+        $data = $res->json('data');
         $this->assertNotEmpty($data, "Expected records for date={$today} but got empty");
         $this->assertArrayHasKey('id', $data[0]);
         $this->assertEquals($this->company->id, $data[0]['employee_id'] > 0 ? $data[0]['employee_id'] : null);
@@ -144,7 +144,7 @@ class AttendanceTest extends TestCase
 
         $res = $this->getJson("/api/attendance?date={$today}", $h);
         $res->assertOk();
-        $this->assertCount(0, $res->json());
+        $this->assertCount(0, $res->json('data'));
     }
 
     public function test_attendance_insights_endpoint(): void

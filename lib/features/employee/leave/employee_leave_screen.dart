@@ -4,10 +4,11 @@ import 'package:go_router/go_router.dart';
 import '../../../core/api/api_result.dart';
 import '../../../core/api/current_user.dart';
 import '../../../core/api/api_config.dart';
-import '../../../core/repositories/leave_repository.dart';
+import 'package:hrm_saas/features/employee/leave/data/leave_repository.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/leave_status_util.dart';
 import '../../../core/utils/text_direction_helper.dart';
+import '../../../core/widgets/responsive_page.dart';
 import '../../../l10n/app_strings.dart';
 
 class EmployeeLeaveScreen extends StatefulWidget {
@@ -36,7 +37,6 @@ class _EmployeeLeaveScreenState extends State<EmployeeLeaveScreen> {
   Future<void> _load() async {
     setState(() => _loading = true);
     await ApiConfig.load();
-    final name = await currentUserDisplayName();
     final bal = await LeaveRepository.getLeaveBalances();
     final req = await LeaveRepository.getLeaveRequests();
 
@@ -44,15 +44,23 @@ class _EmployeeLeaveScreenState extends State<EmployeeLeaveScreen> {
 
     LeaveBalanceItem? mine;
     if (bal is ApiSuccess<List<LeaveBalanceItem>>) {
-      if (name != null && name.isNotEmpty) {
-        for (final b in bal.data) {
-          if (b.employeeName.contains(name) || name.contains(b.employeeName)) {
-            mine = b;
-            break;
+      if (ApiConfig.useApi && ApiConfig.baseUrl != null && ApiConfig.baseUrl!.isNotEmpty) {
+        // Backend scopes leave balances to the authenticated employee, so
+        // the first record is always the current user's own balance.
+        mine = bal.data.isNotEmpty ? bal.data.first : null;
+      } else {
+        // Demo mode: multiple employees returned, match by display name.
+        final name = await currentUserDisplayName();
+        if (name != null && name.isNotEmpty) {
+          for (final b in bal.data) {
+            if (b.employeeName.contains(name) || name.contains(b.employeeName)) {
+              mine = b;
+              break;
+            }
           }
         }
+        mine ??= bal.data.isNotEmpty ? bal.data.first : null;
       }
-      mine ??= bal.data.isNotEmpty ? bal.data.first : null;
       if (mine != null) {
         _annual = mine.annual;
         _sick = mine.sick;
@@ -65,17 +73,22 @@ class _EmployeeLeaveScreenState extends State<EmployeeLeaveScreen> {
 
     var list = <LeaveRequestItem>[];
     if (req is ApiSuccess<List<LeaveRequestItem>>) {
-      list = req.data;
-      if (name != null && name.isNotEmpty) {
-        list = req.data
-            .where(
-              (r) =>
-                  r.employeeName.toLowerCase().contains(name.toLowerCase()) ||
-                  name.toLowerCase().contains(r.employeeName.toLowerCase()),
-            )
-            .toList();
-        if (list.isEmpty) {
-          list = req.data;
+      if (ApiConfig.useApi && ApiConfig.baseUrl != null && ApiConfig.baseUrl!.isNotEmpty) {
+        // Backend scopes leave requests to the authenticated employee's own records.
+        list = req.data;
+      } else {
+        // Demo mode: filter by display name.
+        final name = await currentUserDisplayName();
+        list = req.data;
+        if (name != null && name.isNotEmpty) {
+          final filtered = req.data
+              .where(
+                (r) =>
+                    r.employeeName.toLowerCase().contains(name.toLowerCase()) ||
+                    name.toLowerCase().contains(r.employeeName.toLowerCase()),
+              )
+              .toList();
+          if (filtered.isNotEmpty) list = filtered;
         }
       }
     }
@@ -108,12 +121,7 @@ class _EmployeeLeaveScreenState extends State<EmployeeLeaveScreen> {
         ),
         body: _loading
             ? const Center(child: CircularProgressIndicator())
-            : Align(
-                alignment: Alignment.topCenter,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 640),
-                  child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
+            : ResponsivePage(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -126,11 +134,16 @@ class _EmployeeLeaveScreenState extends State<EmployeeLeaveScreen> {
                             Text(l10n.leaveBalance, style: AppTypography.h4),
                             const SizedBox(height: 16),
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
-                                _BalanceItem(l10n.annualShort, _annual, _annualTot),
-                                _BalanceItem(l10n.sickShort, _sick, _sickTot),
-                                _BalanceItem(l10n.emergencyShort, _emergency, _emergencyTot),
+                                Expanded(
+                                  child: _BalanceItem(l10n.annualShort, _annual, _annualTot),
+                                ),
+                                Expanded(
+                                  child: _BalanceItem(l10n.sickShort, _sick, _sickTot),
+                                ),
+                                Expanded(
+                                  child: _BalanceItem(l10n.emergencyShort, _emergency, _emergencyTot),
+                                ),
                               ],
                             ),
                           ],
@@ -176,8 +189,6 @@ class _EmployeeLeaveScreenState extends State<EmployeeLeaveScreen> {
                   ],
                 ),
               ),
-                  ),
-                ),
       ),
     );
   }
@@ -202,8 +213,20 @@ class _BalanceItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(type, style: AppTypography.caption),
-        Text('$remaining / $total', style: AppTypography.h4),
+        Text(
+          type,
+          style: AppTypography.caption,
+          textAlign: TextAlign.center,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+        Text(
+          '$remaining / $total',
+          style: AppTypography.h4,
+          textAlign: TextAlign.center,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
       ],
     );
   }
@@ -230,21 +253,60 @@ class _LeaveRequestItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        title: Text(type),
-        subtitle: Text('$from → $to'),
-        trailing: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('$days', style: AppTypography.h4),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: statusColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    type,
+                    style: AppTypography.bodyMedium,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '$from → $to',
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
-              child: Text(status, style: TextStyle(color: statusColor, fontSize: 12)),
+            ),
+            const SizedBox(width: 12),
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '$days',
+                    style: AppTypography.h4,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: statusColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      status,
+                      style: TextStyle(color: statusColor, fontSize: 12),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),

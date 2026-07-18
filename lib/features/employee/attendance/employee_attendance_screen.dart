@@ -3,9 +3,10 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/text_direction_helper.dart';
 import '../../../l10n/app_strings.dart';
 import '../../../core/services/wifi_attendance_service.dart';
-import '../../../core/repositories/attendance_repository.dart';
+import 'package:hrm_saas/features/employee/attendance/data/attendance_repository.dart';
 import '../../../core/api/api_result.dart';
-import '../../../core/utils/attendance_gate.dart';
+import '../../../core/widgets/responsive_page.dart';
+import 'attendance_actions.dart';
 
 class EmployeeAttendanceScreen extends StatefulWidget {
   const EmployeeAttendanceScreen({super.key});
@@ -97,75 +98,9 @@ class _EmployeeAttendanceScreenState extends State<EmployeeAttendanceScreen> {
     });
   }
 
-  Future<void> _handleCheckIn() async {
-    final l10n = AppStrings.of(context);
-    if (await requireCompanyWifiForAttendance()) {
-      final result = await WifiAttendanceService.canRecordAttendance();
-      if (!result.success) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(result.message ?? l10n.wifiOffCompany),
-              backgroundColor: AppColors.error,
-            ),
-          );
-        }
-        return;
-      }
-    }
-    final apiResult = await AttendanceRepository.recordCheckIn();
-    if (!mounted) return;
-    if (apiResult is ApiSuccess<void>) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n.checkInRecorded),
-          backgroundColor: AppColors.success,
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text((apiResult as ApiFailure<void>).message),
-          backgroundColor: AppColors.error,
-        ),
-      );
-    }
-  }
+  Future<void> _handleCheckIn() => AttendanceActions.checkIn(context);
 
-  Future<void> _handleCheckOut() async {
-    final l10n = AppStrings.of(context);
-    if (await requireCompanyWifiForAttendance()) {
-      final result = await WifiAttendanceService.canRecordAttendance();
-      if (!result.success) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(result.message ?? l10n.wifiOffCompany),
-              backgroundColor: AppColors.error,
-            ),
-          );
-        }
-        return;
-      }
-    }
-    final apiResult = await AttendanceRepository.recordCheckOut();
-    if (!mounted) return;
-    if (apiResult is ApiSuccess<void>) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n.formSavedSuccess),
-          backgroundColor: AppColors.success,
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text((apiResult as ApiFailure<void>).message),
-          backgroundColor: AppColors.error,
-        ),
-      );
-    }
-  }
+  Future<void> _handleCheckOut() => AttendanceActions.checkOut(context);
 
   @override
   Widget build(BuildContext context) {
@@ -176,12 +111,7 @@ class _EmployeeAttendanceScreenState extends State<EmployeeAttendanceScreen> {
         appBar: AppBar(
           title: Text(l10n.attendance),
         ),
-        body: Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 640),
-            child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
+        body: ResponsivePage(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -294,8 +224,6 @@ class _EmployeeAttendanceScreenState extends State<EmployeeAttendanceScreen> {
             ],
           ),
         ),
-          ),
-        ),
       ),
     );
   }
@@ -339,23 +267,39 @@ class _AttendanceHistoryItem extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(date, style: AppTypography.bodyMedium),
-                Text('$checkIn - $checkOut', style: AppTypography.bodySmall),
-              ],
-            ),
-            const Spacer(),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: statusColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    date,
+                    style: AppTypography.bodyMedium,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    '$checkIn - $checkOut',
+                    style: AppTypography.bodySmall,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
-              child: Text(
-                statusLabel,
-                style: TextStyle(color: statusColor, fontSize: 12),
+            ),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  statusLabel,
+                  style: TextStyle(color: statusColor, fontSize: 12),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ),
           ],

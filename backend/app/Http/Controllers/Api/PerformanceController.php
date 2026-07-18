@@ -3,17 +3,16 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Jobs\ProcessAiTask;
-use App\Models\AiTask;
 use App\Models\Company;
 use App\Models\Employee;
 use App\Models\PerformanceReview;
-use App\Services\AiGatewayService;
+use App\Services\Ai\AiTaskDispatcher;
+use App\Services\PerformanceReviewAnalysisService;
 use Illuminate\Http\Request;
 
 class PerformanceController extends Controller
 {
-    public function __construct(private readonly AiGatewayService $aiGatewayService) {}
+    public function __construct(private readonly AiTaskDispatcher $aiTaskDispatcher) {}
 
     public function index(Request $request)
     {
@@ -107,39 +106,15 @@ class PerformanceController extends Controller
         }
 
         $languageCode = (string) ($request->input('language_code') ?? 'en');
-        $prompt = $this->buildPrompt($review, $languageCode);
-        $status = 'success';
-        $provider = $company->ai_provider ?: 'openai';
-        $model = $company->ai_model;
-
-        try {
-            $reply = $this->aiGatewayService->generateChatReply(
-                message: $prompt,
-                languageCode: $languageCode,
-                history: [],
-                providerOverride: $provider,
-                modelOverride: $model,
-            );
-            $summary = $reply['content'];
-            $provider = $reply['provider'];
-            $model = $reply['model'];
-        } catch (\Throwable $e) {
-            $status = 'error';
-            $summary = str_starts_with($languageCode, 'ar')
-                ? 'تحليل الأداء غير متاح مؤقتا. راجع البيانات اليدوية وأعد المحاولة.'
-                : 'Performance analysis is temporarily unavailable. Please review manually and try again.';
-        }
-
-        $review->ai_summary = $summary;
-        $review->save();
+        $review = app(PerformanceReviewAnalysisService::class)->analyze($review, $company, $languageCode);
 
         return response()->json([
             'data' => [
                 'review_id' => $review->id,
-                'ai_summary' => $summary,
-                'provider' => $provider,
-                'model' => $model,
-                'status' => $status,
+                'ai_summary' => $review->ai_summary,
+                'provider' => $company->ai_provider ?: 'openai',
+                'model' => $company->ai_model,
+                'status' => 'success',
             ],
         ]);
     }
@@ -158,20 +133,15 @@ class PerformanceController extends Controller
             'language_code' => 'nullable|string|max:8',
         ]);
 
-        $task = AiTask::query()->create([
-            'company_id' => $user->company_id,
-            'user_id' => $user->id,
-            'task_type' => 'performance_analyze',
-            'status' => 'queued',
-            'progress_percent' => 0,
-            'queue_name' => 'ai-heavy',
-            'payload' => [
+        $task = $this->aiTaskDispatcher->dispatch(
+            companyId: (int) $user->company_id,
+            userId: (int) $user->id,
+            taskType: 'performance_analyze',
+            payload: [
                 'review_id' => $review->id,
                 'language_code' => (string) ($validated['language_code'] ?? 'en'),
             ],
-        ]);
-
-        ProcessAiTask::dispatch($task->id)->onQueue('ai-heavy');
+        );
 
         return response()->json([
             'message' => 'AI analysis task queued',
@@ -181,35 +151,5 @@ class PerformanceController extends Controller
                 'task_type' => $task->task_type,
             ],
         ], 202);
-    }
-
-    private function buildPrompt(PerformanceReview $review, string $languageCode): string
-    {
-        $employeeName = (string) ($review->employee?->name ?? 'Employee');
-        $department = (string) ($review->employee?->department ?? 'N/A');
-        $position = (string) ($review->employee?->position ?? 'N/A');
-        $rating = $review->rating !== null ? (string) $review->rating : 'N/A';
-
-        if (str_starts_with($languageCode, 'ar')) {
-            return "حلل أداء الموظف وقدّم ملخصا تنفيذيا باللغة العربية مع توصيات عملية.\n"
-                ."الاسم: {$employeeName}\n"
-                ."القسم: {$department}\n"
-                ."المنصب: {$position}\n"
-                ."التقييم: {$rating}/5\n"
-                ."الأهداف: ".($review->goals_summary ?? '-')."\n"
-                ."نقاط القوة: ".($review->strengths ?? '-')."\n"
-                ."مجالات التحسين: ".($review->improvement_areas ?? '-')."\n"
-                ."تعليق المدير: ".($review->manager_comment ?? '-');
-        }
-
-        return "Analyze employee performance and provide an executive summary with actionable recommendations.\n"
-            ."Name: {$employeeName}\n"
-            ."Department: {$department}\n"
-            ."Position: {$position}\n"
-            ."Rating: {$rating}/5\n"
-            ."Goals summary: ".($review->goals_summary ?? '-')."\n"
-            ."Strengths: ".($review->strengths ?? '-')."\n"
-            ."Improvement areas: ".($review->improvement_areas ?? '-')."\n"
-            ."Manager comment: ".($review->manager_comment ?? '-');
     }
 }

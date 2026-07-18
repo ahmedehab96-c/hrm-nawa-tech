@@ -8,6 +8,7 @@ use App\Http\Middleware\EnsureAiRollout;
 use App\Http\Middleware\EnsureTrialActive;
 use App\Http\Middleware\EnsureEmailVerified;
 use App\Http\Middleware\SecurityHeaders;
+use App\Http\Middleware\SetAdminLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -22,6 +23,17 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // Security headers على كل الاستجابات
         $middleware->append(SecurityHeaders::class);
+
+        $middleware->validateCsrfTokens(except: [
+            'stripe/webhook',
+            'moyasar/webhook',
+        ]);
+
+        $middleware->trustProxies(at: env('TRUSTED_PROXIES', '*'));
+
+        $middleware->web(append: [
+            SetAdminLocale::class,
+        ]);
 
         $middleware->alias([
             'role' => EnsureUserRole::class,
