@@ -15,18 +15,22 @@
 | **Stack** | Laravel 13 · Filament 5 · Flutter 3 · Sanctum · SQLite/MySQL · GitHub Actions |
 | **Proof** | 120+ backend tests · 80+ Flutter tests · [Architecture](./docs/ARCHITECTURE.md) · [Demo guide](./DEMO.md) · [Portfolio summary](./docs/PORTFOLIO.md) |
 | **Run locally** | `./scripts/start_api.sh` → http://127.0.0.1:8000/admin |
-| **Live demo** | [docs/LIVE_DEMO.md](./docs/LIVE_DEMO.md) — Railway HTTPS URL for recruiters |
+| **Live demo** | [https://hrm-nawa-api.onrender.com/admin](https://hrm-nawa-api.onrender.com/admin) (Render) |
 
 ### Live demo | تجربة مباشرة
 
-Public hosted demo (after Railway deploy): see **[docs/LIVE_DEMO.md](./docs/LIVE_DEMO.md)**.
+Public hosted demo on Render (free tier may sleep ~30–60s on first open):
 
-Until the public URL is live, run locally:
+- **Admin:** [https://hrm-nawa-api.onrender.com/admin](https://hrm-nawa-api.onrender.com/admin)
+- **API health:** [https://hrm-nawa-api.onrender.com/api/health](https://hrm-nawa-api.onrender.com/api/health)
+- **Company admin:** `admin@demo.com` / `Admin12345!`
+- **Recruiter:** `recruiter@demo.com` / `Recruiter12345!`
+
+Details: **[docs/LIVE_DEMO.md](./docs/LIVE_DEMO.md)**. Local fallback:
 
 ```bash
 ./scripts/start_api.sh
 # Admin → http://127.0.0.1:8000/admin
-# Recruiter → recruiter@demo.com / Recruiter12345!
 ```
 
 ### Mobile preview
@@ -39,9 +43,9 @@ More portfolio captures are tracked in [`docs/screenshots/`](./docs/screenshots/
 
 **دراسة حالة للـ Portfolio:** منصة موارد بشرية توضح بناء منتج Full-Stack باستخدام Laravel وFilament وFlutter وREST API، مع تعدد الشركات والصلاحيات والاختبارات وCI وDocker وميزات مدعومة بالذكاء الاصطناعي.
 
-**Current stage:** Portfolio-ready demo with SaaS foundations. Live payment processing, production hosting, observability, and final security hardening remain roadmap items—not finished claims.
+**Current stage:** Portfolio-ready demo with a public Render host. Live payment processing, durable production hosting, observability, and final security hardening remain roadmap items—not finished claims.
 
-**المرحلة الحالية:** عرض Portfolio قابل للتجربة مع أساس قوي للتحول إلى SaaS. الدفع الحقيقي والنشر الإنتاجي والمراقبة والمراجعة الأمنية النهائية ما زالت ضمن خارطة الطريق.
+**المرحلة الحالية:** عرض Portfolio قابل للتجربة مع استضافة عامة على Render. الدفع الحقيقي والاستضافة الإنتاجية الدائمة والمراقبة والمراجعة الأمنية النهائية ما زالت ضمن خارطة الطريق.
 
 📖 **Architecture:** [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) · **Demo:** [DEMO.md](./DEMO.md) · **Live demo:** [docs/LIVE_DEMO.md](./docs/LIVE_DEMO.md) · **SaaS launch:** [SAAS.md](./SAAS.md)  
 🚀 **Deploy:** [DEPLOY.md](./DEPLOY.md)

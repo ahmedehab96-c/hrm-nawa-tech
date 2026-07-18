@@ -15,17 +15,18 @@ railway up
 railway domain
 ```
 
-### B) Render free Blueprint (good portfolio alternative)
-1. Open https://dashboard.render.com
-2. **New → Blueprint**
-3. Connect the GitHub repo `ahmedehab96-c/hrm-nawa-tech`
-4. Confirm `render.yaml` (SQLite + auto-seed for free tier)
-5. After deploy, set `APP_URL=https://YOUR-SERVICE.onrender.com` in Render → Environment
-6. Redeploy once
+### B) Render free (live now)
 
-You get a public admin at `https://YOUR-SERVICE.onrender.com/admin`.
+**Public URL:** https://hrm-nawa-api.onrender.com  
+**Admin:** https://hrm-nawa-api.onrender.com/admin  
+**API health:** https://hrm-nawa-api.onrender.com/api/health  
+**Dashboard:** https://dashboard.render.com/web/srv-d9djnb77f7vs738q6ug0
+
+Service: `hrm-nawa-api` · Blueprint from `render.yaml` (SQLite + `SEED_ON_START` for free tier).
 
 Free web services on Render may sleep after inactivity; the first request can take ~30–60s. That is acceptable for portfolio demos.
+
+To recreate elsewhere: New → Blueprint → connect `ahmedehab96-c/hrm-nawa-tech` → confirm `render.yaml`.
 
 ## Demo accounts (seeded)
 
@@ -43,19 +44,19 @@ After the first successful seed, set `SEED_ON_START=false` so redeploys do not w
 
 ```bash
 flutter run -d ios \
-  --dart-define=API_BASE_URL=https://YOUR-DOMAIN/api
+  --dart-define=API_BASE_URL=https://hrm-nawa-api.onrender.com/api
 
 # or release APK for reviewers:
 flutter build apk --release \
-  --dart-define=API_BASE_URL=https://YOUR-DOMAIN/api
+  --dart-define=API_BASE_URL=https://hrm-nawa-api.onrender.com/api
 ```
 
 ## Portfolio copy (paste into README / site)
 
 ```markdown
 ### Live demo
-- Admin: https://YOUR-DOMAIN/admin
-- API health: https://YOUR-DOMAIN/api/health
+- Admin: https://hrm-nawa-api.onrender.com/admin
+- API health: https://hrm-nawa-api.onrender.com/api/health
 - Recruiter: recruiter@demo.com / Recruiter12345!
 - Company admin: admin@demo.com / Admin12345!
 ```
