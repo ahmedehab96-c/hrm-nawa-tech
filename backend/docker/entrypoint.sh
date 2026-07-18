@@ -11,18 +11,35 @@ if [ -z "${APP_URL:-}" ] && [ -n "${RENDER_EXTERNAL_URL:-}" ]; then
 fi
 
 # Ensure a usable APP_KEY is available to the PHP process.
-if [ -z "${APP_KEY:-}" ] || [ "${APP_KEY}" = "null" ] || [ "${APP_KEY}" = "base64:" ]; then
-  if grep -q '^APP_KEY=base64:' .env; then
-    export APP_KEY="$(grep '^APP_KEY=base64:' .env | head -n1 | cut -d= -f2-)"
-  else
+# Render CLI --env-var can mangle base64 padding (`=`), so always normalize here.
+case "${APP_KEY:-}" in
+  base64:????????????????*)
+    ;;
+  *)
     export APP_KEY="base64:$(php -r 'echo base64_encode(random_bytes(32));')"
-    if grep -q '^APP_KEY=' .env; then
-      sed -i.bak "s|^APP_KEY=.*|APP_KEY=${APP_KEY}|" .env && rm -f .env.bak
-    else
-      echo "APP_KEY=${APP_KEY}" >> .env
-    fi
-  fi
+    ;;
+esac
+
+# Persist into .env so artisan/config always see a key even if the platform env is blank.
+if grep -q '^APP_KEY=' .env; then
+  # Escape & and \ for sed replacement safety; keep value simple by rewriting the line.
+  TMP_ENV="$(mktemp)"
+  grep -v '^APP_KEY=' .env > "$TMP_ENV" || true
+  echo "APP_KEY=${APP_KEY}" >> "$TMP_ENV"
+  mv "$TMP_ENV" .env
+else
+  echo "APP_KEY=${APP_KEY}" >> .env
 fi
+export APP_KEY
+
+if [ -n "${APP_URL:-}" ]; then
+  TMP_ENV="$(mktemp)"
+  grep -v '^APP_URL=' .env > "$TMP_ENV" || true
+  echo "APP_URL=${APP_URL}" >> "$TMP_ENV"
+  mv "$TMP_ENV" .env
+fi
+
+php artisan config:clear --no-interaction >/dev/null 2>&1 || true
 
 # HTTPS demos behind Render / Railway need secure cookies when APP_URL is https.
 case "${APP_URL:-}" in
