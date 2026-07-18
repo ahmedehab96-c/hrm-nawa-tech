@@ -24,7 +24,24 @@ railway domain
 
 Service: `hrm-nawa-api` · Blueprint from `render.yaml` (SQLite + `SEED_ON_START` for free tier).
 
-Free web services on Render may sleep after inactivity; the first request can take ~30–60s. That is acceptable for portfolio demos.
+#### Keep-alive (so it does not sleep before demos)
+
+Free Render spins down after **~15 minutes** without traffic. This repo runs
+[`.github/workflows/keep_alive.yml`](../.github/workflows/keep_alive.yml): GitHub Actions
+pings `/api/health` every **10 minutes** so cold starts are rare when you open the link.
+
+Optional stronger ping (more reliable than Actions cron): create a free job at
+[cron-job.org](https://cron-job.org) → URL `https://hrm-nawa-api.onrender.com/api/health` → every **10 minutes**.
+
+**Hours limit:** Free workspaces get **~750 instance hours/month**. Keeping one service awake
+24/7 uses almost all of that. If Render suspends free services near month-end, wait for the
+next month or upgrade (below).
+
+#### Never-sleep option (recommended for interviews)
+
+Upgrade the service to **Starter** (~$7/mo) in the Render dashboard → **hrm-nawa-api** →
+**Settings → Instance Type**. Paid instances do **not** spin down. Then you can disable
+`keep_alive.yml` if you want.
 
 To recreate elsewhere: New → Blueprint → connect `ahmedehab96-c/hrm-nawa-tech` → confirm `render.yaml`.
 

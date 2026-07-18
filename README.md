@@ -19,14 +19,16 @@
 
 ### Live demo | تجربة مباشرة
 
-Public hosted demo on Render (free tier may sleep ~30–60s on first open):
+Public hosted demo on Render:
 
 - **Admin:** [https://hrm-nawa-api.onrender.com/admin](https://hrm-nawa-api.onrender.com/admin)
 - **API health:** [https://hrm-nawa-api.onrender.com/api/health](https://hrm-nawa-api.onrender.com/api/health)
 - **Company admin:** `admin@demo.com` / `Admin12345!`
 - **Recruiter:** `recruiter@demo.com` / `Recruiter12345!`
 
-Details: **[docs/LIVE_DEMO.md](./docs/LIVE_DEMO.md)**. Local fallback:
+Keep-alive: GitHub Actions pings the health endpoint every 10 minutes so the free instance
+stays warm for demos. For zero sleep, upgrade to Render **Starter** (~$7/mo) — see
+**[docs/LIVE_DEMO.md](./docs/LIVE_DEMO.md)**. Local fallback:
 
 ```bash
 ./scripts/start_api.sh

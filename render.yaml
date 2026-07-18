@@ -2,8 +2,9 @@
 # Dashboard: https://dashboard.render.com → New → Blueprint → connect this repo
 # Guide: docs/LIVE_DEMO.md
 #
-# Note: free instances may sleep; first request can take ~30–60s.
+# Free instances spin down after ~15m idle. keep_alive.yml pings /api/health every 10m.
 # SQLite is re-seeded on boot so the demo stays usable after restarts.
+# For never-sleep: upgrade instance to Starter in the Render dashboard.
 
 services:
   - type: web
